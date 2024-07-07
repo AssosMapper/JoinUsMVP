@@ -11,27 +11,34 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/aboutUs',
     name: 'AboutUs',
-    component: () => import(/* webpackChunkName: "about" */ '../views/AboutUs.vue'),
+    component: () => import('../views/AboutUs.vue'),
   },
   {
     path: '/register',
     name: 'Register',
-    component: () => import(/* webpackChunkName: "about" */ '../views/Register.vue'),
+    component: () => import('../views/Register.vue'),
   },
   {
     path: '/login',
     name: 'Login',
-    component: () => import(/* webpackChunkName: "about" */ '../views/Login.vue'),
+    component: () => import('../views/Login.vue'),
   },
   {
     path: '/contactUs',
     name: 'ContactUs',
-    component: () => import(/* webpackChunkName: "about" */ '../views/ContactUs.vue'),
+    component: () => import('../views/ContactUs.vue'),
   },
   {
     path: '/adminInterface',
     name: 'AdminInterface',
-    component: () => import(/* webpackChunkName: "about" */ '../views/AdminInterface.vue'),
+    meta: { requiresAdmin: true },
+    component: () => import('../views/AdminInterface.vue'),
+  },
+  {
+    path: '/associationManagerInterface',
+    name: 'AssociationManagerInterface',
+    meta: { requiresAssociationManager: true },
+    component: () => import('../views/AssociationManagerInterface.vue'),
   },
 ];
 
@@ -43,8 +50,12 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const isAuthenticated = store.getters['user/isAuthenticated'];
   const isAdmin = store.getters['user/isAdmin'];
+  const isAssociationManager = store.getters['user/isAssociationManager'];
 
   if (to.name === 'AdminInterface' && (!isAuthenticated || !isAdmin)) {
+    next('/login');
+    alert("Veuillez vous connecter.");
+  } else if (to.name === 'AssociationManagerInterface' && (!isAuthenticated || (!isAssociationManager && !isAdmin))) {
     next('/login');
     alert("Veuillez vous connecter.");
   } else {
