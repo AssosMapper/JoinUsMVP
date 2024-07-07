@@ -1,40 +1,41 @@
-<script lang="ts">
-import { defineComponent, computed } from "vue";
-import { useStore } from "vuex";
-import { useRouter } from "vue-router";
+<script setup lang="ts">
+import { computed } from 'vue'
+import { useStore } from 'vuex'
+import { useRouter } from 'vue-router'
+import { storeToRefs } from 'pinia'
 
-export default defineComponent({
-  name: "HomeView",
-  setup() {
-    const store = useStore();
-    const router = useRouter();
+const store = useStore()
+const router = useRouter()
 
-    const isAuthenticated = computed(() => store.getters['user/isAuthenticated']);
-    const user = computed(() => store.state.user);
+const first_name = computed(() => store.state.user.first_name)
+const { test } = storeToRefs(store.state.user)
 
-    const logout = () => {
-      store.dispatch('user/logoutUser');
-      router.push('/login');
-    };
 
-    return {
-      isAuthenticated,
-      user,
-      logout,
-    };
-  },
-});
+const isAuthenticated = computed(() => store.getters['user/isAuthenticated'])
+const isAdmin = computed(() => store.getters['user/isAdmin'])
+const isAssociationManager = computed(() => store.getters['user/isAssociationManager'])
+
+const logout = () => {
+  store.dispatch('user/logoutUser')
+  router.push('/login')
+}
+
+console.log(test);
 </script>
 
 <template>
   <nav>
     <router-link to="/">Home</router-link> |
-    <router-link to="/register">Register</router-link> |
+    <router-link v-if="isAdmin && isAuthenticated" to="/adminInterface">Admin Interface | </router-link> 
+    <router-link v-if="(isAdmin || isAssociationManager) && isAuthenticated" to="/associationManagerInterface">Association Interface | </router-link> 
     <template v-if="isAuthenticated">
-      <router-link to="/1312" @click.prevent="logout">Logout</router-link> | 
-      <router-link to="/1312">{{ user.first_name }}</router-link>
+      <router-link to="/logout" @click.prevent="logout">Logout</router-link> | 
+      <router-link to="/profile">{{ first_name }}</router-link>
     </template>
-    <router-link v-else to="/login">Login</router-link>
+    <template v-else>
+      <router-link to="/register">Register</router-link> |
+      <router-link to="/login">Login</router-link>
+    </template>
   </nav>
   <router-view />
 

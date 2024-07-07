@@ -48,8 +48,8 @@ const userModule: Module<UserState, RootState> = {
     }),
   getters: {
     isAuthenticated: (state) => !!state.access_token,
-    isAdmin: (state) => state.role && state.role.name == 'admin',
-    isAssociationManager: (state) => state.role?.name === 'associationManager',
+    isAdmin: (state) => state.role?.name === UserRole.ADMIN,
+    isAssociationManager: (state) => state.role?.name === UserRole.ASSOCIATION_MANAGER,
     role: (state) => state.role,
   },
   mutations: {
