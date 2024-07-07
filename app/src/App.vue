@@ -2,13 +2,11 @@
 import { computed } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
-import { storeToRefs } from 'pinia'
 
 const store = useStore()
 const router = useRouter()
 
 const first_name = computed(() => store.state.user.first_name)
-const { test } = storeToRefs(store.state.user)
 
 
 const isAuthenticated = computed(() => store.getters['user/isAuthenticated'])
@@ -20,7 +18,6 @@ const logout = () => {
   router.push('/login')
 }
 
-console.log(test);
 </script>
 
 <template>
