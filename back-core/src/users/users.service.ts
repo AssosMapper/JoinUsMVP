@@ -5,7 +5,7 @@ import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
-import { Role } from 'src/roles/role.entity';
+import { Role } from '../roles/role.entity';
 
 @Injectable()
 export class UsersService {
@@ -20,12 +20,11 @@ export class UsersService {
     return this.usersRepository.find();
   }
 
-  async findOne(id: number): Promise<User> {
-    const user = await this.usersRepository.findOneBy({ id });
-    if (!user) {
-      throw new NotFoundException(`User with ID ${id} not found`);
-    }
-    return user;
+  async findOne(id: number): Promise<User | undefined> {
+    return this.usersRepository.findOne({
+      where: { id },
+      relations: ['role'],
+    });
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -46,7 +45,6 @@ export class UsersService {
     return this.usersRepository.save(newUser);
   }
 
-  
   async update(id: number, updateUserDto: UpdateUserDto): Promise<void> {
     const existingUser = await this.findOne(id);
     if (!existingUser) {
@@ -61,6 +59,10 @@ export class UsersService {
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
-    return this.usersRepository.findOne({ where: { email } });
+    return this.usersRepository.findOne({ 
+      where: { email },
+      select: ['id', 'email', 'password', 'first_name', 'last_name', 'roleId', 'phone', 'address', 'zip', 'country', 'image', 'dateCreated'],
+      relations: ['role'],
+    });
   }
 }

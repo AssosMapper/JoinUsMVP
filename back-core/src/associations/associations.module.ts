@@ -5,7 +5,7 @@ import { AssociationsService } from './associations.service';
 import { AssociationsController } from './associations.controller';
 import { User } from '../users/user.entity';
 import { TypeAssociationsModule } from '../type-associations/type-associations.module';  // Importer le module
-import { UsersModule } from 'src/users/users.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
