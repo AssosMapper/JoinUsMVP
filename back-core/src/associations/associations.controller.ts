@@ -7,6 +7,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
 
 @Controller('associations')
+@UseGuards(JwtAuthGuard)
 export class AssociationsController {
   constructor(private readonly associationsService: AssociationsService) {}
 
@@ -23,19 +24,16 @@ export class AssociationsController {
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
   create(@Body() createAssociationDto: CreateAssociationDto): Promise<Association> {
     return this.associationsService.create(createAssociationDto);
   }
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard)
   update(@Param('id') id: string, @Body() updateAssociationDto: UpdateAssociationDto) {
     return this.associationsService.update(+id, updateAssociationDto);
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
   remove(@Param('id') id: string) {
     return this.associationsService.remove(+id);
   }
