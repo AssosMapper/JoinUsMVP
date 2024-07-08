@@ -8,7 +8,6 @@ const router = useRouter()
 
 const first_name = computed(() => store.state.user.first_name)
 
-
 const isAuthenticated = computed(() => store.getters['user/isAuthenticated'])
 const isAdmin = computed(() => store.getters['user/isAdmin'])
 const isAssociationManager = computed(() => store.getters['user/isAssociationManager'])
@@ -17,7 +16,6 @@ const logout = () => {
   store.dispatch('user/logoutUser')
   router.push('/login')
 }
-
 </script>
 
 <template>
