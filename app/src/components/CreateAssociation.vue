@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import associationService from '@/services/associationService';
+import typeAssociationService from '@/services/typeAssociationService';
 import { useRouter } from 'vue-router';
 
 const store = useStore();
@@ -19,12 +20,13 @@ const association = ref({
   members: 0,
 });
 
-const typeIds = ref('');
+const selectedTypeIds = ref<number[]>([]);
+const availableTypes = ref<{ id: number, name: string }[]>([]);
 
 const handleSubmit = async () => {
   try {
-    association.value.typeIds = typeIds.value.split(',').map(Number);
     const token = store.state.user.access_token;
+    association.value.typeIds = selectedTypeIds.value;
     await associationService.createAssociation(association.value, token);
     alert('Association created successfully!');
     router.push('/');
@@ -33,6 +35,19 @@ const handleSubmit = async () => {
     alert('There was an error creating the association.');
   }
 };
+
+const fetchTypes = async () => {
+  try {
+    const response = await typeAssociationService.getAllTypeAssociations();
+    availableTypes.value = response.data;
+  } catch (error) {
+    console.error('Error fetching types:', error);
+  }
+};
+
+onMounted(() => {
+  fetchTypes();
+});
 </script>
 
 <template>
@@ -112,14 +127,17 @@ const handleSubmit = async () => {
       </div>
       
       <div class="mb-4">
-        <label for="typeIds" class="block text-sm font-medium leading-6 text-gray-900">Type IDs (comma separated)</label>
-        <input
-          type="text"
-          id="typeIds"
-          v-model="typeIds"
-          required
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-        />
+        <label class="block text-sm font-medium leading-6 text-gray-900">Type Associations</label>
+        <div v-for="type in availableTypes" :key="type.id" class="flex items-center">
+          <input
+            type="checkbox"
+            :id="`type-${type.id}`"
+            :value="type.id"
+            v-model="selectedTypeIds"
+            class="mr-2"
+          />
+          <label :for="`type-${type.id}`" class="text-sm font-medium leading-6 text-gray-900">{{ type.name }}</label>
+        </div>
       </div>
       
       <button
@@ -133,5 +151,4 @@ const handleSubmit = async () => {
 </template>
 
 <style scoped>
-/* Add your styles here */
 </style>
