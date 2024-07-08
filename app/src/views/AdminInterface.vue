@@ -14,8 +14,8 @@ const currentView = shallowRef('CreateAssociation')
     <h1>Interface d'administration</h1>
     
     <nav>
-      <button @click="currentView = 'CreateAssociation'">Create Association</button>
-      <button @click="currentView = 'CreateEvent'">Create Événement</button>
+      <button @click="currentView = 'CreateAssociation'">Create Association  </button> |
+      <button @click="currentView = 'CreateEvent'"> Create Event</button>
     </nav>
 
     <component :is="components[currentView]"></component>
