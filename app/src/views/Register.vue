@@ -1,64 +1,58 @@
-<script>
+<script setup lang="ts">
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import userService from "@/services/usersService";
+import { useStore } from 'vuex';
+import userService from '@/services/usersService';
 
-export default {
-  name: "CreateUser",
-  setup() {
-    const router = useRouter();
-    return { router };
-  },
-  data() {
-    return {
-      firstName: "",
-      lastName: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-      roleId: null,
-      phone: "",
-      address: "",
-      zip: "",
-      country: "",
-      image: "",
-    };
-  },
-  methods: {
-    validatePhone(phone) {
-      const phoneRegex = /^0[1-9]\d{8}$/;
-      return phoneRegex.test(phone);
-    },
-    async handleSubmit() {
-      if (!this.validatePhone(this.phone)) {
-        alert("Invalid phone number format. The phone number must be 0+(de 1 a 9) + 8 chiffres.");
-        return;
-      }
-      
-      const user = {
-        first_name: this.firstName,
-        last_name: this.lastName,
-        email: this.email,
-        password: this.password,
-        confirmPassword: this.confirmPassword,
-        roleId: this.roleId,
-        phone: this.phone,
-        address: this.address,
-        zip: this.zip,
-        country: this.country,
-        image: this.image,
-        dateCreated: new Date()
-      };
-      
-      try {
-        await userService.createUser(user);
-        this.router.push('/login');
-        alert("User created successfully!");
-      } catch (error) {
-        console.error("Error creating user:", error);
-        alert("There was an error creating the user.");
-      }
-    },
-  },
+const router = useRouter();
+const store = useStore();
+
+const firstName = ref("");
+const lastName = ref("");
+const email = ref("");
+const password = ref("");
+const confirmPassword = ref("");
+const roleId = ref<number | null>(null);
+const phone = ref("");
+const address = ref("");
+const zip = ref("");
+const country = ref("");
+const image = ref("");
+
+const validatePhone = (phone: string) => {
+  const phoneRegex = /^0[1-9]\d{8}$/;
+  return phoneRegex.test(phone);
+};
+
+const handleSubmit = async () => {
+  if (!validatePhone(phone.value)) {
+    alert("Invalid phone number format. The phone number must be 0+(de 1 a 9) + 8 chiffres.");
+    return;
+  }
+
+  const user = {
+    first_name: firstName.value,
+    last_name: lastName.value,
+    email: email.value,
+    password: password.value,
+    confirmPassword: confirmPassword.value,
+    roleId: roleId.value,
+    phone: phone.value,
+    address: address.value,
+    zip: zip.value,
+    country: country.value,
+    image: image.value,
+    dateCreated: new Date()
+  };
+
+  try {
+    await userService.createUser(user);
+    router.push('/login');
+    alert("User created successfully!");
+  } catch (error) {
+    console.error("Error creating user:", error);
+    alert("There was an error creating the user.");
+  }
 };
 </script>
 
@@ -137,4 +131,5 @@ export default {
 </template>
 
 <style scoped>
+/* Add your styles here */
 </style>
