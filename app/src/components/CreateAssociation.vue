@@ -1,6 +1,137 @@
+<script setup lang="ts">
+import { ref } from 'vue';
+import { useStore } from 'vuex';
+import associationService from '@/services/associationService';
+import { useRouter } from 'vue-router';
+
+const store = useStore();
+const router = useRouter();
+
+const association = ref({
+  name: '',
+  address: '',
+  code_postal: '',
+  ville: '',
+  description: '',
+  image: '',
+  user_id: store.state.user.id,
+  typeIds: [] as number[],
+  members: 0,
+});
+
+const typeIds = ref('');
+
+const handleSubmit = async () => {
+  try {
+    association.value.typeIds = typeIds.value.split(',').map(Number);
+    const token = store.state.user.access_token;
+    await associationService.createAssociation(association.value, token);
+    alert('Association created successfully!');
+    router.push('/');
+  } catch (error) {
+    console.error('Error creating association:', error);
+    alert('There was an error creating the association.');
+  }
+};
+</script>
+
 <template>
-    <div class="about">
-      <h1>This is an create association component</h1>
-    </div>
-  </template>
-  
+  <div class="form-container w-4/5 flex justify-center text-center mx-auto my-10 py-8 border border-gray-300 rounded-lg">
+    <form class="w-full max-w-md" @submit.prevent="handleSubmit">
+      <h2 class="text-2xl font-semibold leading-7 text-gray-900 mb-6">Create Association</h2>
+      
+      <div class="mb-4">
+        <label for="name" class="block text-sm font-medium leading-6 text-gray-900">Name</label>
+        <input
+          type="text"
+          id="name"
+          v-model="association.name"
+          required
+          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+        />
+      </div>
+      
+      <div class="mb-4">
+        <label for="address" class="block text-sm font-medium leading-6 text-gray-900">Address</label>
+        <input
+          type="text"
+          id="address"
+          v-model="association.address"
+          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+        />
+      </div>
+      
+      <div class="mb-4">
+        <label for="code_postal" class="block text-sm font-medium leading-6 text-gray-900">Code Postal</label>
+        <input
+          type="text"
+          id="code_postal"
+          v-model="association.code_postal"
+          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+        />
+      </div>
+      
+      <div class="mb-4">
+        <label for="ville" class="block text-sm font-medium leading-6 text-gray-900">Ville</label>
+        <input
+          type="text"
+          id="ville"
+          v-model="association.ville"
+          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+        />
+      </div>
+      
+      <div class="mb-4">
+        <label for="description" class="block text-sm font-medium leading-6 text-gray-900">Description</label>
+        <textarea
+          id="description"
+          v-model="association.description"
+          required
+          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+        ></textarea>
+      </div>
+      
+      <div class="mb-4">
+        <label for="image" class="block text-sm font-medium leading-6 text-gray-900">Image</label>
+        <input
+          type="text"
+          id="image"
+          v-model="association.image"
+          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+        />
+      </div>
+      
+      <div class="mb-4">
+        <label for="members" class="block text-sm font-medium leading-6 text-gray-900">Members</label>
+        <input
+          type="number"
+          id="members"
+          v-model="association.members"
+          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+        />
+      </div>
+      
+      <div class="mb-4">
+        <label for="typeIds" class="block text-sm font-medium leading-6 text-gray-900">Type IDs (comma separated)</label>
+        <input
+          type="text"
+          id="typeIds"
+          v-model="typeIds"
+          required
+          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+        />
+      </div>
+      
+      <button
+        type="submit"
+        class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
+      >
+        Create
+      </button>
+    </form>
+  </div>
+</template>
+
+<style scoped>
+/* Add your styles here */
+</style>
