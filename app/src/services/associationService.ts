@@ -12,6 +12,11 @@ const createAssociation = async (association: Association, token: string) => {
   return response.data;
 };
 
+const getAllAssociations = () => {
+  return axios.get(`${API_URL}/associations`);
+};
+
 export default {
   createAssociation,
+  getAllAssociations
 };
