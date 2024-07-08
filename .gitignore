@@ -6,3 +6,6 @@ back-core/models/mysqldata/join_us_mvp/association_types_type_associations.ibd
 back-core/models/mysqldata/join_us_mvp/event.ibd
 back-core/models/mysqldata/mysql/innodb_index_stats.ibd
 back-core/models/mysqldata/mysql/innodb_table_stats.ibd
+back-core/models/mysqldata/join_us_mvp/association.frm
+back-core/models/mysqldata/join_us_mvp/association.ibd
+back-core/models/mysqldata/join_us_mvp/user.ibd
