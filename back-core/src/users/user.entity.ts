@@ -44,7 +44,11 @@
     @Column({ nullable: true })
     image: string;
 
+    @Column({ nullable: true })
+    associationId: number;
+
     @OneToMany(() => Association, association => association.user)
+    @JoinColumn({ name: 'associationId' })
     associations: Association[];
 
     constructor() {
