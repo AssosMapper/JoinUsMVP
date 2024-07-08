@@ -1,9 +1,12 @@
-import { Controller, Get, Post, Body, Param, Delete, Put } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards } from '@nestjs/common';
 import { TypeAssociationsService } from './type-associations.service';
 import { CreateTypeAssociationDto } from './dto/create-type-association.dto';
 import { UpdateTypeAssociationDto } from './dto/update-type-association.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Public } from '../auth/decorators/public.decorator';
 
 @Controller('type-associations')
+@UseGuards(JwtAuthGuard)
 export class TypeAssociationsController {
   constructor(private readonly typeAssociationsService: TypeAssociationsService) {}
 
@@ -13,11 +16,13 @@ export class TypeAssociationsController {
   }
 
   @Get()
+  @Public()
   findAll() {
     return this.typeAssociationsService.findAll();
   }
 
   @Get(':id')
+  @Public()
   findOne(@Param('id') id: string) {
     return this.typeAssociationsService.findOne(+id);
   }

@@ -19,11 +19,11 @@ export class AssociationsService {
   ) {}
 
   findAll(): Promise<Association[]> {
-    return this.associationsRepository.find({ relations: ['user', 'types'] });
+    return this.associationsRepository.find({ relations: ['users', 'types'] });
   }
 
   async findOne(id: number): Promise<Association> {
-    const association = await this.associationsRepository.findOne({ where: { id }, relations: ['user', 'types'] });
+    const association = await this.associationsRepository.findOne({ where: { id }, relations: ['users', 'types'] });
     if (!association) {
       throw new NotFoundException(`Association with ID ${id} not found`);
     }
@@ -40,7 +40,7 @@ export class AssociationsService {
       ? await this.typeAssociationsRepository.findByIds(createAssociationDto.typeIds) 
       : [];
 
-    const association = this.associationsRepository.create({ ...createAssociationDto, user, types });
+    const association = this.associationsRepository.create({ ...createAssociationDto, users: [user], types });
     return this.associationsRepository.save(association);
   }
 
@@ -54,7 +54,7 @@ export class AssociationsService {
       if (!user) {
         throw new NotFoundException(`User with ID ${updateAssociationDto.userId} not found`);
       }
-      existingAssociation.user = user;
+      existingAssociation.users = [user];
     }
     if (updateAssociationDto.typeIds?.length) {
       const types = await this.typeAssociationsRepository.findByIds(updateAssociationDto.typeIds);
