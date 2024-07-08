@@ -174,5 +174,4 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* Add your styles here */
 </style>
