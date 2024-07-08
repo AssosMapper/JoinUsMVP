@@ -20,7 +20,7 @@
     }
 
     async login(user: any) {
-      const payload = { email: user.email, sub: user.id, roleId: user.roleId };
+      const payload = { email: user.email, sub: user.id, roleId: user.roleId, associationId: user.associationId };
       return {
         ...user,
         access_token: this.jwtService.sign(payload),

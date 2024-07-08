@@ -7,13 +7,15 @@ import { useRouter } from 'vue-router';
 const store = useStore();
 const router = useRouter();
 
+const isAdmin = store.getters['user/isAdmin'];
+
 const event = ref({
   titre: '',
   description: '',
   image: '',
   date: '',
   lieu: '',
-  association_id: null as number | null,
+  association_id: isAdmin ? null : store.state.user.associationId,
   user_id: store.state.user.id,
   type_event_id: null as number | null,
   isPublic: true,
@@ -22,6 +24,9 @@ const event = ref({
 const handleSubmit = async () => {
   try {
     const token = store.state.user.access_token;
+    if (!isAdmin) {
+      event.value.association_id = store.state.user.associationId;
+    }
     await eventService.createEvent(event.value, token);
     alert('Event created successfully!');
     router.push('/');
@@ -90,7 +95,7 @@ const handleSubmit = async () => {
         />
       </div>
       
-      <div class="mb-4">
+      <div class="mb-4" v-if="isAdmin">
         <label for="association_id" class="block text-sm font-medium leading-6 text-gray-900">Association ID</label>
         <input
           type="number"
@@ -131,6 +136,10 @@ const handleSubmit = async () => {
     </form>
   </div>
 </template>
+
+<style scoped>
+/* A
+
 
 <style scoped>
 /* Add your styles here */
