@@ -27,6 +27,7 @@ export interface UserState {
   image: string | null;
   // roleId: number | null;
   role: Role | null;
+  associationId: number | null;
 }
 
 const userModule: Module<UserState, RootState> = {
@@ -45,6 +46,7 @@ const userModule: Module<UserState, RootState> = {
     image: null,
     // roleId: null,
     role: null,
+    associationId: null,
     }),
   getters: {
     isAuthenticated: (state) => !!state.access_token,
@@ -71,6 +73,7 @@ const userModule: Module<UserState, RootState> = {
         image: null,
         // role: null,
         roleId: null,
+        associationId: null,
       });
     },
   },
