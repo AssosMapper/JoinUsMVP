@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, ManyToMany, JoinTable } from 'typeorm';
 import { User } from '../users/user.entity';
 import { TypeAssociations } from '../type-associations/type-associations.entity';
 
@@ -25,12 +25,8 @@ export class Association {
   @Column({ nullable: true })
   image: string;
 
-  @Column({ nullable: true })
-  user_id: number;
-
-  @ManyToOne(() => User, user => user.associations)
-  @JoinColumn({ name: 'user_id' })
-  user: User;
+  @OneToMany(() => User, user => user.association)
+  users: User[];
 
   @Column({ nullable: true })
   dateCreated: Date;
