@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useStore } from 'vuex';
 import eventService from '@/services/eventService';
+import associationService from '@/services/associationService';
+import typeEventService from '@/services/typeEventService'; 
 import { useRouter } from 'vue-router';
 
 const store = useStore();
@@ -21,6 +23,9 @@ const event = ref({
   isPublic: true,
 });
 
+const associations = ref<{ id: number, name: string }[]>([]);
+const typeEvents = ref<{ id: number, name: string }[]>([]);
+
 const handleSubmit = async () => {
   try {
     const token = store.state.user.access_token;
@@ -35,6 +40,31 @@ const handleSubmit = async () => {
     alert('There was an error creating the event.');
   }
 };
+
+const fetchAssociations = async () => {
+  try {
+    const response = await associationService.getAllAssociations();
+    associations.value = response.data;
+  } catch (error) {
+    console.error('Error fetching associations:', error);
+  }
+};
+
+const fetchTypeEvents = async () => {
+  try {
+    const response = await typeEventService.getAllTypeEvents();
+    typeEvents.value = response.data;
+  } catch (error) {
+    console.error('Error fetching type events:', error);
+  }
+};
+
+onMounted(() => {
+  if (isAdmin) {
+    fetchAssociations();
+  }
+  fetchTypeEvents();
+});
 </script>
 
 <template>
@@ -96,25 +126,31 @@ const handleSubmit = async () => {
       </div>
       
       <div class="mb-4" v-if="isAdmin">
-        <label for="association_id" class="block text-sm font-medium leading-6 text-gray-900">Association ID</label>
-        <input
-          type="number"
+        <label for="association_id" class="block text-sm font-medium leading-6 text-gray-900">Association</label>
+        <select
           id="association_id"
           v-model="event.association_id"
           required
           class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-        />
+        >
+          <option v-for="association in associations" :key="association.id" :value="association.id">
+            {{ association.name }}
+          </option>
+        </select>
       </div>
       
       <div class="mb-4">
-        <label for="type_event_id" class="block text-sm font-medium leading-6 text-gray-900">Event Type ID</label>
-        <input
-          type="number"
+        <label for="type_event_id" class="block text-sm font-medium leading-6 text-gray-900">Event Type</label>
+        <select
           id="type_event_id"
           v-model="event.type_event_id"
           required
           class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-        />
+        >
+          <option v-for="typeEvent in typeEvents" :key="typeEvent.id" :value="typeEvent.id">
+            {{ typeEvent.name }}
+          </option>
+        </select>
       </div>
       
       <div class="mb-4">
@@ -138,11 +174,5 @@ const handleSubmit = async () => {
 </template>
 
 <style scoped>
-/* A
-
-
-<style scoped>
 /* Add your styles here */
 </style>
-
-
