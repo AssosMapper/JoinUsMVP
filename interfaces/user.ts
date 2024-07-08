@@ -7,6 +7,7 @@ export interface User {
     password: string;
     confirmPassword: string;
     roleId: number;
+    associationId: number;
     phone?: string;
     address?: string;
     zip?: string;
