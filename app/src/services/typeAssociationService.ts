@@ -19,7 +19,7 @@ const getTypeAssociationById = (id: number) => {
   return axios.get(`${API_URL}/type-associations/${id}`);
 };
 
-const updateTypeAssociation = async (id: number, typeAssociation: { name: string }, token: string) => {
+const updateTypeAssociation = async (id: number, typeAssociation: { name: string; description?: string }, token: string) => {
   const response = await axios.put(`${API_URL}/type-associations/${id}`, typeAssociation, {
     headers: {
       Authorization: `Bearer ${token}`
