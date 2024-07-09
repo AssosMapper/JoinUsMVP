@@ -6,6 +6,7 @@ const components = {
   'UpdateAssociation': defineAsyncComponent(() => import('../components/UpdateAssociation.vue')),
   'CreateEvent': defineAsyncComponent(() => import('../components/CreateEvent.vue')),
   'CreateTypeEvent': defineAsyncComponent(() => import('../components/CreateTypeEvent.vue')),
+  'UpdateTypeEvent': defineAsyncComponent(() => import('../components/UpdateTypeEvent.vue')),
   'UpdateTypeAssociation': defineAsyncComponent(() => import('../components/UpdateTypeAssociation.vue')),
   'CreateTypeAssociation': defineAsyncComponent(() => import('../components/CreateTypeAssociation.vue')),
 }
