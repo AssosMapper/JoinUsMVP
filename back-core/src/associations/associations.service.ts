@@ -49,6 +49,7 @@ export class AssociationsService {
     if (!existingAssociation) {
       throw new NotFoundException(`Association with ID ${id} not found`);
     }
+  
     if (updateAssociationDto.userId) {
       const user = await this.usersRepository.findOne({ where: { id: updateAssociationDto.userId } });
       if (!user) {
@@ -56,10 +57,12 @@ export class AssociationsService {
       }
       existingAssociation.users = [user];
     }
-    if (updateAssociationDto.typeIds?.length) {
+  
+    if (Array.isArray(updateAssociationDto.typeIds)) {
       const types = await this.typeAssociationsRepository.findByIds(updateAssociationDto.typeIds);
       existingAssociation.types = types;
     }
+  
     Object.assign(existingAssociation, updateAssociationDto);
     await this.associationsRepository.save(existingAssociation);
   }

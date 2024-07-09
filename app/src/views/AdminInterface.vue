@@ -5,7 +5,8 @@ const components = {
   'CreateAssociation': defineAsyncComponent(() => import('../components/CreateAssociation.vue')),
   'CreateEvent': defineAsyncComponent(() => import('../components/CreateEvent.vue')),
   'CreateTypeEvent': defineAsyncComponent(() => import('../components/CreateTypeEvent.vue')),
-  'CreateTypeAssociation': defineAsyncComponent(() => import('../components/CreateTypeAssociation.vue'))
+  'CreateTypeAssociation': defineAsyncComponent(() => import('../components/CreateTypeAssociation.vue')),
+  'UpdateAssociation': defineAsyncComponent(() => import('../components/UpdateAssociation.vue'))
 }
 
 const currentView = shallowRef('CreateAssociation')
@@ -16,12 +17,22 @@ const currentView = shallowRef('CreateAssociation')
     <h1>Interface d'administration</h1>
     
     <nav>
-      <button @click="currentView = 'CreateAssociation'">Create Association  </button> |
-      <button @click="currentView = 'CreateEvent'"> Create Event</button> | 
-      <button @click="currentView = 'CreateTypeAssociation'"> Create TypeAssociation</button> | 
-      <button @click="currentView = 'CreateTypeEvent'"> Create TypeEvent</button>
+      <button :class="{ 'font-bold': currentView === 'CreateAssociation' }" @click="currentView = 'CreateAssociation'">Create Association</button> |
+      <button :class="{ 'font-bold': currentView === 'UpdateAssociation' }" @click="currentView = 'UpdateAssociation'">Update Association</button> |
+      <button :class="{ 'font-bold': currentView === 'CreateEvent' }" @click="currentView = 'CreateEvent'">Create Event</button> |
+      <button :class="{ 'font-bold': currentView === 'UpdateEvent' }" @click="currentView = 'UpdateEvent'">Update Event</button> |
+      <button :class="{ 'font-bold': currentView === 'CreateTypeAssociation' }" @click="currentView = 'CreateTypeAssociation'">Create TypeAssociation</button> |
+      <button :class="{ 'font-bold': currentView === 'UpdateTypeAssociation' }" @click="currentView = 'UpdateTypeAssociation'">Update TypeAssociation</button> |
+      <button :class="{ 'font-bold': currentView === 'CreateTypeEvent' }" @click="currentView = 'CreateTypeEvent'">Create TypeEvent</button> |
+      <button :class="{ 'font-bold': currentView === 'UpdateTypeEvent' }" @click="currentView = 'UpdateTypeEvent'">Update TypeEvent</button> |
     </nav>
 
     <component :is="components[currentView]"></component>
   </div>
 </template>
+
+<style scoped>
+.font-bold {
+  font-weight: bold;
+}
+</style>
