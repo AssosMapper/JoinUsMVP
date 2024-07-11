@@ -5,6 +5,9 @@ import App from "./App.vue";
 import router from "./router";
 import './assets/main.scss';
 import { useUserStore } from './store/usersStore';
+import { loadGoogleMapsApi } from '@/utils/loadGoogleMapsApi';
+
+const googleMapsApiKey = process.env.VUE_APP_GOOGLE_MAPS_API_KEY;
 
 const app = createApp(App);
 const pinia = createPinia();
@@ -17,17 +20,20 @@ const userStore = useUserStore();
 
 async function initializeApp() {
   try {
+    await loadGoogleMapsApi(googleMapsApiKey);
+    console.log("Google Maps API loaded");
+
     router.push('/');
     await userStore.checkTokenValidity();
     console.log("Token validity check completed");
     
   } catch (error) {
-    console.error("Error during token validity check:", error);
+    console.error("Error during initialization:", error);
   }
 
   window.addEventListener('beforeunload', (event) => {
-    event.preventDefault(); // Annule l'événement selon la spécification du standard
-    event.returnValue = ''; // Chrome requiert returnValue à être défini
+    event.preventDefault();
+    event.returnValue = '';
     return;
   });
 
