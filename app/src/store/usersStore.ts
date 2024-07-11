@@ -1,9 +1,12 @@
 import { defineStore } from 'pinia';
+import axios from 'axios';
+import userService from '@/services/usersService';
+import { jwtDecode } from "jwt-decode";
 
 export enum UserRole {
-    ADMIN = 'admin',
-    ASSOCIATION_MANAGER = 'associationManager',
-    USER = 'user'
+  ADMIN = 'admin',
+  ASSOCIATION_MANAGER = 'associationManager',
+  USER = 'user'
 }
 
 export interface Role {
@@ -67,6 +70,43 @@ export const useUserStore = defineStore('user', {
     updateUserInfo(userData: Partial<UserState>): void {
       this.setUser(userData);
     },
+    async fetchUserDetails(): Promise<void> {
+      if (this.access_token) {
+        try {
+          const decodedToken: any = jwtDecode(this.access_token);
+          const userId = decodedToken.sub;
+
+          const response = await userService.getUserById(userId, this.access_token);
+          this.setUser(response.data);
+        } catch (error) {
+          console.error('Error fetching user details:', error);
+          this.logoutUser();
+        }
+      }
+    },
+    async checkTokenValidity(): Promise<void> {
+      if (this.access_token) {
+        try {
+          console.log('Checking token validity');
+          const response = await axios.get(`${process.env.VUE_APP_BACKEND_URL}/auth/check-token`, {
+            headers: {
+              Authorization: `Bearer ${this.access_token}`
+            }
+          });
+          if (response.data.valid) {
+            console.log('Token is valid, fetching user details');
+            await this.fetchUserDetails();
+          } else {
+            this.logoutUser();
+          }
+        } catch (error) {
+          console.error('Error checking token validity:', error);
+          this.logoutUser();
+        }
+      }
+    },
   },
-  persist: true
+  persist: {
+    paths: ['access_token']
+  }
 });
