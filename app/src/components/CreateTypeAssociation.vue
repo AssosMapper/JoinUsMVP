@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useStore } from 'vuex';
+import { useUserStore } from '../store/usersStore';
 import typeAssociationService from '@/services/typeAssociationService';
 import { useRouter } from 'vue-router';
 
-const store = useStore();
+const userStore = useUserStore();
 const router = useRouter();
 
 const typeAssociation = ref({
@@ -14,7 +14,7 @@ const typeAssociation = ref({
 
 const handleSubmit = async () => {
   try {
-    const token = store.state.user.access_token;
+    const token = userStore.access_token;
     await typeAssociationService.createTypeAssociation(typeAssociation.value, token);
     alert('Type Association created successfully!');
     router.push('/');

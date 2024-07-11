@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useStore } from 'vuex';
+import { useUserStore } from '../store/usersStore';
 import userService from '@/services/usersService';
 
 const router = useRouter();
-const store = useStore();
+const userStore = useUserStore();
 
 const firstName = ref("");
 const lastName = ref("");
@@ -18,6 +18,7 @@ const address = ref("");
 const zip = ref("");
 const country = ref("");
 const image = ref("");
+const associationId = ref<number | null>(null);
 
 const validatePhone = (phone: string) => {
   const phoneRegex = /^0[1-9]\d{8}$/;
@@ -30,19 +31,30 @@ const handleSubmit = async () => {
     return;
   }
 
+  if (roleId.value === null) {
+    alert("Role ID is required.");
+    return;
+  }
+
+  if (associationId.value === null) {
+    alert("Association ID is required.");
+    return;
+  }
+  
   const user = {
     first_name: firstName.value,
     last_name: lastName.value,
     email: email.value,
     password: password.value,
     confirmPassword: confirmPassword.value,
-    roleId: roleId.value,
+    roleId: roleId.value, // Assurez-vous que roleId n'est pas null ici
     phone: phone.value,
     address: address.value,
     zip: zip.value,
     country: country.value,
     image: image.value,
-    dateCreated: new Date()
+    dateCreated: new Date(),
+    associationId: associationId.value
   };
 
   try {

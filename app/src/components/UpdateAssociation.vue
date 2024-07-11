@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import { useStore } from 'vuex';
+import { useUserStore } from '../store/usersStore';
 import associationService from '@/services/associationService';
 import typeAssociationService from '@/services/typeAssociationService';
 import { useRouter } from 'vue-router';
 
-const store = useStore();
+const userStore = useUserStore();
 const router = useRouter();
 
-const isAdmin = store.getters['user/isAdmin'];
-const isAssociationManager = store.getters['user/isAssociationManager'];
+const isAdmin = userStore.isAdmin;
+const isAssociationManager = userStore.isAssociationManager;
 
 const association = ref({
   id: 0,
@@ -19,7 +19,7 @@ const association = ref({
   ville: '',
   description: '',
   image: '',
-  user_id: store.state.user.id,
+  user_id: userStore.id,
   typeIds: [] as number[],
   members: 0,
 });
@@ -54,7 +54,7 @@ const fetchAssociationDetails = async (id: number) => {
     association.value = {
       ...data,
       typeIds: data.types.map((type: any) => type.id),
-      user_id: store.state.user.id
+      user_id: userStore.id
     };
     selectedTypeIds.value = data.types.map((type: any) => type.id);
   } catch (error) {
@@ -64,12 +64,12 @@ const fetchAssociationDetails = async (id: number) => {
 
 const handleSubmit = async () => {
   try {
-    const token = store.state.user.access_token;
+    const token = userStore.access_token;
     const dataToSend = {
       ...association.value,
-      typeIds: selectedTypeIds.value
+      typeIds: selectedTypeIds.value,
+      user_id: association.value.user_id as number
     };
-    delete dataToSend.types; 
     await associationService.updateAssociation(association.value.id, dataToSend, token);
     alert('Association updated successfully!');
     router.push('/');
@@ -84,8 +84,10 @@ onMounted(() => {
   if (isAdmin) {
     fetchAssociations();
   } else if (isAssociationManager) {
-    selectedAssociationId.value = store.state.user.associationId;
-    fetchAssociationDetails(selectedAssociationId.value);
+    if (userStore.associationId !== null) {
+      selectedAssociationId.value = userStore.associationId;
+      fetchAssociationDetails(userStore.associationId);
+    }
   }
 });
 

@@ -1,19 +1,19 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { useStore } from 'vuex'
+import { useUserStore } from './store/usersStore'
 import { useRouter } from 'vue-router'
 
-const store = useStore()
+const userStore = useUserStore()
 const router = useRouter()
 
-const first_name = computed(() => store.state.user.first_name)
+const first_name = computed(() => userStore.first_name)
 
-const isAuthenticated = computed(() => store.getters['user/isAuthenticated'])
-const isAdmin = computed(() => store.getters['user/isAdmin'])
-const isAssociationManager = computed(() => store.getters['user/isAssociationManager'])
+const isAuthenticated = computed(() => userStore.isAuthenticated)
+const isAdmin = computed(() => userStore.isAdmin)
+const isAssociationManager = computed(() => userStore.isAssociationManager)
 
 const logout = () => {
-  store.dispatch('user/logoutUser')
+  userStore.logoutUser()
   router.push('/login')
 }
 </script>

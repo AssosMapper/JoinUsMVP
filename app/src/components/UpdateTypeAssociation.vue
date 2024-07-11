@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import { useStore } from 'vuex';
+import { useUserStore } from '../store/usersStore';
 import typeAssociationService from '@/services/typeAssociationService';
 import { useRouter } from 'vue-router';
 
-const store = useStore();
+const userStore = useUserStore();
 const router = useRouter();
 
 const typeAssociation = ref({
@@ -36,7 +36,7 @@ const fetchTypeAssociationDetails = async (id: number) => {
 
 const handleSubmit = async () => {
   try {
-    const token = store.state.user.access_token;
+    const token = userStore.access_token;
     const { name, description } = typeAssociation.value;
     await typeAssociationService.updateTypeAssociation(typeAssociation.value.id, { name, description }, token);
     alert('Type Association updated successfully!');

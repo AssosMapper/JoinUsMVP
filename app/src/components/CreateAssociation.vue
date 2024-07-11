@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import { useUserStore } from '@/store/usersStore';
 import associationService from '@/services/associationService';
 import typeAssociationService from '@/services/typeAssociationService';
-import { useRouter } from 'vue-router';
 
-const store = useStore();
+const userStore = useUserStore();
 const router = useRouter();
+
+const userId = userStore.id !== null ? userStore.id : 0;
 
 const association = ref({
   name: '',
@@ -15,7 +17,7 @@ const association = ref({
   ville: '',
   description: '',
   image: '',
-  user_id: store.state.user.id,
+  user_id: userId,
   typeIds: [] as number[],
   members: 0,
 });
@@ -25,7 +27,7 @@ const availableTypes = ref<{ id: number, name: string }[]>([]);
 
 const handleSubmit = async () => {
   try {
-    const token = store.state.user.access_token;
+    const token = userStore.access_token;
     association.value.typeIds = selectedTypeIds.value;
     await associationService.createAssociation(association.value, token);
     alert('Association created successfully!');
@@ -49,6 +51,7 @@ onMounted(() => {
   fetchTypes();
 });
 </script>
+
 
 <template>
   <div class="form-container w-4/5 flex justify-center text-center mx-auto my-10 py-8 border border-gray-300 rounded-lg">

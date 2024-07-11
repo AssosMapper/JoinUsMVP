@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import { useStore } from 'vuex';
-import typeEventService from '@/services/typeEventService';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/store/usersStore';
+import typeEventService from '@/services/typeEventService';
 
-const store = useStore();
+const userStore = useUserStore();
 const router = useRouter();
 
 const typeEvent = ref({
@@ -36,7 +36,7 @@ const fetchTypeEventDetails = async (id: number) => {
 
 const handleSubmit = async () => {
   try {
-    const token = store.state.user.access_token;
+    const token = userStore.access_token;
     await typeEventService.updateTypeEvent(typeEvent.value.id, typeEvent.value, token);
     alert('Type Event updated successfully!');
     router.push('/');

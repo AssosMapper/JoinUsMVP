@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import { useStore } from 'vuex';
+import { useUserStore } from '../store/usersStore';
 import typeEventService from '@/services/typeEventService';
 import { useRouter } from 'vue-router';
 
-const store = useStore();
+const userStore = useUserStore();
 const router = useRouter();
 
 const typeEvent = ref({
@@ -14,7 +14,7 @@ const typeEvent = ref({
 
 const handleSubmit = async () => {
   try {
-    const token = store.state.user.access_token;
+    const token = userStore.access_token;
     await typeEventService.createTypeEvent(typeEvent.value, token);
     alert('Type Event created successfully!');
     router.push('/');

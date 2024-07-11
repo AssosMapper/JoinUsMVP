@@ -20,6 +20,7 @@
         "src/*"
       ],
       "@interfaces/*": ["../interfaces/*"],
+      "@stores/*": ["/app/src/store*"],
     },
     "lib": [
       "esnext",

@@ -1,17 +1,19 @@
 import axios from 'axios';
 import { Login } from '@interfaces/login';
-import store from '@/store';
+import { useUserStore } from '../store/usersStore';
 
 const API_URL = process.env.VUE_APP_BACKEND_URL;
 
 const login = async (credentials: Login) => {
   const response = await axios.post(`${API_URL}/auth/login`, credentials);
-  store.dispatch('user/loginUser', response.data);
+  const userStore = useUserStore();
+  userStore.loginUser(response.data);
   return response.data;
 };
 
 const logout = () => {
-  store.dispatch('user/logoutUser');
+  const userStore = useUserStore();
+  userStore.logoutUser();
 };
 
 export default {
