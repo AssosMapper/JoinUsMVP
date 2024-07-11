@@ -3,11 +3,14 @@ import { ref, onMounted } from 'vue';
 import { useUserStore } from '../store/usersStore';
 import eventService from '@/services/eventService';
 import associationService from '@/services/associationService';
-import typeEventService from '@/services/typeEventService'; 
+import typeEventService from '@/services/typeEventService';
 import { useRouter } from 'vue-router';
+import { GoogleAutocomplete } from 'vue3-google-autocomplete';
 
 const userStore = useUserStore();
 const router = useRouter();
+
+const googleMapsApiKey = process.env.VUE_APP_GOOGLE_MAPS_API_KEY;
 
 const isAdmin = userStore.isAdmin;
 
@@ -72,6 +75,10 @@ const fetchTypeEvents = async () => {
   }
 };
 
+const handlePlaceChanged = (place: any) => {
+  event.value.lieu = place.formatted_address;
+};
+
 onMounted(() => {
   if (isAdmin) {
     fetchAssociations();
@@ -84,7 +91,7 @@ onMounted(() => {
   <div class="form-container w-4/5 flex justify-center text-center mx-auto my-10 py-8 border border-gray-300 rounded-lg">
     <form class="w-full max-w-md" @submit.prevent="handleSubmit">
       <h2 class="text-2xl font-semibold leading-7 text-gray-900 mb-6">Create Event</h2>
-      
+
       <div class="mb-4">
         <label for="titre" class="block text-sm font-medium leading-6 text-gray-900">Title</label>
         <input
@@ -95,7 +102,7 @@ onMounted(() => {
           class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         />
       </div>
-      
+
       <div class="mb-4">
         <label for="description" class="block text-sm font-medium leading-6 text-gray-900">Description</label>
         <textarea
@@ -105,7 +112,7 @@ onMounted(() => {
           class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         ></textarea>
       </div>
-      
+
       <div class="mb-4">
         <label for="image" class="block text-sm font-medium leading-6 text-gray-900">Image URL</label>
         <input
@@ -115,7 +122,7 @@ onMounted(() => {
           class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         />
       </div>
-      
+
       <div class="mb-4">
         <label for="date" class="block text-sm font-medium leading-6 text-gray-900">Date</label>
         <input
@@ -126,18 +133,23 @@ onMounted(() => {
           class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         />
       </div>
-      
+
       <div class="mb-4">
-        <label for="lieu" class="block text-sm font-medium leading-6 text-gray-900">Location</label>
-        <input
-          type="text"
+        <label for="lieu" class="block text-sm font-medium leading-6 text-gray-900">Lieu</label>
+        <GoogleAutocomplete
           id="lieu"
           v-model="event.lieu"
+          placeholder="Enter location"
+          :apiKey="googleMapsApiKey"
           required
+          @placechanged="handlePlaceChanged"
+          :options="{
+            types: ['geocode'],
+          }"
           class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         />
       </div>
-      
+
       <div class="mb-4" v-if="isAdmin">
         <label for="association_id" class="block text-sm font-medium leading-6 text-gray-900">Association</label>
         <select
@@ -151,7 +163,7 @@ onMounted(() => {
           </option>
         </select>
       </div>
-      
+
       <div class="mb-4">
         <label for="type_event_id" class="block text-sm font-medium leading-6 text-gray-900">Event Type</label>
         <select
@@ -165,7 +177,7 @@ onMounted(() => {
           </option>
         </select>
       </div>
-      
+
       <div class="mb-4">
         <label for="isPublic" class="block text-sm font-medium leading-6 text-gray-900">Public Event</label>
         <input
@@ -175,7 +187,7 @@ onMounted(() => {
           class="mt-1"
         />
       </div>
-      
+
       <button
         type="submit"
         class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
@@ -187,4 +199,5 @@ onMounted(() => {
 </template>
 
 <style scoped>
+/* Add any component-specific styles here */
 </style>
