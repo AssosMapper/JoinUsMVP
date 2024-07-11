@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import { useStore } from 'vuex';
+import { useUserStore } from '../store/usersStore';
 import eventService from '@/services/eventService';
 import associationService from '@/services/associationService';
 import typeEventService from '@/services/typeEventService'; 
 import { useRouter } from 'vue-router';
 
-const store = useStore();
+const userStore = useUserStore();
 const router = useRouter();
 
-const isAdmin = store.getters['user/isAdmin'];
+const isAdmin = userStore.isAdmin;
 
 const event = ref({
   titre: '',
@@ -17,8 +17,8 @@ const event = ref({
   image: '',
   date: '',
   lieu: '',
-  association_id: isAdmin ? null : store.state.user.associationId,
-  user_id: store.state.user.id,
+  association_id: isAdmin ? null : userStore.associationId,
+  user_id: userStore.id,
   type_event_id: null as number | null,
   isPublic: true,
 });
@@ -28,11 +28,24 @@ const typeEvents = ref<{ id: number, name: string }[]>([]);
 
 const handleSubmit = async () => {
   try {
-    const token = store.state.user.access_token;
+    const token = userStore.access_token;
     if (!isAdmin) {
-      event.value.association_id = store.state.user.associationId;
+      event.value.association_id = userStore.associationId;
     }
-    await eventService.createEvent(event.value, token);
+
+    if (event.value.association_id === null || event.value.user_id === null || event.value.type_event_id === null) {
+      alert('Association, User, and Event Type must be selected.');
+      return;
+    }
+
+    const dataToSend = {
+      ...event.value,
+      association_id: event.value.association_id ?? 0,
+      user_id: event.value.user_id ?? 0,
+      type_event_id: event.value.type_event_id ?? 0
+    };
+
+    await eventService.createEvent(dataToSend, token);
     alert('Event created successfully!');
     router.push('/');
   } catch (error) {

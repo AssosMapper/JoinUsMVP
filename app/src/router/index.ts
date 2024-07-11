@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
-import store from '../store';
+import { useUserStore } from '../store/usersStore';
 import Home from '../views/Home.vue';
 
 const routes: Array<RouteRecordRaw> = [
@@ -48,9 +48,10 @@ const router = createRouter({
 });
 
 router.beforeEach((to, from, next) => {
-  const isAuthenticated = store.getters['user/isAuthenticated'];
-  const isAdmin = store.getters['user/isAdmin'];
-  const isAssociationManager = store.getters['user/isAssociationManager'];
+  const userStore = useUserStore();
+  const isAuthenticated = userStore.isAuthenticated;
+  const isAdmin = userStore.isAdmin;
+  const isAssociationManager = userStore.isAssociationManager;
 
   if (to.name === 'AdminInterface' && (!isAuthenticated || !isAdmin)) {
     next('/login');

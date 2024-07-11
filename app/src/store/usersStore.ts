@@ -1,6 +1,4 @@
-import { Module } from 'vuex';
-import { RootState } from './types';
-// import { UserRole } from '@interfaces/roles';
+import { defineStore } from 'pinia';
 
 export enum UserRole {
     ADMIN = 'admin',
@@ -10,7 +8,7 @@ export enum UserRole {
 
 export interface Role {
   id: number | null;
-  name: UserRole.ADMIN | UserRole.ASSOCIATION_MANAGER | UserRole.USER;
+  name: UserRole;
 }
 
 export interface UserState {
@@ -25,66 +23,50 @@ export interface UserState {
   phone: string;
   zip: string;
   image: string | null;
-  // roleId: number | null;
   role: Role | null;
   associationId: number | null;
 }
 
-const userModule: Module<UserState, RootState> = {
-  namespaced: true,
-  state: () => ({
-    id: null,
-    first_name: '',
-    last_name: '',
-    email: '',
-    access_token: '',
-    address: '',
-    country: '',
-    dateCreated: '',
-    phone: '',
-    zip: '',
-    image: null,
-    // roleId: null,
-    role: null,
-    associationId: null,
-    }),
-  getters: {
-    isAuthenticated: (state) => !!state.access_token,
-    isAdmin: (state) => state.role?.name === UserRole.ADMIN,
-    isAssociationManager: (state) => state.role?.name === UserRole.ASSOCIATION_MANAGER,
-    role: (state) => state.role,
-  },
-  mutations: {
-    setUser(state, userData: UserState) {
-      Object.assign(state, userData);
-    },
-    clearUser(state) {
-      Object.assign(state, {
-        id: null,
-        first_name: '',
-        last_name: '',
-        email: '',
-        access_token: '',
-        address: '',
-        country: '',
-        dateCreated: '',
-        phone: '',
-        zip: '',
-        image: null,
-        // role: null,
-        roleId: null,
-        associationId: null,
-      });
-    },
-  },
-  actions: {
-    loginUser({ commit }, userData: UserState) {
-      commit('setUser', userData);
-    },
-    logoutUser({ commit }) {
-      commit('clearUser');
-    },
-  },
+const initialState: UserState = {
+  id: null,
+  first_name: '',
+  last_name: '',
+  email: '',
+  access_token: '',
+  address: '',
+  country: '',
+  dateCreated: '',
+  phone: '',
+  zip: '',
+  image: null,
+  role: null,
+  associationId: null,
 };
 
-export default userModule;
+export const useUserStore = defineStore('user', {
+  state: (): UserState => ({ ...initialState }),
+  getters: {
+    isAuthenticated: (state): boolean => !!state.access_token,
+    isAdmin: (state): boolean => state.role?.name === UserRole.ADMIN,
+    isAssociationManager: (state): boolean => state.role?.name === UserRole.ASSOCIATION_MANAGER,
+    fullName: (state): string => `${state.first_name} ${state.last_name}`.trim(),
+  },
+  actions: {
+    setUser(userData: Partial<UserState>): void {
+      Object.assign(this, userData);
+    },
+    clearUser(): void {
+      Object.assign(this, initialState);
+    },
+    loginUser(userData: UserState): void {
+      this.setUser(userData);
+    },
+    logoutUser(): void {
+      this.clearUser();
+    },
+    updateUserInfo(userData: Partial<UserState>): void {
+      this.setUser(userData);
+    },
+  },
+  persist: true
+});
