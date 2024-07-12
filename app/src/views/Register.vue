@@ -3,6 +3,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useUserStore } from '../store/usersStore';
 import userService from '@/services/usersService';
+import { GoogleAutocomplete } from 'vue3-google-autocomplete';
 
 const router = useRouter();
 const userStore = useUserStore();
@@ -14,11 +15,11 @@ const password = ref("");
 const confirmPassword = ref("");
 const roleId = ref<number | null>(null);
 const phone = ref("");
-const address = ref("");
-const zip = ref("");
-const country = ref("");
+const localisation = ref("");
 const image = ref("");
 const associationId = ref<number | null>(null);
+
+const googleMapsApiKey = process.env.VUE_APP_GOOGLE_MAPS_API_KEY;
 
 const validatePhone = (phone: string) => {
   const phoneRegex = /^0[1-9]\d{8}$/;
@@ -36,10 +37,10 @@ const handleSubmit = async () => {
     return;
   }
 
-  if (associationId.value === null) {
-    alert("Association ID is required.");
-    return;
-  }
+  // if (associationId.value === null) {
+  //   alert("Association ID is required.");
+  //   return;
+  // }
   
   const user = {
     first_name: firstName.value,
@@ -47,11 +48,9 @@ const handleSubmit = async () => {
     email: email.value,
     password: password.value,
     confirmPassword: confirmPassword.value,
-    roleId: roleId.value, // Assurez-vous que roleId n'est pas null ici
+    roleId: roleId.value, 
     phone: phone.value,
-    address: address.value,
-    zip: zip.value,
-    country: country.value,
+    localisation: localisation.value,
     image: image.value,
     dateCreated: new Date(),
     associationId: associationId.value
@@ -65,6 +64,10 @@ const handleSubmit = async () => {
     console.error("Error creating user:", error);
     alert("There was an error creating the user.");
   }
+};
+
+const handlePlaceChanged = (place: any) => {
+  localisation.value = place.formatted_address;
 };
 </script>
 
@@ -112,18 +115,17 @@ const handleSubmit = async () => {
             </div>
 
             <div class="sm:col-span-2">
-              <label for="address" class="block text-sm font-medium leading-6 text-gray-900">Address</label>
-              <input type="text" id="address" v-model="address" class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2" />
-            </div>
-
-            <div class="sm:col-span-2">
-              <label for="zip" class="block text-sm font-medium leading-6 text-gray-900">ZIP / Postal code</label>
-              <input type="text" id="zip" v-model="zip" class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2" />
-            </div>
-
-            <div class="sm:col-span-2">
-              <label for="country" class="block text-sm font-medium leading-6 text-gray-900">Country</label>
-              <input type="text" id="country" v-model="country" class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2" />
+              <label for="address" class="block text-sm font-medium leading-6 text-gray-900">localisation</label>
+              <GoogleAutocomplete
+                id="address"
+                v-model="localisation"
+                placeholder="Enter location"
+                :apiKey="googleMapsApiKey"
+                required
+                @placechanged="handlePlaceChanged"
+                :options="{ types: ['geocode'] }"
+                class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
+              />
             </div>
 
             <div class="col-span-full">

@@ -33,13 +33,7 @@ export class User {
   phone: string;
 
   @Column({ nullable: true })
-  address: string;
-
-  @Column({ nullable: true })
-  zip: string;
-
-  @Column({ nullable: true })
-  country: string;
+  localisation: string;
 
   @Column({ nullable: true })
   image: string;
@@ -60,9 +54,7 @@ export class User {
     this.password = '';
     this.role = new Role(); 
     this.phone = '';
-    this.address = '';
-    this.zip = '';
-    this.country = '';
+    this.localisation = '';
     this.roleId = 0;
   }
 }

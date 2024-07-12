@@ -32,17 +32,13 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsString()
-  address?: string;
-
-  @IsOptional()
-  @IsString()
-  zip?: string;
-
-  @IsOptional()
-  @IsString()
-  country?: string;
+  localisation?: string;
 
   @IsOptional()
   @IsString()
   image?: string;
+
+  @IsOptional()
+  @IsNumber ()
+  idAssociation?: string;
 }
