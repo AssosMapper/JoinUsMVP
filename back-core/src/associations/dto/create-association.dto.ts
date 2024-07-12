@@ -6,15 +6,7 @@ export class CreateAssociationDto {
 
   @IsString()
   @IsOptional()
-  address?: string;
-
-  @IsString()
-  @IsOptional()
-  code_postal?: string;
-
-  @IsString()
-  @IsOptional()
-  ville?: string;
+  localisation?: string;
 
   @IsString()
   description: string;

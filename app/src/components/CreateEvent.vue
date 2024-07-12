@@ -19,7 +19,7 @@ const event = ref({
   description: '',
   image: '',
   date: '',
-  lieu: '',
+  localisation: '',
   association_id: isAdmin ? null : userStore.associationId,
   user_id: userStore.id,
   type_event_id: null as number | null,
@@ -76,7 +76,7 @@ const fetchTypeEvents = async () => {
 };
 
 const handlePlaceChanged = (place: any) => {
-  event.value.lieu = place.formatted_address;
+  event.value.localisation = place.formatted_address;
 };
 
 onMounted(() => {
@@ -135,11 +135,10 @@ onMounted(() => {
       </div>
 
       <div class="mb-4">
-        <label for="lieu" class="block text-sm font-medium leading-6 text-gray-900">Lieu</label>
+        <label for="localisation" class="block text-sm font-medium leading-6 text-gray-900">Localisation</label>
         <GoogleAutocomplete
-          id="lieu"
-          v-model="event.lieu"
-          placeholder="Enter location"
+          id="localisation"
+          v-model="event.localisation"
           :apiKey="googleMapsApiKey"
           required
           @placechanged="handlePlaceChanged"

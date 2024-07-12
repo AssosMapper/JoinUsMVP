@@ -11,13 +11,7 @@ export class Association {
   name: string;
 
   @Column({ nullable: true })
-  address: string;
-
-  @Column({ nullable: true })
-  code_postal: string;
-
-  @Column({ nullable: true })
-  ville: string;
+  localisation: string;
 
   @Column('text')
   description: string;

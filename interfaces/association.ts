@@ -1,9 +1,7 @@
 export interface Association {
     id?: number;
     name: string;
-    address?: string;
-    code_postal?: string;
-    ville?: string;
+    localisation?: string;
     description: string;
     image?: string;
     user_id: number;
