@@ -4,17 +4,18 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/store/usersStore';
 import associationService from '@/services/associationService';
 import typeAssociationService from '@/services/typeAssociationService';
+import { GoogleAutocomplete } from 'vue3-google-autocomplete';
 
 const userStore = useUserStore();
 const router = useRouter();
+
+const googleMapsApiKey = process.env.VUE_APP_GOOGLE_MAPS_API_KEY;
 
 const userId = userStore.id !== null ? userStore.id : 0;
 
 const association = ref({
   name: '',
-  address: '',
-  code_postal: '',
-  ville: '',
+  localisation: '',
   description: '',
   image: '',
   user_id: userId,
@@ -47,6 +48,10 @@ const fetchTypes = async () => {
   }
 };
 
+const handlePlaceChanged = (place: any) => {
+  event.value.lieu = place.formatted_address;
+};
+
 onMounted(() => {
   fetchTypes();
 });
@@ -70,31 +75,16 @@ onMounted(() => {
       </div>
       
       <div class="mb-4">
-        <label for="address" class="block text-sm font-medium leading-6 text-gray-900">Address</label>
-        <input
+        <label for="localisation" class="block text-sm font-medium leading-6 text-gray-900">Localisation</label>
+        <GoogleAutocomplete
           type="text"
-          id="address"
-          v-model="association.address"
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-        />
-      </div>
-      
-      <div class="mb-4">
-        <label for="code_postal" class="block text-sm font-medium leading-6 text-gray-900">Code Postal</label>
-        <input
-          type="text"
-          id="code_postal"
-          v-model="association.code_postal"
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-        />
-      </div>
-      
-      <div class="mb-4">
-        <label for="ville" class="block text-sm font-medium leading-6 text-gray-900">Ville</label>
-        <input
-          type="text"
-          id="ville"
-          v-model="association.ville"
+          id="localisation"
+          v-model="association.localisation"
+              required
+          @placechanged="handlePlaceChanged"
+          :options="{
+            types: ['geocode'],
+          }"
           class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         />
       </div>
