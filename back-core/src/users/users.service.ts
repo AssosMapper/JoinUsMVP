@@ -50,12 +50,21 @@ export class UsersService {
     if (!existingUser) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
+
+    if (updateUserDto.password) {
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+
+    if (updateUserDto.roleId) {
+      const role = await this.rolesRepository.findOne({ where: { id: updateUserDto.roleId } });
+      if (!role) {
+        throw new NotFoundException(`Role with ID ${updateUserDto.roleId} not found`);
+      }
+      existingUser.role = role;
+    }
+
     Object.assign(existingUser, updateUserDto);
     await this.usersRepository.save(existingUser);
-  }
-
-  async remove(id: number): Promise<void> {
-    await this.usersRepository.delete(id);
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
@@ -64,5 +73,9 @@ export class UsersService {
       select: ['id', 'email', 'password', 'first_name', 'last_name', 'roleId', 'phone', 'localisation', 'image', 'dateCreated', 'associationId'],
       relations: ['role', 'association'],
     });
+  }
+
+  async remove(id: number): Promise<void> {
+    await this.usersRepository.delete(id);
   }
 }
