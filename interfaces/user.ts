@@ -7,11 +7,9 @@ export interface User {
     password: string;
     confirmPassword: string;
     roleId: number;
-    associationId: number;
+    associationId: number | null; 
     phone?: string;
-    address?: string;
-    zip?: string;
-    country?: string;
+    localisation?: string;
     image?: string;
   }
   

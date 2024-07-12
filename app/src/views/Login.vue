@@ -1,37 +1,35 @@
-<script>
+<script setup>
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import authService from '@/services/authService';
+import { useUserStore } from '@/store/usersStore';
 
-export default {
-  name: "Login",
-  setup() {
-    const router = useRouter();
-    return { router };
-  },
-  data() {
-    return {
-      email: "",
-      password: "",
-    };
-  },
-  methods: {
-    async handleLogin() {
-      const credentials = {
-        email: this.email,
-        password: this.password,
-      };
-      
-      try {
-        await authService.login(credentials);
-        alert("Login successful!");
-        this.router.push('/');
-      } catch (error) {
-        console.error("Error logging in:", error);
-        alert("There was an error logging in.");
-      }
-    },
-  },
+const userStore = useUserStore();
+const router = useRouter();
+
+const token = userStore.access_token;
+
+
+const email = ref('');
+const password = ref('');
+
+const handleLogin = async () => {
+  const credentials = {
+    email: email.value,
+    password: password.value,
+  };
+
+  try {
+    await authService.login(credentials);
+    router.push('/'); 
+    alert("Login successful!");
+    return;
+  } catch (error) {
+    console.error("Veuillez réessayer de:", error);
+    alert("There was an error logging in.");
+  }
 };
+
 </script>
 
 <template>
