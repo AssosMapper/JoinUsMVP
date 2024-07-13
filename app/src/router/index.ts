@@ -45,6 +45,16 @@ const routes: Array<RouteRecordRaw> = [
     meta: { requiresAssociationManager: true },
     component: () => import('../views/AssociationManagerInterface.vue'),
   },
+  {
+    path: '/displayEvents',
+    name: 'DisplayEvents',
+    component: () => import('../views/DisplayEvents.vue'),
+  },
+  {
+    path: '/displayAssociations',
+    name: 'DisplayAssociations',
+    component: () => import('../views/DisplayAssociations.vue'),
+  },
 ];
 
 const router = createRouter({
