@@ -216,6 +216,7 @@ watch(selectedEventId, (newId) => {
         <GoogleAutocomplete
           id="localisation"
           v-model="event.localisation"
+          :value="event.localisation"
           :apiKey="googleMapsApiKey"
           required
           @placechanged="handlePlaceChanged"
@@ -273,7 +274,3 @@ watch(selectedEventId, (newId) => {
     </form>
   </div>
 </template>
-
-<style scoped>
-/* Add your styles here */
-</style>
