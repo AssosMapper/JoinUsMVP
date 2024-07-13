@@ -26,6 +26,7 @@ const event = ref({
   user_id: userStore.id,
   type_event_id: null as number | null,
   isPublic: true,
+  organisation: '',
 });
 
 const selectedEventId = ref<number | null>(null);
@@ -41,12 +42,13 @@ const fetchEventDetails = async (id: number) => {
       titre: eventData.titre,
       description: eventData.description,
       image: eventData.image,
-      date: formatDateForInput(eventData.date),  // Utilisez la fonction ici
+      date: formatDateForInput(eventData.date),
       localisation: eventData.localisation,
       association_id: eventData.association?.id ?? null,
       user_id: eventData.user?.id ?? null,
       type_event_id: eventData.typeEvent?.id ?? null,
-      isPublic: eventData.isPublic
+      isPublic: eventData.isPublic,
+      organisation: eventData.organisation  
     };
   } catch (error) {
     console.error('Error fetching event details:', error);
@@ -71,8 +73,8 @@ const handleSubmit = async () => {
       return;
     }
 
-    const dataToSend = {
-      ...event.value,
+    const { organisation, ...dataToSend } = {
+        ...event.value,
       association_id: event.value.association_id ?? 0,
       user_id: event.value.user_id ?? 0,
       type_event_id: event.value.type_event_id ?? 0
@@ -141,6 +143,7 @@ watch(selectedEventId, (newId) => {
     fetchEventDetails(newId);
   }
 });
+
 </script>
 
 <template>
@@ -234,8 +237,18 @@ watch(selectedEventId, (newId) => {
         />
       </div>
 
+         <div v-if="isAdmin" class="mb-4">
+        <label for="association" class="block text-sm font-medium leading-6 text-gray-900">Association</label>
+        <div
+          id="association"
+          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-gray-100"
+        >
+          {{ event.organisation.name }}
+        </div>
+      </div>
+
       <div class="mb-4" v-if="isAdmin">
-        <label for="association_id" class="block text-sm font-medium leading-6 text-gray-900">Association</label>
+        <label for="association_id" class="block text-sm font-medium leading-6 text-gray-900">Attribuer nouvelle Association</label>
         <select
           id="association_id"
           v-model="event.association_id"
@@ -257,7 +270,7 @@ watch(selectedEventId, (newId) => {
           class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         >
           <option v-for="typeEvent in typeEvents" :key="typeEvent.id" :value="typeEvent.id">
-            {{ typeEvent.name }}
+            {{ typeEvent.name }} 
           </option>
         </select>
       </div>
