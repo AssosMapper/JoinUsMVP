@@ -22,6 +22,11 @@ const getEventById = async (id: number) => {
   return response.data;
 };
 
+const getEventsByUserId = async (userId: number) => {
+  const response = await axios.get(`${API_URL}/events/user/${userId}`);
+  return response.data;
+};
+
 const updateEvent = async (id: number, event: Partial<Event>, token: string) => {
   const response = await axios.put(`${API_URL}/events/${id}`, event, {
     headers: {
@@ -45,5 +50,6 @@ export default {
   getAllEvents,
   getEventById,
   updateEvent,
-  deleteEvent
+  deleteEvent,
+  getEventsByUserId
 };

@@ -27,6 +27,13 @@ export class EventsService {
     return event;
   }
 
+  async findByUserId(userId: number): Promise<Event[]> {
+    return this.eventsRepository.find({
+      where: { user_id: userId },
+      relations: ['organisation', 'user', 'typeEvent'],
+    });
+  }
+
   create(createEventDto: CreateEventDto): Promise<Event> {
     const event = this.eventsRepository.create(createEventDto);
     return this.eventsRepository.save(event);

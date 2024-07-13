@@ -53,7 +53,7 @@ const handleSubmit = async () => {
 
   try {
     await userService.updateUser(userStore.id as number, user, userStore.access_token);
-    await userStore.fetchUserDetails(); // Appeler fetchUserDetails pour mettre à jour le store
+    await userStore.fetchUserDetails(); 
     alert("User updated successfully!");
     router.push('/');
   } catch (error) {

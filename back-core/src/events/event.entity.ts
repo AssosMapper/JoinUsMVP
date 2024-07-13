@@ -21,7 +21,7 @@ export class Event {
   date: Date;
 
   @Column()
-  lieu: string;
+  localisation: string;
 
   @Column()
   association_id: number;

@@ -22,6 +22,11 @@ export class EventsController {
     return this.eventsService.findOne(+id);
   }
 
+  @Get('/user/:userId')
+  findEventsByUser(@Param('userId') userId: string): Promise<Event[]> {
+    return this.eventsService.findByUserId(+userId);
+  }
+
   @Post()
   @UseGuards(JwtAuthGuard)
   create(@Body() createEventDto: CreateEventDto): Promise<Event> {
