@@ -41,7 +41,7 @@ const fetchEventDetails = async (id: number) => {
       titre: eventData.titre,
       description: eventData.description,
       image: eventData.image,
-      date: eventData.date,
+      date: formatDateForInput(eventData.date),  // Utilisez la fonction ici
       localisation: eventData.localisation,
       association_id: eventData.association?.id ?? null,
       user_id: eventData.user?.id ?? null,
@@ -121,6 +121,13 @@ const fetchEvents = async () => {
 
 const handlePlaceChanged = (place: any) => {
   event.value.localisation = place.formatted_address;
+};
+
+const formatDateForInput = (dateString: string) => {
+  const date = new Date(dateString);
+  const offset = date.getTimezoneOffset();
+  const formattedDate = new Date(date.getTime() - (offset * 60 * 1000));
+  return formattedDate.toISOString().slice(0, 16);
 };
 
 onMounted(() => {
