@@ -12,7 +12,7 @@ export class CreateEventDto {
   userId: number;
 
   @IsInt()
-  organisationId: number;
+  association_id: number;
 
   @IsInt()
   typeEventId: number;

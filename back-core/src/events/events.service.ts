@@ -2,6 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Event } from './event.entity';
+import { Association } from '../associations/association.entity';
 import { CreateEventDto } from './dto/create-events.dto';
 import { UpdateEventDto } from './dto/update-events.dto';
 
@@ -10,6 +11,9 @@ export class EventsService {
   constructor(
     @InjectRepository(Event)
     private eventsRepository: Repository<Event>,
+    
+    @InjectRepository(Association)
+    private associationRepository: Repository<Association>,
   ) {}
 
   findAll(): Promise<Event[]> {
@@ -41,6 +45,13 @@ export class EventsService {
 
   async update(id: number, updateEventDto: UpdateEventDto): Promise<void> {
     const existingEvent = await this.findOne(id);
+    if (updateEventDto.association_id) {
+      const association = await this.associationRepository.findOne({ where: { id: updateEventDto.association_id } });
+      if (!association) {
+        throw new NotFoundException(`Association with ID ${updateEventDto.association_id} not found`);
+      }
+      existingEvent.organisation = association;
+    }
     Object.assign(existingEvent, updateEventDto);
     await this.eventsRepository.save(existingEvent);
   }
