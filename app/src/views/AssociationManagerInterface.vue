@@ -3,6 +3,7 @@ import { shallowRef, defineAsyncComponent } from 'vue'
 
 const components = {
   'CreateEvent': defineAsyncComponent(() => import('../components/CreateEvent.vue')),
+  'UpdateEvent': defineAsyncComponent(() => import('../components/UpdateEvent.vue')),
   'UpdateAssociation': defineAsyncComponent(() => import('../components/UpdateAssociation.vue'))
 }
 
