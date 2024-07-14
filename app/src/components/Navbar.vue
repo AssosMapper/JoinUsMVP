@@ -23,8 +23,8 @@ const logout = () => {
       <router-link to="/">Home</router-link> |
       <router-link to="/displayEvents">Display Events</router-link> |
       <router-link to="/displayAssociations">Display Association</router-link> |
-      <router-link v-if="isAdmin && isAuthenticated" to="/adminInterface">Admin Interface</router-link> | 
-      <router-link v-if="(isAdmin || isAssociationManager) && isAuthenticated" to="/associationManagerInterface">Association Interface</router-link> | 
+      <router-link v-if="isAdmin && isAuthenticated" to="/adminInterface">Admin Interface | </router-link> 
+      <router-link v-if="(isAdmin || isAssociationManager) && isAuthenticated" to="/associationManagerInterface">Association Interface | </router-link>  
       <template v-if="isAuthenticated">
         <router-link to="/logout" @click.prevent="logout">Logout</router-link> | 
         <router-link to="/updateProfile">{{ first_name }}</router-link>

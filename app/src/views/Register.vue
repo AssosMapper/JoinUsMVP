@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useUserStore } from '../store/usersStore';
+// import { useUserStore } from '../store/usersStore';
 import userService from '@/services/usersService';
 import { GoogleAutocomplete } from 'vue3-google-autocomplete';
 
 const router = useRouter();
-const userStore = useUserStore();
+// const userStore = useUserStore();
 
 const firstName = ref("");
 const lastName = ref("");

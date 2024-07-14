@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import { useUserStore } from '../store/usersStore';
+import { useUserStore } from '@/store/usersStore';
 import typeAssociationService from '@/services/typeAssociationService';
 import { useRouter } from 'vue-router';
 

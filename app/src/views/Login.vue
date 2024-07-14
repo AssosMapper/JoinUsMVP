@@ -2,12 +2,12 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import authService from '@/services/authService';
-import { useUserStore } from '@/store/usersStore';
+// import { useUserStore } from '@/store/usersStore';
 
-const userStore = useUserStore();
+// const userStore = useUserStore();
 const router = useRouter();
 
-const token = userStore.access_token;
+// const token = userStore.access_token;
 
 
 const email = ref('');
@@ -29,7 +29,6 @@ const handleLogin = async () => {
     alert("There was an error logging in.");
   }
 };
-
 </script>
 
 <template>
