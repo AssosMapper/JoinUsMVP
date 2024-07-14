@@ -4,12 +4,11 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '@/store/usersStore';
 import associationService from '@/services/associationService';
 import typeAssociationService from '@/services/typeAssociationService';
-import { GoogleAutocomplete } from 'vue3-google-autocomplete';
+import GoogleAutoCompleteComponent from '../GoogleAutoCompleteComponent.vue';
 
 const userStore = useUserStore();
 const router = useRouter();
 
-const googleMapsApiKey = process.env.VUE_APP_GOOGLE_MAPS_API_KEY;
 
 const userId = userStore.id !== null ? userStore.id : 0;
 
@@ -48,13 +47,10 @@ const fetchTypes = async () => {
   }
 };
 
-const handlePlaceChanged = (place: any) => {
-  event.value.lieu = place.formatted_address;
-};
-
-onMounted(() => {
+onMounted(async () => {
   fetchTypes();
 });
+
 </script>
 
 
@@ -76,15 +72,11 @@ onMounted(() => {
       
       <div class="mb-4">
         <label for="localisation" class="block text-sm font-medium leading-6 text-gray-900">Localisation</label>
-        <GoogleAutocomplete
+        <GoogleAutoCompleteComponent
           type="text"
           id="localisation"
           v-model="association.localisation"
-              required
-          @placechanged="handlePlaceChanged"
-          :options="{
-            types: ['geocode'],
-          }"
+          required
           class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         />
       </div>

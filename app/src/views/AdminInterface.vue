@@ -2,14 +2,14 @@
 import { shallowRef, defineAsyncComponent } from 'vue'
 
 const components = {
-  'CreateAssociation': defineAsyncComponent(() => import('../components/CreateAssociation.vue')),
-  'UpdateAssociation': defineAsyncComponent(() => import('../components/UpdateAssociation.vue')),
-  'CreateEvent': defineAsyncComponent(() => import('../components/CreateEvent.vue')),
-  'UpdateEvent': defineAsyncComponent(() => import('../components/UpdateEvent.vue')),
-  'CreateTypeEvent': defineAsyncComponent(() => import('../components/CreateTypeEvent.vue')),
-  'UpdateTypeEvent': defineAsyncComponent(() => import('../components/UpdateTypeEvent.vue')),
-  'UpdateTypeAssociation': defineAsyncComponent(() => import('../components/UpdateTypeAssociation.vue')),
-  'CreateTypeAssociation': defineAsyncComponent(() => import('../components/CreateTypeAssociation.vue')),
+  'CreateAssociation': defineAsyncComponent(() => import('../components/Create/CreateAssociation.vue')),
+  'UpdateAssociation': defineAsyncComponent(() => import('../components/Update/UpdateAssociation.vue')),
+  'CreateEvent': defineAsyncComponent(() => import('../components/Create/CreateEvent.vue')),
+  'UpdateEvent': defineAsyncComponent(() => import('../components/Update/UpdateEvent.vue')),
+  'CreateTypeEvent': defineAsyncComponent(() => import('../components/Create/CreateTypeEvent.vue')),
+  'UpdateTypeEvent': defineAsyncComponent(() => import('../components/Update/UpdateTypeEvent.vue')),
+  'UpdateTypeAssociation': defineAsyncComponent(() => import('../components/Update/UpdateTypeAssociation.vue')),
+  'CreateTypeAssociation': defineAsyncComponent(() => import('../components/Create/CreateTypeAssociation.vue')),
 }
 
 const currentView = shallowRef('CreateAssociation')

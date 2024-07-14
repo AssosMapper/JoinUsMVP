@@ -1,16 +1,14 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import { useUserStore } from '../store/usersStore';
+import { useUserStore } from '@/store/usersStore';
 import eventService from '@/services/eventService';
 import associationService from '@/services/associationService';
 import typeEventService from '@/services/typeEventService';
 import { useRouter } from 'vue-router';
-import { GoogleAutocomplete } from 'vue3-google-autocomplete';
+import GoogleAutoCompleteComponent from '../GoogleAutoCompleteComponent.vue';
 
 const userStore = useUserStore();
 const router = useRouter();
-
-const googleMapsApiKey = process.env.VUE_APP_GOOGLE_MAPS_API_KEY;
 
 const isAdmin = userStore.isAdmin;
 const isAssociationManager = userStore.isAssociationManager;
@@ -55,12 +53,6 @@ const fetchEventDetails = async (id: number) => {
   }
 };
 
-const handleEventChange = async () => {
-  if (selectedEventId.value !== null) {
-    await fetchEventDetails(selectedEventId.value);
-  }
-};
-
 const handleSubmit = async () => {
   try {
     const token = userStore.access_token;
@@ -73,6 +65,7 @@ const handleSubmit = async () => {
       return;
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { organisation, ...dataToSend } = {
         ...event.value,
       association_id: event.value.association_id ?? 0,
@@ -223,16 +216,12 @@ watch(selectedEventId, (newId) => {
 
       <div class="mb-4">
         <label for="localisation" class="block text-sm font-medium leading-6 text-gray-900">Localisation</label>
-        <GoogleAutocomplete
+        <GoogleAutoCompleteComponent
           id="localisation"
           v-model="event.localisation"
           :value="event.localisation"
           :apiKey="googleMapsApiKey"
           required
-          @placechanged="handlePlaceChanged"
-          :options="{
-            types: ['geocode'],
-          }"
           class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         />
       </div>
