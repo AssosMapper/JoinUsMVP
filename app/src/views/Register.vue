@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-// import { useUserStore } from '../store/usersStore';
 import userService from '@/services/usersService';
-import { GoogleAutocomplete } from 'vue3-google-autocomplete';
+import GoogleAutoCompleteComponent from '../components/GoogleAutoCompleteComponent';
 
 const router = useRouter();
-// const userStore = useUserStore();
 
 const firstName = ref("");
 const lastName = ref("");
@@ -18,8 +16,6 @@ const phone = ref("");
 const localisation = ref("");
 const image = ref("");
 const associationId = ref<number | null>(null);
-
-const googleMapsApiKey = process.env.VUE_APP_GOOGLE_MAPS_API_KEY;
 
 const validatePhone = (phone: string) => {
   const phoneRegex = /^0[1-9]\d{8}$/;
@@ -64,10 +60,6 @@ const handleSubmit = async () => {
     console.error("Error creating user:", error);
     alert("There was an error creating the user.");
   }
-};
-
-const handlePlaceChanged = (place: any) => {
-  localisation.value = place.formatted_address;
 };
 </script>
 
@@ -116,14 +108,11 @@ const handlePlaceChanged = (place: any) => {
 
             <div class="sm:col-span-2">
               <label for="address" class="block text-sm font-medium leading-6 text-gray-900">localisation</label>
-              <GoogleAutocomplete
+              <GoogleAutoCompleteComponent
                 id="address"
                 v-model="localisation"
                 placeholder="Enter location"
-                :apiKey="googleMapsApiKey"
                 required
-                @placechanged="handlePlaceChanged"
-                :options="{ types: ['geocode'] }"
                 class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
               />
             </div>
