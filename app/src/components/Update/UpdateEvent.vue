@@ -220,7 +220,6 @@ watch(selectedEventId, (newId) => {
           id="localisation"
           v-model="event.localisation"
           :value="event.localisation"
-          :apiKey="googleMapsApiKey"
           required
           class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         />

@@ -20,11 +20,9 @@ export interface UserState {
   last_name: string;
   email: string;
   access_token: string;
-  address: string;
-  country: string;
   dateCreated: string;
   phone: string;
-  zip: string;
+  localisation: string;
   image: string | null;
   role: Role | null;
   associationId: number | null;
@@ -36,11 +34,9 @@ const initialState: UserState = {
   last_name: '',
   email: '',
   access_token: '',
-  address: '',
-  country: '',
+  localisation: '',
   dateCreated: '',
   phone: '',
-  zip: '',
   image: null,
   role: null,
   associationId: null,
