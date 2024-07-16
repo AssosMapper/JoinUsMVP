@@ -19,4 +19,12 @@ import Navbar from './components/Navbar.vue'
   text-align: center;
   color: #2c3e50;
 }
+
+footer{
+  /* bottom: 0;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-bottom: 0.5rem; */
+}
 </style>
