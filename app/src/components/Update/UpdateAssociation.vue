@@ -65,11 +65,19 @@ const fetchAssociationDetails = async (id: number) => {
 const handleSubmit = async () => {
   try {
     const token = userStore.access_token;
+    
+    const { types, ...dataWithoutTypes } = association.value;
+    
     const dataToSend = {
-      ...association.value,
+      ...dataWithoutTypes,
       typeIds: selectedTypeIds.value,
       user_id: association.value.user_id as number
     };
+    
+    delete dataToSend.users;
+    
+    console.log('Data to send:', JSON.stringify(dataToSend, null, 2));
+    
     await associationService.updateAssociation(association.value.id, dataToSend, token);
     alert('Association updated successfully!');
     router.push('/');
