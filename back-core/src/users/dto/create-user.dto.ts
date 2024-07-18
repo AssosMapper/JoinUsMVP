@@ -23,8 +23,8 @@ export class CreateUserDto {
   @IsString()
   confirmPassword: string;
 
-  @IsNumber()
-  roleId: number;
+  @IsString()
+  roleId: string;
 
   @IsOptional()
   @IsString()
@@ -39,6 +39,6 @@ export class CreateUserDto {
   image?: string;
 
   @IsOptional()
-  @IsNumber ()
+  @IsString ()
   idAssociation?: string;
 }

@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards } from '@nes
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './user.entity';
+import { User } from './entities/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
 
@@ -20,7 +20,7 @@ export class UsersController {
   @Get(':id')
   @Public()
   findOne(@Param('id') id: string): Promise<User> {
-    return this.usersService.findOne(+id);
+    return this.usersService.findOne(id);
   }
 
   @Post()
@@ -31,11 +31,11 @@ export class UsersController {
 
   @Put(':id')
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto): Promise<void> {
-    return this.usersService.update(+id, updateUserDto);
+    return this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string): Promise<void> {
-    return this.usersService.remove(+id);
+    return this.usersService.remove(id);
   }
 }

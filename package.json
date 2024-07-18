@@ -1,0 +1,11 @@
+{
+  "name": "joinus",
+  "version": "1.0.0",
+  "author": "",
+  "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "workspaces": [
+    "packages/*"
+  ]
+}

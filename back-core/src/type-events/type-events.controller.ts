@@ -2,7 +2,7 @@ import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards } from '@nes
 import { TypeEventsService } from './type-events.service';
 import { CreateTypeEventDto } from './dto/create-type-event.dto';
 import { UpdateTypeEventDto } from './dto/update-type-event.dto';
-import { TypeEvents } from './type-events.entity';
+import { TypeEvents } from './entities/type-events.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
 
@@ -20,7 +20,7 @@ export class TypeEventsController {
   @Get(':id')
   @Public()
   findOne(@Param('id') id: string): Promise<TypeEvents> {
-    return this.typeEventsService.findOne(+id);
+    return this.typeEventsService.findOne(id);
   }
 
   @Post()
@@ -30,11 +30,11 @@ export class TypeEventsController {
 
   @Put(':id')
   update(@Param('id') id: string, @Body() updateTypeEventDto: UpdateTypeEventDto) {
-    return this.typeEventsService.update(+id, updateTypeEventDto);
+    return this.typeEventsService.update(id, updateTypeEventDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.typeEventsService.remove(+id);
+    return this.typeEventsService.remove(id);
   }
 }

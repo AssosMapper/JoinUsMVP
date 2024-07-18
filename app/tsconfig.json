@@ -21,7 +21,6 @@
       "@/*": [
         "src/*"
       ],
-      "@interfaces/*": ["../interfaces/*"],
       "@stores/*": ["/app/src/store*"],
     },
     "lib": [
@@ -37,7 +36,6 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx",
-    "interfaces/**/*.d.ts",
     "types/**/*.d.ts"
   ],
   "exclude": [

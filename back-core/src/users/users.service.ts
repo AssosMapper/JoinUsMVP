@@ -1,26 +1,26 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './user.entity';
+import { User } from './entities/user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
-import { Role } from '../roles/role.entity';
+import { Role } from '../roles/entities/role.entity';
+import { Association } from '../associations/entities/association.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User)
-    private usersRepository: Repository<User>,
-    @InjectRepository(Role)
-    private rolesRepository: Repository<Role>,
+    @Inject('USER_REPOSITORY') private usersRepository: Repository<User>,
+    @Inject('ROLE_REPOSITORY') private rolesRepository: Repository<Role>,
+    @Inject('ASSOCIATION_REPOSITORY') private associationsRepository: Repository<Association>,
   ) {}
 
   findAll(): Promise<User[]> {
     return this.usersRepository.find();
   }
 
-  async findOne(id: number): Promise<User | undefined> {
+  async findOne(id: string): Promise<User | undefined> {
     return this.usersRepository.findOne({
       where: { id },
       relations: ['role'],
@@ -28,25 +28,40 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const { roleId, ...userDetails } = createUserDto;
     
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     
-    const role = await this.rolesRepository.findOne({ where: { id: roleId } });
+    const role = await this.rolesRepository.findOne({ where: { id: createUserDto.roleId } });
     if (!role) {
-      throw new NotFoundException(`Role with ID ${roleId} not found`);
+      throw new NotFoundException(`Role with ID ${createUserDto.roleId} not found`);
     }
 
-    const newUser = this.usersRepository.create({
-      ...userDetails,
-      password: hashedPassword,
-      role,
+    const association = await this.associationsRepository.findOne({
+      where: {
+        id: createUserDto.idAssociation,
+      }
     });
+    if (!association) {
+      throw new NotFoundException(`Association with ID ${createUserDto.idAssociation} not found`);
+    }
+    const newUser = new User();
+    newUser.password = hashedPassword;
+    newUser.roles = [role];
+    newUser.association = association;
+    newUser.email = createUserDto.email;
+    newUser.first_name = createUserDto.first_name;
+    newUser.last_name = createUserDto.last_name;
+    newUser.phone = createUserDto.phone;
+    newUser.localisation = createUserDto.localisation;
+    newUser.image = createUserDto.image;
     return this.usersRepository.save(newUser);
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<void> {
-    const existingUser = await this.findOne(id);
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<void> {
+    const existingUser = await this.usersRepository.findOne({
+      where: { id },
+      relations: ['role','association'],
+    });
     if (!existingUser) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
@@ -60,7 +75,6 @@ export class UsersService {
       if (!role) {
         throw new NotFoundException(`Role with ID ${updateUserDto.roleId} not found`);
       }
-      existingUser.role = role;
     }
 
     Object.assign(existingUser, updateUserDto);
@@ -70,12 +84,11 @@ export class UsersService {
   async findByEmail(email: string): Promise<User | undefined> {
     return this.usersRepository.findOne({ 
       where: { email },
-      select: ['id', 'email', 'password', 'first_name', 'last_name', 'roleId', 'phone', 'localisation', 'image', 'dateCreated', 'associationId'],
       relations: ['role', 'association'],
     });
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     await this.usersRepository.delete(id);
   }
 }
