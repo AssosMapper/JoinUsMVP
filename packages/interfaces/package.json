@@ -1,0 +1,24 @@
+{
+  "name": "@joinus/interfaces",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "clear": "rimraf dist"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "interfaces",
+    "typescript",
+    "types"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "typescript": "^5.5.3"
+  }
+}

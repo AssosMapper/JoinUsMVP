@@ -1,40 +1,36 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './users/user.entity';
-import { UsersModule } from './users/users.module'; 
+import { User } from './users/entities/user.entity';
+import { UsersModule } from './users/users.module';
 import { AssociationsModule } from './associations/associations.module';
-import { Association } from './associations/association.entity';
+import { Association } from './associations/entities/association.entity';
 import { EventsModule } from './events/events.module';
 import { TypeEventsModule } from './type-events/type-events.module';
-import { Event } from './events/event.entity';
-import { TypeEvents } from './type-events/type-events.entity';
+import { Event } from './events/entities/event.entity';
+import { TypeEvents } from './type-events/entities/type-events.entity';
 import { TypeAssociationsModule } from './type-associations/type-associations.module';
-import { TypeAssociations } from './type-associations/type-associations.entity';
+import { TypeAssociations } from './type-associations/entities/type-associations.entity';
 import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './auth/auth.module';
 import { RolesModule } from './roles/roles.module';
-import { Role } from './roles/role.entity';
+import { Role } from './roles/entities/role.entity';
+import { DatabaseModule } from './utils/database/database.module';
+import { validationSchema } from './utils/config/config';
+import { PermissionsModule } from './permissions/permissions.module';
+import { Permission } from './permissions/entities/permission.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost', 
-      port: 3306,
-      username: 'join_us_mvp_admin',
-      password: 'SN384yGAETYrwsxJd6tLcM',
-      database: 'join_us_mvp',
-      entities: [User, Association, Event, TypeEvents, TypeAssociations, Role], 
-      synchronize: true,
-    }),
+    DatabaseModule.forRoot([User, Association, Event, TypeEvents, TypeAssociations,Permission, Role]),
     ConfigModule.forRoot({
       isGlobal: true,
+      validationSchema: validationSchema,
     }),
     UsersModule,
     AssociationsModule,
     EventsModule,
     TypeEventsModule,
     TypeAssociationsModule,
+    PermissionsModule,
     AuthModule,
     RolesModule
   ],

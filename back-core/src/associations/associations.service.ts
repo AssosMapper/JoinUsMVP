@@ -1,20 +1,19 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Association } from './association.entity';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { In, Repository } from 'typeorm';
+import { Association } from './entities/association.entity';
 import { CreateAssociationDto } from './dto/create-association.dto';
 import { UpdateAssociationDto } from './dto/update-association.dto';
-import { User } from '../users/user.entity';
-import { TypeAssociations } from '../type-associations/type-associations.entity';
+import { User } from '../users/entities/user.entity';
+import { TypeAssociations } from '../type-associations/entities/type-associations.entity';
 
 @Injectable()
 export class AssociationsService {
   constructor(
-    @InjectRepository(Association)
+    @Inject('ASSOCIATION_REPOSITORY')
     private associationsRepository: Repository<Association>,
-    @InjectRepository(User)
+    @Inject('USER_REPOSITORY')
     private usersRepository: Repository<User>,
-    @InjectRepository(TypeAssociations)
+    @Inject('TYPEASSOCIATIONS_REPOSITORY')
     private typeAssociationsRepository: Repository<TypeAssociations>,
   ) {}
 
@@ -22,7 +21,7 @@ export class AssociationsService {
     return this.associationsRepository.find({ relations: ['users', 'types'] });
   }
 
-  async findOne(id: number): Promise<Association> {
+  async findOne(id: string): Promise<Association> {
     const association = await this.associationsRepository.findOne({ where: { id }, relations: ['users', 'types'] });
     if (!association) {
       throw new NotFoundException(`Association with ID ${id} not found`);
@@ -30,44 +29,35 @@ export class AssociationsService {
     return association;
   }
 
-  async create(createAssociationDto: CreateAssociationDto): Promise<Association> {
-    const user = await this.usersRepository.findOne({ where: { id: createAssociationDto.userId } });
-    if (!user) {
-      throw new NotFoundException(`User with ID ${createAssociationDto.userId} not found`);
-    }
+  async create(user: User,createAssociationDto: CreateAssociationDto): Promise<Association> {
+    const types = await this.typeAssociationsRepository.findBy({ id: In(createAssociationDto.typeIds) });
 
-    const types = createAssociationDto.typeIds?.length 
-      ? await this.typeAssociationsRepository.findByIds(createAssociationDto.typeIds) 
-      : [];
-
-    const association = this.associationsRepository.create({ ...createAssociationDto, users: [user], types });
+    const association = new Association();
+    association.name = createAssociationDto.name;
+    association.description = createAssociationDto.description;
+    association.image = createAssociationDto.image;
+    association.localisation = createAssociationDto.localisation;
+    association.users = [user];
+    association.types = types;
+    association.members = createAssociationDto.members;
     return this.associationsRepository.save(association);
   }
 
-  async update(id: number, updateAssociationDto: UpdateAssociationDto): Promise<void> {
+  async update(id: string, updateAssociationDto: UpdateAssociationDto): Promise<void> {
     const existingAssociation = await this.findOne(id);
     if (!existingAssociation) {
       throw new NotFoundException(`Association with ID ${id} not found`);
     }
   
-    if (updateAssociationDto.userId) {
-      const user = await this.usersRepository.findOne({ where: { id: updateAssociationDto.userId } });
-      if (!user) {
-        throw new NotFoundException(`User with ID ${updateAssociationDto.userId} not found`);
-      }
-      existingAssociation.users = [user];
-    }
-  
     if (Array.isArray(updateAssociationDto.typeIds)) {
-      const types = await this.typeAssociationsRepository.findByIds(updateAssociationDto.typeIds);
-      existingAssociation.types = types;
+      existingAssociation.types = await this.typeAssociationsRepository.findBy({ id: In(updateAssociationDto.typeIds) });
     }
   
     Object.assign(existingAssociation, updateAssociationDto);
     await this.associationsRepository.save(existingAssociation);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     await this.associationsRepository.delete(id);
   }
 }

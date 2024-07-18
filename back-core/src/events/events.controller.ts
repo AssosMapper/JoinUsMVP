@@ -1,12 +1,17 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Put, UseGuards } from '@nestjs/common';
 import { EventsService } from './events.service';
-import { Event } from './event.entity';
+import { Event } from './entities/event.entity';
 import { CreateEventDto } from './dto/create-events.dto';
 import { UpdateEventDto } from './dto/update-events.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Public } from '../auth/decorators/public.decorator';
+import { CurrentUserId } from '../utils/decorators/current-user-id.decorator';
+import { User } from '../users/entities/user.entity';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
 
 @Controller('events')
+@ApiBearerAuth()
 export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
@@ -19,29 +24,29 @@ export class EventsController {
   @Get(':id')
   @Public()
   findOne(@Param('id') id: string): Promise<Event> {
-    return this.eventsService.findOne(+id);
+    return this.eventsService.findOne(id);
   }
 
   @Get('/user/:userId')
   findEventsByUser(@Param('userId') userId: string): Promise<Event[]> {
-    return this.eventsService.findByUserId(+userId);
+    return this.eventsService.findByUserId(userId);
   }
 
   @Post()
-  @UseGuards(JwtAuthGuard)
-  create(@Body() createEventDto: CreateEventDto): Promise<Event> {
-    return this.eventsService.create(createEventDto);
+  @BearAuthToken()
+  create(@CurrentUserId() user:User,@Body() createEventDto: CreateEventDto): Promise<Event> {
+    return this.eventsService.create(user,createEventDto);
   }
 
   @Put(':id')
-  @UseGuards(JwtAuthGuard)
+  @BearAuthToken()
   update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
-    return this.eventsService.update(+id, updateEventDto);
+    return this.eventsService.update(id, updateEventDto);
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard)
+  @BearAuthToken()
   remove(@Param('id') id: string) {
-    return this.eventsService.remove(+id);
+    return this.eventsService.remove(id);
   }
 }

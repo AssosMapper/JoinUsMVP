@@ -1,32 +1,68 @@
-import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import {
+  HttpException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { CreateRoleDto } from './dto/create-role.dto';
+import { UpdateRoleDto } from './dto/update-role.dto';
 import { Repository } from 'typeorm';
-import { Role } from './role.entity';
+import { Role } from './entities/role.entity';
+import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 
 @Injectable()
 export class RolesService {
   constructor(
-    @InjectRepository(Role)
-    private rolesRepository: Repository<Role>,
+    @Inject('ROLE_REPOSITORY')
+    private readonly rolesRepository: Repository<Role>,
   ) {}
-
-  findAll(): Promise<Role[]> {
-    return this.rolesRepository.find();
+  async create(createRoleDto: CreateRoleDto) {
+    const existingRole = await this.rolesRepository.findOne({
+      where: {
+        name: createRoleDto.name,
+      },
+    });
+    if (existingRole) {
+      // throw duplicate error
+      throw new HttpException('Role with this name already exists', 409);
+    }
+    const role = new Role();
+    role.name = createRoleDto.name;
+    role.description = createRoleDto.description;
+    return await this.rolesRepository.save(role);
   }
 
-  findOne(id: number): Promise<Role> {
-    return this.rolesRepository.findOne({ where: { id } });
+  findAll(query: PaginateQuery): Promise<Paginated<Role>> {
+    return paginate(query, this.rolesRepository, {
+      sortableColumns: ['id', 'name', 'createdAt', 'updatedAt'],
+      defaultSortBy: [['id', 'ASC']],
+      searchableColumns: ['name'],
+      select: ['id', 'name', 'description'],
+      ignoreSelectInQueryParam: true,
+    });
   }
 
-  create(role: Role): Promise<Role> {
-    return this.rolesRepository.save(role);
+  async findOne(id: string): Promise<Role | null> {
+    return await this.rolesRepository.findOne({
+      where: {
+        id,
+      },
+    });
   }
 
-  async update(id: number, role: Role): Promise<void> {
-    await this.rolesRepository.update(id, role);
+  update(id: string, updateRoleDto: UpdateRoleDto) {
+    let role = this.rolesRepository.findOne({
+      where: {
+        id,
+      },
+    });
+    if (!role) {
+      throw new NotFoundException('Role not found');
+    }
+    return this.rolesRepository.update(id, updateRoleDto);
   }
 
-  async remove(id: number): Promise<void> {
-    await this.rolesRepository.delete(id);
+  remove(id: string) {
+    return this.rolesRepository.delete(id);
   }
 }
