@@ -3,8 +3,6 @@ import { EventsService } from './events.service';
 import { Event } from './entities/event.entity';
 import { CreateEventDto } from './dto/create-events.dto';
 import { UpdateEventDto } from './dto/update-events.dto';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { Public } from '../auth/decorators/public.decorator';
 import { CurrentUserId } from '../utils/decorators/current-user-id.decorator';
 import { User } from '../users/entities/user.entity';
 import { ApiBearerAuth } from '@nestjs/swagger';
@@ -16,13 +14,11 @@ export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Get()
-  @Public()
   findAll(): Promise<Event[]> {
     return this.eventsService.findAll();
   }
 
   @Get(':id')
-  @Public()
   findOne(@Param('id') id: string): Promise<Event> {
     return this.eventsService.findOne(id);
   }

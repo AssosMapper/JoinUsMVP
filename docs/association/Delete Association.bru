@@ -1,0 +1,18 @@
+meta {
+  name: Delete Association
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{url}}/associations/dc3179cd-4041-4068-a03d-f8bd478bef41
+  body: json
+  auth: inherit
+}
+
+tests {
+  test("Successful DELETE request", function () {
+      expect(res.getStatus()).to.be.oneOf([200, 202, 204]);
+  });
+  
+}

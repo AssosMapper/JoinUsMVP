@@ -1,0 +1,31 @@
+meta {
+  name: Create event
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/events
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "titre": "Fête reconnaissance de l'état ¨Palestinien",
+    "description": "Enfin !",
+    "image": "https://example.com/images/fete-musique-2024.jpg",
+    "date": "2024-06-21T18:00:00.000Z",
+    "localisation": "Place de la République, Paris",
+    "typeEventId": "b70d220f-4974-4fea-b91e-91285de06380",
+    "associationId": "025a85c9-5734-4e38-b963-6d13a68545f8",
+    "isPublic": true
+  }
+}
+
+tests {
+  test("Successful POST request", function () {
+      expect(res.getStatus()).to.be.oneOf([200, 201]);
+  });
+  
+}

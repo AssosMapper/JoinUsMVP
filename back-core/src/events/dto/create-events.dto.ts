@@ -1,4 +1,4 @@
-import { IsString, IsInt, IsOptional, IsDate, IsNotEmpty } from 'class-validator';
+import { IsString, IsInt, IsOptional, IsDate, IsNotEmpty, IsBoolean } from 'class-validator';
 
 export class CreateEventDto {
   @IsString()
@@ -12,10 +12,9 @@ export class CreateEventDto {
   @IsString()
   associationId: string;
 
-  @IsInt()
+  @IsString()
   typeEventId: string;
 
-  @IsDate()
   @IsOptional()
   date?: Date;
 
@@ -26,4 +25,7 @@ export class CreateEventDto {
   @IsString()
   @IsNotEmpty()
   localisation: string;
+
+  @IsBoolean()
+  isPublic: boolean;
 }

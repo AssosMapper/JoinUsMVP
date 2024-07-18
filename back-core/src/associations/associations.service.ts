@@ -43,7 +43,7 @@ export class AssociationsService {
     return this.associationsRepository.save(association);
   }
 
-  async update(id: string, updateAssociationDto: UpdateAssociationDto): Promise<void> {
+  async update(id: string, updateAssociationDto: UpdateAssociationDto): Promise<Association> {
     const existingAssociation = await this.findOne(id);
     if (!existingAssociation) {
       throw new NotFoundException(`Association with ID ${id} not found`);
@@ -54,7 +54,7 @@ export class AssociationsService {
     }
   
     Object.assign(existingAssociation, updateAssociationDto);
-    await this.associationsRepository.save(existingAssociation);
+    return await this.associationsRepository.save(existingAssociation);
   }
 
   async remove(id: string): Promise<void> {

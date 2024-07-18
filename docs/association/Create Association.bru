@@ -1,0 +1,36 @@
+meta {
+  name: Create Association
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/associations
+  body: json
+  auth: inherit
+}
+
+headers {
+  Authorization: votre_token_jwt
+}
+
+body:json {
+  {
+    "name": "Urgence s",
+    "description": "Description de l'association Urgence Palestine",
+    "localisation": "5 rue de Paris 75015",
+    "members": 100,
+    "image": "https://example.com/image.jpg",
+    "typeIds": [
+      "ab580a9c-67b1-4c44-a46a-e216192dc086",
+      "3d5c3ba8-a43b-4b63-9a17-e53461d65e7a"
+    ]
+  }
+}
+
+tests {
+  test("Successful POST request", function () {
+      expect(res.getStatus()).to.be.oneOf([200, 201]);
+  });
+  
+}

@@ -10,7 +10,7 @@
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
+    "debug": "nest start --debug --watch",
     "start:prod": "node dist/back-core/src/main.js",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
@@ -18,7 +18,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js"
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
+    "seed": "ts-node ./src/seed/seed.ts"
   },
   "dependencies": {
     "@faker-js/faker": "^8.4.1",
@@ -53,6 +54,7 @@
     "@types/faker": "^6.6.9",
     "@types/jest": "^29.5.2",
     "@types/node": "^20.3.1",
+    "@types/passport-jwt": "^4.0.1",
     "@types/supertest": "^6.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",

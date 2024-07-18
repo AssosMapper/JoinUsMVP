@@ -42,6 +42,7 @@ export class UserSeedService {
     const user = new User();
     user.first_name = 'Admin';
     user.last_name = 'Admin';
+    user.email = 'admin@test.com';
     user.password = await hashPassword('Password123!');
     user.roles = [superAdminRole];
     users.push(user);

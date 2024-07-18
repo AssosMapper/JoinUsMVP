@@ -1,24 +1,24 @@
-import { Controller, Post, Get, Body, UnauthorizedException, UseGuards, Req } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { Body, Controller, Post } from '@nestjs/common';
 import { LoginDto } from './dto/login.dto';
-import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { AuthService } from './auth.service';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('auth')
+@ApiTags('Authentification')
+@Controller({
+  path: 'auth',
+  version: '1',
+})
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('login')
   async login(@Body() loginDto: LoginDto) {
-    const user = await this.authService.validateUser(loginDto.email, loginDto.password);
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-    return this.authService.login(user);
+    return await this.authService.login(loginDto);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @Get('check-token')
-  async checkToken(@Req() req) {
-    return { valid: true };
+  @Post('register')
+  async register(@Body() createUserDto: CreateUserDto) {
+    return await this.authService.register(createUserDto);
   }
 }
