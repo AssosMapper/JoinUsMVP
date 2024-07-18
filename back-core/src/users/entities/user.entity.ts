@@ -13,9 +13,6 @@ export class User extends EntityStructure{
   last_name: string;
 
   @Column()
-  dateCreated: Date;
-
-  @Column()
   email: string;
 
   @Column()

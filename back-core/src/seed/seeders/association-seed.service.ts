@@ -16,6 +16,8 @@ export class AssociationSeedService {
     const associations = [];
     for (let i = 0; i < 50; i++) {
       const association = new Association();
+      association.name = `Association ${i}`;
+      association.description = `Description ${i}`;
       associations.push(association);
     }
     console.log('Seeding associations...');

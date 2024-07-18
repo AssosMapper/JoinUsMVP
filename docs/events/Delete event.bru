@@ -1,0 +1,18 @@
+meta {
+  name: Delete event
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{url}}/events/5c433575-b7dd-4542-9723-365afe0176d5
+  body: json
+  auth: inherit
+}
+
+tests {
+  test("Successful DELETE request", function () {
+      expect(res.getStatus()).to.be.oneOf([200, 202, 204]);
+  });
+  
+}

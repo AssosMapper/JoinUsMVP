@@ -1,0 +1,34 @@
+meta {
+  name: Create User
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/users
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "first_name": "Tutu",
+    "last_name": "CToi",
+    "email": "gaia@gmail.com",
+    "password": "SecurePass123!",
+    "confirmPassword": "SecurePass123!",
+    "roleId": "ca63d09e-0420-4884-a249-0993fd9216c2",
+    "phone": "1234567890",
+    "localisation": "123 Main St",
+    "image": "https://example.com/image.jpg",
+    "associationId": "025a85c9-5734-4e38-b963-6d13a68545f8"
+  }
+  
+}
+
+tests {
+  test("Successful POST request", function () {
+      expect(res.getStatus()).to.be.oneOf([200, 201]);
+  });
+  
+}

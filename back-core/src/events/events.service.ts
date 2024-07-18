@@ -19,13 +19,13 @@ export class EventsService {
   ) {}
 
   findAll(): Promise<Event[]> {
-    return this.eventsRepository.find({ relations: ['organisation', 'user', 'typeEvent'] });
+    return this.eventsRepository.find({ relations: ['association', 'user', 'typeEvent'] });
   }
 
   async findOne(id: string): Promise<Event> {
     const event = await this.eventsRepository.findOne({
       where: { id },
-      relations: ['organisation', 'user', 'typeEvent'],
+      relations: ['association', 'user', 'typeEvent'],
     });
     if (!event) {
       throw new NotFoundException(`Event with ID ${id} not found`);
@@ -40,7 +40,7 @@ export class EventsService {
           id: userId,
         },
       },
-      relations: ['organisation', 'user', 'typeEvent'],
+      relations: ['association', 'user', 'typeEvent'],
     });
   }
 
@@ -67,7 +67,7 @@ export class EventsService {
     return this.eventsRepository.save(event);
   }
 
-  async update(id: string, updateEventDto: UpdateEventDto): Promise<void> {
+  async update(id: string, updateEventDto: UpdateEventDto): Promise<Event> {
     const existingEvent = await this.findOne(id);
     if (!existingEvent)
       throw new NotFoundException(`Event with ID ${id} not found`);
@@ -86,7 +86,7 @@ export class EventsService {
       existingEvent.typeEvent = typeEvent;
     }
     Object.assign(existingEvent, updateEventDto);
-    await this.eventsRepository.save(existingEvent);
+   return await this.eventsRepository.save(existingEvent);
   }
 
   async remove(id: string): Promise<void> {

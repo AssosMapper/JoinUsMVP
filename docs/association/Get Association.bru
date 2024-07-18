@@ -1,0 +1,17 @@
+meta {
+  name: Get Association
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{url}}/associations/025a85c9-5734-4e38-b963-6d13a68545f8
+  body: none
+  auth: none
+}
+
+tests {
+  test("Status code is 200", function () {
+      expect(res.getStatus()).to.equal(200);
+  });
+}

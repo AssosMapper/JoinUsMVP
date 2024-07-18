@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "JoinUs",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}

@@ -1,0 +1,24 @@
+meta {
+  name: Create type-event
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/type-events
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Add your name in the body"
+  }
+}
+
+tests {
+  test("Successful POST request", function () {
+      expect(res.getStatus()).to.be.oneOf([200, 201]);
+  });
+  
+}

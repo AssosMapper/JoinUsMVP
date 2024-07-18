@@ -31,13 +31,13 @@ export class TypeEventsService {
     return this.typeEventsRepository.save(typeEvent);
   }
 
-  async update(id: string, updateTypeEventDto: UpdateTypeEventDto): Promise<void> {
+  async update(id: string, updateTypeEventDto: UpdateTypeEventDto): Promise<TypeEvents> {
     const existingTypeEvent = await this.findOne(id);
     if (!existingTypeEvent) {
       throw new NotFoundException(`TypeEvent with ID ${id} not found`);
     }
     Object.assign(existingTypeEvent, updateTypeEventDto);
-    await this.typeEventsRepository.save(existingTypeEvent);
+    return await this.typeEventsRepository.save(existingTypeEvent);
   }
 
   async remove(id: string): Promise<void> {

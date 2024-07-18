@@ -11,9 +11,9 @@ import { Association } from '../associations/entities/association.entity';
 @Injectable()
 export class UsersService {
   constructor(
-    @Inject('USER_REPOSITORY') private usersRepository: Repository<User>,
-    @Inject('ROLE_REPOSITORY') private rolesRepository: Repository<Role>,
-    @Inject('ASSOCIATION_REPOSITORY') private associationsRepository: Repository<Association>,
+    @Inject('USER_REPOSITORY') private readonly usersRepository: Repository<User>,
+    @Inject('ROLE_REPOSITORY') private readonly rolesRepository: Repository<Role>,
+    @Inject('ASSOCIATION_REPOSITORY') private readonly associationsRepository: Repository<Association>,
   ) {}
 
   findAll(): Promise<User[]> {
@@ -21,10 +21,14 @@ export class UsersService {
   }
 
   async findOne(id: string): Promise<User | undefined> {
-    return this.usersRepository.findOne({
+    const user = await this.usersRepository.findOne({
       where: { id },
-      relations: ['role'],
+      relations: ['roles'],
     });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+    return user;
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -32,17 +36,18 @@ export class UsersService {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     
     const role = await this.rolesRepository.findOne({ where: { id: createUserDto.roleId } });
+    console.log(role);
     if (!role) {
       throw new NotFoundException(`Role with ID ${createUserDto.roleId} not found`);
     }
 
     const association = await this.associationsRepository.findOne({
       where: {
-        id: createUserDto.idAssociation,
+        id: createUserDto.associationId,
       }
     });
     if (!association) {
-      throw new NotFoundException(`Association with ID ${createUserDto.idAssociation} not found`);
+      throw new NotFoundException(`Association with ID ${createUserDto.associationId} not found`);
     }
     const newUser = new User();
     newUser.password = hashedPassword;
@@ -57,10 +62,10 @@ export class UsersService {
     return this.usersRepository.save(newUser);
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<void> {
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const existingUser = await this.usersRepository.findOne({
       where: { id },
-      relations: ['role','association'],
+      relations: ['roles','association'],
     });
     if (!existingUser) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -78,13 +83,13 @@ export class UsersService {
     }
 
     Object.assign(existingUser, updateUserDto);
-    await this.usersRepository.save(existingUser);
+    return await this.usersRepository.save(existingUser);
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
     return this.usersRepository.findOne({ 
       where: { email },
-      relations: ['role', 'association'],
+      relations: ['roles', 'association'],
     });
   }
 

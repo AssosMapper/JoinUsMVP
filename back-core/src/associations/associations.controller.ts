@@ -3,8 +3,6 @@ import { AssociationsService } from './associations.service';
 import { CreateAssociationDto } from './dto/create-association.dto';
 import { UpdateAssociationDto } from './dto/update-association.dto';
 import { Association } from './entities/association.entity';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { Public } from '../auth/decorators/public.decorator';
 import { CurrentUserId } from '../utils/decorators/current-user-id.decorator';
 import { User } from '../users/entities/user.entity';
 import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
