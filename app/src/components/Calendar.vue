@@ -3,7 +3,9 @@ import { ref, computed, onMounted } from 'vue';
 import eventService from '@/services/eventService';
 import { Association } from '@interfaces/Association';
 import { Event } from '@interfaces/Event';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const events = ref<Event[]>([]);
 const currentDate = ref(new Date());
 const selectedDate = ref(new Date());
@@ -119,6 +121,10 @@ const formatTime = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
+
+const goToAssociationDetails = (id: number) => {
+  router.push({ name: 'AssociationDetails', params: { id } });
+};
 </script>
 
 <template>
@@ -179,11 +185,11 @@ const formatTime = (dateString: string) => {
                     </div>
                     <div v-else-if="!isMobile" class="flex overflow-hidden h-4 max-w-[80%] absolute right-2">
                       <img v-for="event in getEventsForDate(day)"
-                           :key="event.id"
-                           :src="getImageSrc(event.organisation?.name || '')"
-                           :alt="event.organisation?.name || 'Association'"
-                           class="w-4 h-4 mr-1"
-                      />
+                            :key="event.id"
+                            :src="getImageSrc(event.organisation?.name || '')"
+                            :alt="event.organisation?.name || 'Association'"
+                            class="w-4 h-4 mr-1"
+                        />
                     </div>
                   </div>
                 </td>
@@ -198,8 +204,9 @@ const formatTime = (dateString: string) => {
             <div v-for="event in selectedDateEvents" :key="event.id" class="justify-center w-full border-b pb-2 border-gray-400 border-dashed flex">   
                 <div class="flex justify-center items-center">
                     <img :src="getImageSrc(event.organisation?.name || '')"
-                    :alt="event.organisation?.name || 'Association'"
-                    class="w-12 h-12 mr-4"
+                        @click="goToAssociationDetails(event.organisation?.id)"
+                        :alt="event.organisation?.name || 'Association'"
+                        class="w-12 h-12 mr-4 clickable"
                       />
                 </div>
                 <div class="max-w-full md:max-w-1/2">

@@ -31,7 +31,7 @@ onMounted(() => {
 <template>
   <div v-if="association" class="p-6 bg-white rounded-lg shadow-md">
     <div class="flex justify-center flex-col md:flex-row w-full">
-        <div class="imageContainer justify-center flex md:w-40 w-full">
+        <div class="imageContainer justify-center flex md:w-100 w-full">
             <img :src="getImageSrc(association.name)" alt="Association Image" class="w-64 h-64 mb-4" />
         </div>
         <div class="infosContainer w-inherit">
