@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import { useUserStore } from '../store/usersStore';
 import Home from '../views/Home.vue';
+import DisplayAssociationDetails from '@/views/DisplayAssociationDetails.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -55,6 +56,12 @@ const routes: Array<RouteRecordRaw> = [
     name: 'DisplayAssociations',
     component: () => import('../views/DisplayAssociations.vue'),
   },
+  {
+    path: '/displayAssociation/:id',
+    name: 'AssociationDetails',
+    component: DisplayAssociationDetails,
+    props: true
+  }
 ];
 
 const router = createRouter({

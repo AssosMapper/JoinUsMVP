@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import associationService from '@/services/associationService';
+
+const router = useRouter();
 
 const associations = ref<{ id: number, name: string, localisation: string, description: string, image: string, dateCreated: string, members: number, types: { id: number, name: string }[] }[]>([]);
 
@@ -19,6 +22,10 @@ const getImageSrc = (associationName: string) => {
   } catch (e) {
     return require('../assets/associations-images/default.png'); 
   }
+};
+
+const goToDetails = (id: number) => {
+  router.push({ name: 'AssociationDetails', params: { id } });
 };
 
 onMounted(() => {
@@ -53,7 +60,7 @@ onMounted(() => {
         </p>
       </div>
       <div class="p-6 pt-0">
-        <button class="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none" type="button">
+        <button @click="goToDetails(association.id)" class="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none" type="button">
           Read More
         </button>
       </div>
