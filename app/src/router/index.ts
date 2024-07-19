@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import { useUserStore } from '../store/usersStore';
 import Home from '../views/Home.vue';
-import DisplayAssociationDetails from '@/views/DisplayAssociationDetails.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -52,6 +51,12 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../views/DisplayEvents.vue'),
   },
   {
+    path: '/displayEvent/:id',
+    name: 'EventDetails',
+    component: () => import('../views/DisplayEventDetails.vue'),
+    props: true
+  },
+  {
     path: '/displayAssociations',
     name: 'DisplayAssociations',
     component: () => import('../views/DisplayAssociations.vue'),
@@ -59,7 +64,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/displayAssociation/:id',
     name: 'AssociationDetails',
-    component: DisplayAssociationDetails,
+    component: () => import('../views/DisplayAssociationDetails.vue'),
     props: true
   }
 ];

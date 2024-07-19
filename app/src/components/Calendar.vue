@@ -125,6 +125,10 @@ const formatTime = (dateString: string) => {
 const goToAssociationDetails = (id: number) => {
   router.push({ name: 'AssociationDetails', params: { id } });
 };
+
+const goToEventDetails = (id: number) => {
+  router.push({ name: 'EventDetails', params: { id } });
+};
 </script>
 
 <template>
@@ -209,7 +213,7 @@ const goToAssociationDetails = (id: number) => {
                         class="w-12 h-12 mr-4 clickable"
                       />
                 </div>
-                <div class="max-w-full md:max-w-1/2">
+                <div class="descriptionEventContainer clickable max-w-full md:max-w-1/2" @click="goToEventDetails(event.id)">
                     <a tabindex="0" class="focus:outline-none text-lg font-medium leading-5 text-gray-800 dark:text-gray-100 mt-2">{{ event.titre }}</a>
                     <p class="text-xs pt-1 leading-4 leading-none text-gray-600 dark:text-gray-300">{{ event.localisation }} | {{ formatTime(event.date) }}</p>
                     <p class="text-sm pt-2 leading-4 leading-none text-gray-600 dark:text-gray-300">{{ event.description }}</p>
@@ -226,5 +230,4 @@ const goToAssociationDetails = (id: number) => {
 </template>
 
 <style scoped>
-/* Ajoutez ici les styles nécessaires */
 </style>
