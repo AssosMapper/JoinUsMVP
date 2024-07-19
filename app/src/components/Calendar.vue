@@ -192,13 +192,21 @@ const formatTime = (dateString: string) => {
           </table>
         </div>
       </div>
-      <div class="py-2 md:px-16 px-5 dark:bg-gray-700 bg-gray-50 rounded-b">
-        <div class="px-4">
-          <div v-if="selectedDateEvents.length > 0">
-            <div v-for="event in selectedDateEvents" :key="event.id" class="border-b pb-4 border-gray-400 border-dashed">
-              <p class="text-xs font-light leading-3 text-gray-500 dark:text-gray-300 pt-2">{{ formatTime(event.date) }}</p>
-              <a tabindex="0" class="focus:outline-none text-lg font-medium leading-5 text-gray-800 dark:text-gray-100 mt-2">{{ event.titre }}</a>
-              <p class="text-sm pt-2 leading-4 leading-none text-gray-600 dark:text-gray-300">{{ event.description }}</p>
+      <div class="flex justify-start py-2 md:px-16 px-5 dark:bg-gray-700 bg-gray-50 rounded-b">
+        <div class="px-4 flex w-full">
+          <div v-if="selectedDateEvents.length > 0" class="w-full">
+            <div v-for="event in selectedDateEvents" :key="event.id" class="justify-center w-full border-b pb-2 border-gray-400 border-dashed flex">   
+                <div class="flex justify-center items-center">
+                    <img :src="getImageSrc(event.organisation?.name || '')"
+                    :alt="event.organisation?.name || 'Association'"
+                    class="w-12 h-12 mr-4"
+                      />
+                </div>
+                <div class="max-w-full md:max-w-1/2">
+                    <a tabindex="0" class="focus:outline-none text-lg font-medium leading-5 text-gray-800 dark:text-gray-100 mt-2">{{ event.titre }}</a>
+                    <p class="text-xs pt-1 leading-4 leading-none text-gray-600 dark:text-gray-300">{{ event.localisation }} | {{ formatTime(event.date) }}</p>
+                    <p class="text-sm pt-2 leading-4 leading-none text-gray-600 dark:text-gray-300">{{ event.description }}</p>
+                </div>
             </div>
           </div>
           <div v-else class="text-center text-gray-500 dark:text-gray-300">
