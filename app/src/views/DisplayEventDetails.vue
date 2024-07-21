@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import {onMounted, ref} from 'vue';
+import {useRoute} from 'vue-router';
 import eventService from '@/services/eventService';
-import { Loader } from '@googlemaps/js-api-loader';
-import { loadGoogleMapsApi } from '../utils/loadGoogleMapsApi';
+import {loadGoogleMapsApi} from '@/utils/loadGoogleMapsApi';
 
 const route = useRoute();
 const event = ref(null);
@@ -12,8 +11,7 @@ const marker = ref<google.maps.Marker | null>(null);
 
 const fetchEventDetails = async () => {
   try {
-    const response = await eventService.getEventById(route.params.id);
-    event.value = response;
+    event.value = await eventService.getEventById(route.params.id);
     initMap();
   } catch (error) {
     console.error('Error fetching event details:', error);

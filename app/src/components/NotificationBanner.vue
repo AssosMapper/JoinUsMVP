@@ -1,8 +1,8 @@
 
 
 <script setup lang="ts">
-import { computed, ref } from 'vue';
-import { useNotificationStore } from '../store/notificationStore.ts';
+import { computed } from 'vue';
+import { useNotificationStore } from '@/store/notificationStore';
 
 const notificationStore = useNotificationStore();
 const visible = computed(() => notificationStore.visible);
