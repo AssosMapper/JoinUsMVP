@@ -1,10 +1,15 @@
 <script setup lang="ts">
 import Navbar from './components/Navbar.vue'
 import Footer from './components/Footer.vue'
+import NotificationBanner from './components/NotificationBanner.vue'
+import { useNotificationStore } from './store/notificationStore.ts';
+
+const notificationStore = useNotificationStore();
 </script>
 
 <template>
   <Navbar />
+  <NotificationBanner v-if="notificationStore.visible" />
   <router-view />
   <Footer />
 

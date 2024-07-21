@@ -1,14 +1,13 @@
-<script setup>
+
+
+<script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import authService from '@/services/authService';
-// import { useUserStore } from '@/store/usersStore';
+import { useNotificationStore } from '@/store/notificationStore.ts';
 
-// const userStore = useUserStore();
 const router = useRouter();
-
-// const token = userStore.access_token;
-
+const notificationStore = useNotificationStore();
 
 const email = ref('');
 const password = ref('');
@@ -22,11 +21,10 @@ const handleLogin = async () => {
   try {
     await authService.login(credentials);
     router.push('/'); 
-    alert("Login successful!");
-    return;
+    notificationStore.showNotification("Connexion réussie !", "success");
   } catch (error) {
-    console.error("Veuillez réessayer de:", error);
-    alert("There was an error logging in.");
+    console.error("Error logging in:", error);
+    notificationStore.showNotification("Email ou mot de passe incorrect. Veuillez réessayer", "error");
   }
 };
 </script>
@@ -71,4 +69,5 @@ const handleLogin = async () => {
 </template>
 
 <style scoped>
+/* Your styles */
 </style>

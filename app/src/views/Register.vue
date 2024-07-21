@@ -3,8 +3,10 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import userService from '@/services/usersService';
 import GoogleAutoCompleteComponent from '../components/GoogleAutoCompleteComponent';
+import { useNotificationStore } from '@/store/notificationStore.ts';
 
 const router = useRouter();
+const notificationStore = useNotificationStore();
 
 const firstName = ref("");
 const lastName = ref("");
@@ -24,12 +26,12 @@ const validatePhone = (phone: string) => {
 
 const handleSubmit = async () => {
   if (!validatePhone(phone.value)) {
-    alert("Invalid phone number format. The phone number must be 0+(de 1 a 9) + 8 chiffres.");
+    notificationStore.showNotification("Invalid phone number format. The phone number must be 0+(de 1 a 9) + 8 chiffres.", "error");
     return;
   }
 
   if (roleId.value === null) {
-    alert("Role ID is required.");
+    notificationStore.showNotification("Role ID is required.", "error");
     return;
   }
 
@@ -55,10 +57,9 @@ const handleSubmit = async () => {
   try {
     await userService.createUser(user);
     router.push('/login');
-    alert("User created successfully!");
+    notificationStore.showNotification("Profil créé avec succès !", "success");
   } catch (error) {
-    console.error("Error creating user:", error);
-    alert("There was an error creating the user.");
+    notificationStore.showNotification("Erreur lors de la création du profil", "error");
   }
 };
 </script>
