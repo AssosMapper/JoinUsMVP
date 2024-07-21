@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import {computed, onMounted, ref} from 'vue';
 import eventService from '@/services/eventService';
-import { Association } from '@interfaces/Association';
-import { Event } from '@interfaces/Event';
-import { useRouter } from 'vue-router';
+import {Event} from '@joinus/interfaces';
+import {useRouter} from 'vue-router';
 
 const router = useRouter();
 const events = ref<Event[]>([]);
@@ -13,8 +12,7 @@ const isMobile = ref(window.innerWidth < 768);
 
 const fetchEvents = async () => {
   try {
-    const response = await eventService.getAllEvents();
-    events.value = response;
+    events.value = await eventService.getAllEvents();
   } catch (error) {
     console.error('Error fetching events:', error);
   }

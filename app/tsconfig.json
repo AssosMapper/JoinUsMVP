@@ -22,6 +22,7 @@
         "src/*"
       ],
       "@stores/*": ["/app/src/store*"],
+      "@joinus/interfaces": ["../packages/interfaces/src"]
     },
     "lib": [
       "esnext",
@@ -37,7 +38,8 @@
     "tests/**/*.ts",
     "tests/**/*.tsx",
     "types/**/*.d.ts"
-  , "src/utils/loadGoogleMapsApi.js"  
+  ,
+    "src/utils/loadGoogleMapsApi"
   ],
   "exclude": [
     "node_modules"

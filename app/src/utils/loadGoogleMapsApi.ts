@@ -1,7 +1,7 @@
 let scriptLoaded = false;
-let scriptLoadingPromise = null;
+let scriptLoadingPromise: Promise<void> | null = null;
 
-export function loadGoogleMapsApi() {
+export function loadGoogleMapsApi(): Promise<void> {
   const apiKey = process.env.VUE_APP_GOOGLE_MAPS_API_KEY;
   if (!apiKey) {
     return Promise.reject(new Error("Google Maps API key is missing"));
@@ -15,7 +15,7 @@ export function loadGoogleMapsApi() {
     return scriptLoadingPromise;
   }
 
-  scriptLoadingPromise = new Promise((resolve, reject) => {
+  scriptLoadingPromise = new Promise<void>((resolve, reject) => {
     if (typeof window.google === 'object' && typeof window.google.maps === 'object') {
       scriptLoaded = true;
       resolve();

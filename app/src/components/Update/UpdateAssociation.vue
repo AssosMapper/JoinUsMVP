@@ -65,8 +65,7 @@ const fetchAssociationDetails = async (id: number) => {
 const handleSubmit = async () => {
   try {
     const token = userStore.access_token;
-    
-    const { types, ...dataWithoutTypes } = association.value;
+    const { typeIds, ...dataWithoutTypes } = association.value;
     
     const dataToSend = {
       ...dataWithoutTypes,
