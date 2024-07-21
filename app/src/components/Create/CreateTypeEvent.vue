@@ -3,9 +3,11 @@ import { ref } from 'vue';
 import { useUserStore } from '@/store/usersStore';
 import typeEventService from '@/services/typeEventService';
 import { useRouter } from 'vue-router';
+import { useNotificationStore } from '@/store/notificationStore.ts';
 
 const userStore = useUserStore();
 const router = useRouter();
+const notificationStore = useNotificationStore();
 
 const typeEvent = ref({
   name: '',
@@ -16,11 +18,11 @@ const handleSubmit = async () => {
   try {
     const token = userStore.access_token;
     await typeEventService.createTypeEvent(typeEvent.value, token);
-    alert('Type Event created successfully!');
+    notificationStore.showNotification("Type d'évènement créé avec succès !", "success");
     router.push('/');
   } catch (error) {
     console.error('Error creating type event:', error);
-    alert('There was an error creating the type event.');
+    notificationStore.showNotification("Erreur lors de la création d'un type d'évènement !", "error");
   }
 };
 </script>

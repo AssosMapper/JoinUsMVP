@@ -5,10 +5,11 @@ import { useUserStore } from '@/store/usersStore';
 import associationService from '@/services/associationService';
 import typeAssociationService from '@/services/typeAssociationService';
 import GoogleAutoCompleteComponent from '../GoogleAutoCompleteComponent.vue';
+import { useNotificationStore } from '@/store/notificationStore.ts';
 
 const userStore = useUserStore();
 const router = useRouter();
-
+const notificationStore = useNotificationStore();
 
 const userId = userStore.id !== null ? userStore.id : 0;
 
@@ -30,11 +31,11 @@ const handleSubmit = async () => {
     const token = userStore.access_token;
     association.value.typeIds = selectedTypeIds.value;
     await associationService.createAssociation(association.value, token);
-    alert('Association created successfully!');
+    notificationStore.showNotification("L'association a été créé !", "success");
     router.push('/');
   } catch (error) {
     console.error('Error creating association:', error);
-    alert('There was an error creating the association.');
+    notificationStore.showNotification("Erreur lors de la création de l'association", "error");
   }
 };
 

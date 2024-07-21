@@ -3,9 +3,11 @@ import { ref } from 'vue';
 import { useUserStore } from '@/store/usersStore';
 import typeAssociationService from '@/services/typeAssociationService';
 import { useRouter } from 'vue-router';
+import { useNotificationStore } from '@/store/notificationStore.ts';
 
 const userStore = useUserStore();
 const router = useRouter();
+const notificationStore = useNotificationStore();
 
 const typeAssociation = ref({
   name: '',
@@ -16,11 +18,10 @@ const handleSubmit = async () => {
   try {
     const token = userStore.access_token;
     await typeAssociationService.createTypeAssociation(typeAssociation.value, token);
-    alert('Type Association created successfully!');
+    notificationStore.showNotification("Type d'association créé avec succès !", "success");
     router.push('/');
   } catch (error) {
-    console.error('Error creating type association:', error);
-    alert('There was an error creating the type association.');
+    notificationStore.showNotification("Erreur lors de la création d'un type d'association", "error");
   }
 };
 </script>

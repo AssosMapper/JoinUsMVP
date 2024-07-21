@@ -4,8 +4,11 @@ import { useRouter } from 'vue-router';
 import { useUserStore } from '../store/usersStore';
 import userService from '@/services/usersService';
 import GoogleAutoCompleteComponent from '../components/GoogleAutoCompleteComponent';
+import { useNotificationStore } from '@/store/notificationStore.ts';
+
 const router = useRouter();
 const userStore = useUserStore();
+const notificationStore = useNotificationStore();
 
 const firstName = ref(userStore.first_name);
 const lastName = ref(userStore.last_name);
@@ -26,12 +29,12 @@ const validatePhone = (phone: string) => {
 
 const handleSubmit = async () => {
   if (!validatePhone(phone.value)) {
-    alert("Invalid phone number format. The phone number must be 0+(de 1 a 9) + 8 chiffres.");
+    notificationStore.showNotification("Invalid phone number format. The phone number must be 0+(de 1 a 9) + 8 chiffres.", "error");
     return;
   }
 
   if (roleId.value === null) {
-    alert("Role ID is required.");
+    notificationStore.showNotification("Role ID is required.", "error");
     return;
   }
   
@@ -52,11 +55,10 @@ const handleSubmit = async () => {
   try {
     await userService.updateUser(userStore.id as number, user, userStore.access_token);
     await userStore.fetchUserDetails(); 
-    alert("User updated successfully!");
+    notificationStore.showNotification("Profil modifié avec succès !", "success");
     router.push('/');
   } catch (error) {
-    console.error("Error updating user:", error);
-    alert("There was an error updating the user.");
+    notificationStore.showNotification("Erreur lors de la modification du profil", "error");
   }
 };
 </script>

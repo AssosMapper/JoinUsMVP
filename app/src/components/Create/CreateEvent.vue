@@ -6,8 +6,10 @@ import associationService from '@/services/associationService';
 import typeEventService from '@/services/typeEventService';
 import { useRouter } from 'vue-router';
 import GoogleAutoCompleteComponent from '../GoogleAutoCompleteComponent.vue';
+import { useNotificationStore } from '@/store/notificationStore.ts';
 
 const userStore = useUserStore();
+const notificationStore = useNotificationStore();
 const router = useRouter();
 
 const isAdmin = userStore.isAdmin;
@@ -35,7 +37,7 @@ const handleSubmit = async () => {
     }
 
     if (event.value.association_id === null || event.value.user_id === null || event.value.type_event_id === null) {
-      alert('Association, User, and Event Type must be selected.');
+      notificationStore.showNotification("Association, User, and Event Type must be selected", "error");
       return;
     }
 
@@ -47,11 +49,11 @@ const handleSubmit = async () => {
     };
 
     await eventService.createEvent(dataToSend, token);
-    alert('Event created successfully!');
+    notificationStore.showNotification("Evenement créé avec succès !", "success");
     router.push('/');
   } catch (error) {
     console.error('Error creating event:', error);
-    alert('There was an error creating the event.');
+    notificationStore.showNotification("Erreur lors de la création de l'évènement", "error");
   }
 };
 
