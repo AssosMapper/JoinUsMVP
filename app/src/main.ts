@@ -5,9 +5,6 @@ import App from "./App.vue";
 import router from "./router";
 import './assets/main.scss';
 import { useUserStore } from './store/usersStore';
-import { loadGoogleMapsApi } from '@/utils/loadGoogleMapsApi';
-
-const googleMapsApiKey = process.env.VUE_APP_GOOGLE_MAPS_API_KEY;
 
 const app = createApp(App);
 const pinia = createPinia();
@@ -20,9 +17,6 @@ const userStore = useUserStore();
 
 async function initializeApp() {
   try {
-    await loadGoogleMapsApi(googleMapsApiKey);
-    console.log("Google Maps API loaded");
-
     router.push('/');
     await userStore.checkTokenValidity();
     console.log("Token validity check completed");

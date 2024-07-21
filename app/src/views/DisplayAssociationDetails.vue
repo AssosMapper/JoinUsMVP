@@ -2,10 +2,10 @@
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import associationService from '@/services/associationService';
-import { Loader } from '@googlemaps/js-api-loader';
+import { loadGoogleMapsApi } from '../utils/loadGoogleMapsApi';
 
 const route = useRoute();
-const association = ref(null);
+const association = ref<any>(null); // Ajustez le type selon votre interface
 const map = ref<google.maps.Map | null>(null);
 const marker = ref<google.maps.Marker | null>(null);
 
@@ -30,41 +30,39 @@ const getImageSrc = (associationName: string) => {
 const initMap = async () => {
   if (!association.value || !association.value.localisation) return;
 
-  const loader = new Loader({
-    apiKey: "YOUR_GOOGLE_MAPS_API_KEY",
-    version: "weekly",
-  });
+  try {
+    await loadGoogleMapsApi();
+    const mapElement = document.getElementById("map") as HTMLElement;
 
-  const google = await loader.load();
-  const mapElement = document.getElementById("map") as HTMLElement;
-  
-  const geocoder = new google.maps.Geocoder();
-  geocoder.geocode({ address: association.value.localisation }, (results, status) => {
-    if (status === "OK" && results && results[0]) {
-      const location = results[0].geometry.location;
-      map.value = new google.maps.Map(mapElement, {
-        center: location,
-        zoom: 15,
-      });
-      
-      // Créer une icône personnalisée avec l'image de l'association
-      const icon = {
-        url: getImageSrc(association.value.name),
-        scaledSize: new google.maps.Size(50, 50), // Ajustez la taille selon vos besoins
-        origin: new google.maps.Point(0, 0),
-        anchor: new google.maps.Point(25, 25)
-      };
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ address: association.value.localisation }, (results, status) => {
+      if (status === "OK" && results && results[0]) {
+        const location = results[0].geometry.location;
+        map.value = new google.maps.Map(mapElement, {
+          center: location,
+          zoom: 15,
+        });
 
-      marker.value = new google.maps.Marker({
-        map: map.value,
-        position: location,
-        title: association.value.name,
-        icon: icon
-      });
-    } else {
-      console.error('Geocode was not successful for the following reason: ' + status);
-    }
-  });
+        const icon = {
+          url: getImageSrc(association.value.name),
+          scaledSize: new google.maps.Size(50, 50),
+          origin: new google.maps.Point(0, 0),
+          anchor: new google.maps.Point(25, 25)
+        };
+
+        marker.value = new google.maps.Marker({
+          map: map.value,
+          position: location,
+          title: association.value.name,
+          icon: icon
+        });
+      } else {
+        console.error('Geocode was not successful for the following reason: ' + status);
+      }
+    });
+  } catch (error) {
+    console.error('Error loading Google Maps API:', error);
+  }
 };
 
 onMounted(() => {
