@@ -1,15 +1,3 @@
-<template>
-  <div>
-    <input
-      :id="inputId"
-      v-model="inputValue"
-      :class="inputClass"
-      :placeholder="placeholder"
-      class="w-full"
-    />
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
 import { Loader } from '@googlemaps/js-api-loader';
@@ -74,6 +62,18 @@ watch(() => props.modelValue, (newVal) => {
   inputValue.value = newVal;
 });
 </script>
+
+<template>
+  <div>
+    <input
+      :id="inputId"
+      v-model="inputValue"
+      :class="inputClass"
+      :placeholder="placeholder"
+      class="w-full"
+    />
+  </div>
+</template>
 
 <style scoped>
 </style>

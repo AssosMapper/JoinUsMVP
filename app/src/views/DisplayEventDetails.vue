@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import eventService from '@/services/eventService';
 import { Loader } from '@googlemaps/js-api-loader';
+import { loadGoogleMapsApi } from '../utils/loadGoogleMapsApi';
 
 const route = useRoute();
 const event = ref(null);
@@ -22,31 +23,47 @@ const fetchEventDetails = async () => {
 const initMap = async () => {
   if (!event.value || !event.value.localisation) return;
 
-  const loader = new Loader({
-    apiKey: "YOUR_GOOGLE_MAPS_API_KEY",
-    version: "weekly",
-  });
+  try {
+    await loadGoogleMapsApi();
+    const mapElement = document.getElementById("map") as HTMLElement;
 
-  const google = await loader.load();
-  const mapElement = document.getElementById("map") as HTMLElement;
-  
-  const geocoder = new google.maps.Geocoder();
-  geocoder.geocode({ address: event.value.localisation }, (results, status) => {
-    if (status === "OK" && results && results[0]) {
-      const location = results[0].geometry.location;
-      map.value = new google.maps.Map(mapElement, {
-        center: location,
-        zoom: 15,
-      });
-      marker.value = new google.maps.Marker({
-        map: map.value,
-        position: location,
-        title: event.value.titre,
-      });
-    } else {
-      console.error('Geocode was not successful for the following reason: ' + status);
-    }
-  });
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ address: event.value.localisation }, (results, status) => {
+      if (status === "OK" && results && results[0]) {
+        const location = results[0].geometry.location;
+        map.value = new google.maps.Map(mapElement, {
+          center: location,
+          zoom: 15,
+        });
+
+        const icon = {
+          url: getImageSrc(event.value.name),
+          scaledSize: new google.maps.Size(50, 50),
+          origin: new google.maps.Point(0, 0),
+          anchor: new google.maps.Point(25, 25)
+        };
+
+        marker.value = new google.maps.Marker({
+          map: map.value,
+          position: location,
+          title: event.value.titre,
+          icon: icon
+        });
+      } else {
+        console.error('Geocode was not successful for the following reason: ' + status);
+      }
+    });
+  } catch (error) {
+    console.error('Error loading Google Maps API:', error);
+  }
+};
+
+const getImageSrc = (associationName: string) => {
+  try {
+    return require(`../assets/events-images/${title.value.replace(/\s+/g, '').toLowerCase()}.png`);
+  } catch (e) {
+    return require('../assets/events-images/default.png'); 
+  }
 };
 
 onMounted(() => {
@@ -59,7 +76,9 @@ onMounted(() => {
     <div class="flex flex-col md:flex-row">
       <div class="md:w-1/2 pr-4">
         <h1 class="text-2xl font-bold mb-4">{{ event.titre }}</h1>
-        <img :src="event.image ? `/path/to/images/${event.image}` : '/path/to/default/image.png'" alt="Event Image" class="w-64 h-64 object-cover mb-4" />
+        <div class="imageContainer justify-center flex mb-4">
+          <img :src="getImageSrc(event.titre)" alt="Event Image" class="w-64 h-64" />
+        </div>
         <p class="text-lg mb-2">{{ event.description }}</p>
         <p class="text-lg mb-2">Location: {{ event.localisation }}</p>
         <p class="text-lg mb-2">Date: {{ new Date(event.date).toLocaleDateString() }}</p>

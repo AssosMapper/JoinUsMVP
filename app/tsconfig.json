@@ -39,6 +39,7 @@
     "tests/**/*.tsx",
     "interfaces/**/*.d.ts",
     "types/**/*.d.ts"
+  , "src/utils/loadGoogleMapsApi.js"  
   ],
   "exclude": [
     "node_modules"
