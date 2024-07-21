@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { User } from '@interfaces/User';
+import { User } from '@joinus/interfaces';
 
 const API_URL = process.env.VUE_APP_BACKEND_URL;
 

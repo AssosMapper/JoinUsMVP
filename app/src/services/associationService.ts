@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Association } from '@interfaces/Association';
+import { Association } from '@joinus/interfaces';
 
 const API_URL = process.env.VUE_APP_BACKEND_URL;
 

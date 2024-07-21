@@ -7,8 +7,6 @@ export class CreateUserDto {
   @IsString()
   last_name: string;
 
-  @IsDate()
-  dateCreated: Date;
 
   @IsEmail()
   email: string;
@@ -23,8 +21,8 @@ export class CreateUserDto {
   @IsString()
   confirmPassword: string;
 
-  @IsNumber()
-  roleId: number;
+  @IsString()
+  roleId: string;
 
   @IsOptional()
   @IsString()
@@ -39,6 +37,6 @@ export class CreateUserDto {
   image?: string;
 
   @IsOptional()
-  @IsNumber ()
-  idAssociation?: string;
+  @IsString ()
+  associationId?: string;
 }

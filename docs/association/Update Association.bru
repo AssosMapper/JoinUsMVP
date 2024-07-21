@@ -1,0 +1,25 @@
+meta {
+  name: Update Association
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{url}}/associations/dc3179cd-4041-4068-a03d-f8bd478bef41
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Urgence Palestiness"
+  }
+  
+}
+
+tests {
+  test("Successful PUT request", function () {
+      expect(res.getStatus()).to.be.oneOf([200, 201, 204]);
+  });
+  
+}

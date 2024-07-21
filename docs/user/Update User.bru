@@ -1,0 +1,26 @@
+meta {
+  name: Update User
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{url}}/users/4d5bb7e9-c605-40d6-b453-3aaf68bdc071
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "first_name": "Gaia",
+    "last_name": "Nakamura"
+  }
+  
+}
+
+tests {
+  test("Successful PUT request", function () {
+      expect(res.getStatus()).to.be.oneOf([200, 201, 204]);
+  });
+  
+}

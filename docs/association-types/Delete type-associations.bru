@@ -1,0 +1,18 @@
+meta {
+  name: Delete type-associations
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{url}}/type-associations/3d5c3ba8-a43b-4b63-9a17-e53461d65e7a
+  body: json
+  auth: inherit
+}
+
+tests {
+  test("Successful DELETE request", function () {
+      expect(res.getStatus()).to.be.oneOf([200, 202, 204]);
+  });
+  
+}

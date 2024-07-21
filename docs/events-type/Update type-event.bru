@@ -1,0 +1,25 @@
+meta {
+  name: Update type-event
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{url}}/type-events/b70d220f-4974-4fea-b91e-91285de06380
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Maraude",
+    "description": "Action mobile d'aide et de soutien aux personnes dans le besoin, généralement nocturne"
+  }
+}
+
+tests {
+  test("Successful PUT request", function () {
+      expect(res.getStatus()).to.be.oneOf([200, 201, 204]);
+  });
+  
+}

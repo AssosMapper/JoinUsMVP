@@ -16,17 +16,10 @@ export class CreateAssociationDto {
   image?: string;
 
   @IsInt()
-  userId: number;
-
-  @IsDate()
-  @IsOptional()
-  dateCreated?: Date;
-
-  @IsInt()
   @IsOptional()
   members?: number;
 
   @IsArray()
   @ArrayNotEmpty()
-  typeIds: number[];
+  typeIds: Array<string>;
 }

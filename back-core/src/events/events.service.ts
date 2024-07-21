@@ -1,29 +1,31 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
-import { Event } from './event.entity';
-import { Association } from '../associations/association.entity';
+import { Event } from './entities/event.entity';
+import { Association } from '../associations/entities/association.entity';
 import { CreateEventDto } from './dto/create-events.dto';
 import { UpdateEventDto } from './dto/update-events.dto';
+import { User } from '../users/entities/user.entity';
+import { TypeEvents } from '../type-events/entities/type-events.entity';
 
 @Injectable()
 export class EventsService {
   constructor(
-    @InjectRepository(Event)
+    @Inject('EVENT_REPOSITORY')
     private eventsRepository: Repository<Event>,
-    
-    @InjectRepository(Association)
+    @Inject('ASSOCIATION_REPOSITORY')
     private associationRepository: Repository<Association>,
+    @Inject('TYPEEVENTS_REPOSITORY')
+    private typeEventsRepository: Repository<TypeEvents>,
   ) {}
 
   findAll(): Promise<Event[]> {
-    return this.eventsRepository.find({ relations: ['organisation', 'user', 'typeEvent'] });
+    return this.eventsRepository.find({ relations: ['association', 'user', 'typeEvent'] });
   }
 
-  async findOne(id: number): Promise<Event> {
+  async findOne(id: string): Promise<Event> {
     const event = await this.eventsRepository.findOne({
       where: { id },
-      relations: ['organisation', 'user', 'typeEvent'],
+      relations: ['association', 'user', 'typeEvent'],
     });
     if (!event) {
       throw new NotFoundException(`Event with ID ${id} not found`);
@@ -31,32 +33,63 @@ export class EventsService {
     return event;
   }
 
-  async findByUserId(userId: number): Promise<Event[]> {
+  async findByUserId(userId: string): Promise<Event[]> {
     return this.eventsRepository.find({
-      where: { user_id: userId },
-      relations: ['organisation', 'user', 'typeEvent'],
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+      relations: ['association', 'user', 'typeEvent'],
     });
   }
 
-  create(createEventDto: CreateEventDto): Promise<Event> {
-    const event = this.eventsRepository.create(createEventDto);
+  async create(user: User, createEventDto: CreateEventDto): Promise<Event> {
+    const event = new Event();
+    const association = await this.associationRepository.findOne({ where: { id: createEventDto.associationId } });
+    if (!association) {
+      throw new NotFoundException(`Association with ID ${createEventDto.associationId} not found`);
+    }
+    const typeEvent = await this.typeEventsRepository.findOne({ where: { id: createEventDto.typeEventId } });
+    if (!typeEvent) {
+      throw new NotFoundException(`TypeEvent with ID ${createEventDto.typeEventId} not found`);
+    }
+    event.titre = createEventDto.titre;
+    event.description = createEventDto.description;
+    event.image = createEventDto.image;
+    event.date = createEventDto.date;
+    event.localisation = createEventDto.localisation;
+    event.association = association;
+    event.user = user;
+    event.typeEvent = typeEvent;
+    event.isPublic = true;
+
     return this.eventsRepository.save(event);
   }
 
-  async update(id: number, updateEventDto: UpdateEventDto): Promise<void> {
+  async update(id: string, updateEventDto: UpdateEventDto): Promise<Event> {
     const existingEvent = await this.findOne(id);
-    if (updateEventDto.association_id) {
-      const association = await this.associationRepository.findOne({ where: { id: updateEventDto.association_id } });
+    if (!existingEvent)
+      throw new NotFoundException(`Event with ID ${id} not found`);
+    if (updateEventDto.associationId) {
+      const association = await this.associationRepository.findOne({ where: { id: updateEventDto.associationId } });
       if (!association) {
-        throw new NotFoundException(`Association with ID ${updateEventDto.association_id} not found`);
+        throw new NotFoundException(`Association with ID ${updateEventDto.associationId} not found`);
       }
-      existingEvent.organisation = association;
+      existingEvent.association = association;
+    }
+    if (updateEventDto.typeEventId) {
+      const typeEvent = await this.typeEventsRepository.findOne({ where: { id: updateEventDto.typeEventId } });
+      if (!typeEvent) {
+        throw new NotFoundException(`TypeEvent with ID ${updateEventDto.typeEventId} not found`);
+      }
+      existingEvent.typeEvent = typeEvent;
     }
     Object.assign(existingEvent, updateEventDto);
-    await this.eventsRepository.save(existingEvent);
+   return await this.eventsRepository.save(existingEvent);
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: string): Promise<void> {
     await this.eventsRepository.delete(id);
   }
 }

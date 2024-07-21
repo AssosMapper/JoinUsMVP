@@ -2,39 +2,40 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Put, UseGuards } fro
 import { AssociationsService } from './associations.service';
 import { CreateAssociationDto } from './dto/create-association.dto';
 import { UpdateAssociationDto } from './dto/update-association.dto';
-import { Association } from './association.entity';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { Public } from '../auth/decorators/public.decorator';
+import { Association } from './entities/association.entity';
+import { CurrentUserId } from '../utils/decorators/current-user-id.decorator';
+import { User } from '../users/entities/user.entity';
+import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
 
 @Controller('associations')
-@UseGuards(JwtAuthGuard)
 export class AssociationsController {
   constructor(private readonly associationsService: AssociationsService) {}
 
   @Get()
-  @Public()
   findAll(): Promise<Association[]> {
     return this.associationsService.findAll();
   }
 
   @Get(':id')
-  @Public()
   findOne(@Param('id') id: string): Promise<Association> {
-    return this.associationsService.findOne(+id);
+    return this.associationsService.findOne(id);
   }
 
   @Post()
-  create(@Body() createAssociationDto: CreateAssociationDto): Promise<Association> {
-    return this.associationsService.create(createAssociationDto);
+  @BearAuthToken()
+  create(@CurrentUserId() user: User,@Body() createAssociationDto: CreateAssociationDto): Promise<Association> {
+    return this.associationsService.create(user,createAssociationDto);
   }
 
   @Put(':id')
+  @BearAuthToken()
   update(@Param('id') id: string, @Body() updateAssociationDto: UpdateAssociationDto) {
-    return this.associationsService.update(+id, updateAssociationDto);
+    return this.associationsService.update(id, updateAssociationDto);
   }
 
   @Delete(':id')
+  @BearAuthToken()
   remove(@Param('id') id: string) {
-    return this.associationsService.remove(+id);
+    return this.associationsService.remove(id);
   }
 }

@@ -1,0 +1,25 @@
+meta {
+  name: Create type-associations
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{url}}/type-associations
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Anti-colonialisme, paix dans le mondes 2",
+    "description": "Contre le colonialisme, l'impérialisme, pour la paix dans le monde."
+  }
+}
+
+tests {
+  test("Successful POST request", function () {
+      expect(res.getStatus()).to.be.oneOf([200, 201]);
+  });
+  
+}

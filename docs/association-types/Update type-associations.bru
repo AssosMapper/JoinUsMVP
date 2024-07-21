@@ -1,0 +1,25 @@
+meta {
+  name: Update type-associations
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{url}}/type-associations/3d5c3ba8-a43b-4b63-9a17-e53461d65e7a
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Ecologie",
+      "description": "Sauver le vivant sous toute ses formes"
+  }
+}
+
+tests {
+  test("Successful PUT request", function () {
+      expect(res.getStatus()).to.be.oneOf([200, 201, 204]);
+  });
+  
+}

@@ -1,27 +1,31 @@
-import { IsString, IsInt, IsOptional, IsDate } from 'class-validator';
+import { IsString, IsInt, IsOptional, IsDate, IsNotEmpty, IsBoolean } from 'class-validator';
 
 export class CreateEventDto {
   @IsString()
-  name: string;
+  @IsNotEmpty()
+  titre: string;
 
   @IsString()
   @IsOptional()
   description?: string;
 
-  @IsInt()
-  userId: number;
+  @IsString()
+  associationId: string;
 
-  @IsInt()
-  association_id: number;
+  @IsString()
+  typeEventId: string;
 
-  @IsInt()
-  typeEventId: number;
-
-  @IsDate()
   @IsOptional()
   date?: Date;
 
   @IsString()
   @IsOptional()
   image?: string;
+
+  @IsString()
+  @IsNotEmpty()
+  localisation: string;
+
+  @IsBoolean()
+  isPublic: boolean;
 }

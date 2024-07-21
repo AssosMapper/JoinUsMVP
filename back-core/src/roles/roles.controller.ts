@@ -1,35 +1,59 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { RolesService } from './roles.service';
-import { Role } from './role.entity';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CreateRoleDto } from './dto/create-role.dto';
+import { UpdateRoleDto } from './dto/update-role.dto';
+import { ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Role } from './entities/role.entity';
+import { NeedPermissions } from '../utils/decorators/need-permission.decorator';
+import { ApiPaginationQuery } from '../utils/decorators/ApiPaginationQuery.decorator';
+import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 
-@Controller('roles')
-@UseGuards(JwtAuthGuard)
+@ApiTags('Roles')
+// @BearAuthToken()
+@Controller({
+  path: 'roles',
+  version: '1',
+})
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
+  @Post()
+  @NeedPermissions('role:create')
+  create(@Body() createRoleDto: CreateRoleDto) {
+    return this.rolesService.create(createRoleDto);
+  }
+
   @Get()
-  findAll(): Promise<Role[]> {
-    return this.rolesService.findAll();
+  @ApiResponse({ status: 200, type: Paginated<Role> })
+  @ApiPaginationQuery({ canSelect: false })
+  @NeedPermissions('role:list')
+  findAll(@Paginate() query: PaginateQuery) {
+    return this.rolesService.findAll(query);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Role> {
-    return this.rolesService.findOne(+id);
-  }
-
-  @Post()
-  create(@Body() role: Role): Promise<Role> {
-    return this.rolesService.create(role);
+  @NeedPermissions('role:read')
+  findOne(@Param('id') id: string) {
+    return this.rolesService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() role: Role) {
-    return this.rolesService.update(+id, role);
+  @NeedPermissions('role:update')
+  update(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
+    return this.rolesService.update(id, updateRoleDto);
   }
 
   @Delete(':id')
+  @NeedPermissions('role:delete')
   remove(@Param('id') id: string) {
-    return this.rolesService.remove(+id);
+    return this.rolesService.remove(id);
   }
 }

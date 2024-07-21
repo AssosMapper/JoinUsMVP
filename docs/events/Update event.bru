@@ -1,0 +1,26 @@
+meta {
+  name: Update event
+  type: http
+  seq: 4
+}
+
+put {
+  url: {{url}}/events/5c433575-b7dd-4542-9723-365afe0176d5
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "titre": "ManifestationManifestation"
+  }
+  
+  
+}
+
+tests {
+  test("Successful PUT request", function () {
+      expect(res.getStatus()).to.be.oneOf([200, 201, 204]);
+  });
+  
+}
