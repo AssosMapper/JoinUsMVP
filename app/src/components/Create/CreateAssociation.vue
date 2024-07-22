@@ -11,13 +11,14 @@ const userStore = useUserStore();
 const router = useRouter();
 const notificationStore = useNotificationStore();
 
-const userId = userStore.id !== null ? userStore.id : 0;
+// const userId = userStore.id !== null ? userStore.id : 0;
 
 const association = ref({
   name: '',
   localisation: '',
   description: '',
   image: '',
+  // user_id: userId,
   typeIds: [] as number[],
   members: 0,
 });
