@@ -6,7 +6,7 @@ import associationService from '@/services/associationService';
 import typeEventService from '@/services/typeEventService';
 import { useRouter } from 'vue-router';
 import GoogleAutoCompleteComponent from '../GoogleAutoCompleteComponent.vue';
-import { useNotificationStore } from '@/store/notificationStore.ts';
+import { useNotificationStore } from '@/store/notificationStore';
 
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();

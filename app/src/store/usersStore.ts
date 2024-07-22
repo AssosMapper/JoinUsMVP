@@ -2,30 +2,33 @@ import { defineStore } from 'pinia';
 import axios from 'axios';
 import userService from '@/services/usersService';
 import { jwtDecode } from "jwt-decode";
+import { Association } from '@joinus/interfaces';
 
 export enum UserRole {
-  ADMIN = 'admin',
-  ASSOCIATION_MANAGER = 'associationManager',
-  USER = 'user'
+  ADMIN = 'SuperAdmin',
+  ASSOCIATION_MANAGER = 'AssociationManager',
+  USER = 'User'
 }
 
 export interface Role {
-  id: number | null;
+  id: string;
   name: UserRole;
+  description: string | null;
 }
 
 export interface UserState {
-  id: number | null;
+  id: string | null;
   first_name: string;
   last_name: string;
   email: string;
   access_token: string;
-  dateCreated: string;
-  phone: string;
-  localisation: string;
+  createdAt: string;
+  updatedAt: string;
+  phone: string | null;
+  localisation: string | null;
   image: string | null;
-  role: Role | null;
-  associationId: number | null;
+  roles: Role[];
+  association: Association | null; 
 }
 
 const initialState: UserState = {
@@ -34,20 +37,21 @@ const initialState: UserState = {
   last_name: '',
   email: '',
   access_token: '',
-  localisation: '',
-  dateCreated: '',
-  phone: '',
+  createdAt: '',
+  updatedAt: '',
+  phone: null,
+  localisation: null,
   image: null,
-  role: null,
-  associationId: null,
+  roles: [],
+  association: null,
 };
 
 export const useUserStore = defineStore('user', {
   state: (): UserState => ({ ...initialState }),
   getters: {
     isAuthenticated: (state): boolean => !!state.access_token,
-    isAdmin: (state): boolean => state.role?.name === UserRole.ADMIN,
-    isAssociationManager: (state): boolean => state.role?.name === UserRole.ASSOCIATION_MANAGER,
+    isAdmin: (state): boolean => state.roles.some(role => role.name === UserRole.ADMIN),
+    isAssociationManager: (state): boolean => state.roles.some(role => role.name === UserRole.ASSOCIATION_MANAGER),
     fullName: (state): string => `${state.first_name} ${state.last_name}`.trim(),
   },
   actions: {
@@ -57,8 +61,9 @@ export const useUserStore = defineStore('user', {
     clearUser(): void {
       Object.assign(this, initialState);
     },
-    loginUser(userData: UserState): void {
-      this.setUser(userData);
+    loginUser(loginResponse: { access_token: string, user: Partial<UserState> }): void {
+      const { access_token, user } = loginResponse;
+      this.setUser({ ...user, access_token });
     },
     logoutUser(): void {
       this.clearUser();
