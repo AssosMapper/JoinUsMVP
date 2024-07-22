@@ -5,7 +5,7 @@ import { useUserStore } from '@/store/usersStore';
 import associationService from '@/services/associationService';
 import typeAssociationService from '@/services/typeAssociationService';
 import GoogleAutoCompleteComponent from '../GoogleAutoCompleteComponent.vue';
-import { useNotificationStore } from '@/store/notificationStore.ts';
+import { useNotificationStore } from '@/store/notificationStore';
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -18,7 +18,6 @@ const association = ref({
   localisation: '',
   description: '',
   image: '',
-  user_id: userId,
   typeIds: [] as number[],
   members: 0,
 });
