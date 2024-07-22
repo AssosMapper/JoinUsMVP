@@ -3,10 +3,6 @@ import { ref, onMounted, watch } from 'vue';
 import { Loader } from '@googlemaps/js-api-loader';
 
 const props = defineProps({
-  apiKey: {
-    type: String,
-    required: true,
-  },
   modelValue: {
     type: String,
     required: true,
@@ -35,15 +31,18 @@ const props = defineProps({
 const emit = defineEmits(['update:modelValue', 'placechanged']);
 const inputValue = ref(props.modelValue);
 let autocomplete: google.maps.places.Autocomplete;
+let loader: Loader | null = null;
 
 onMounted(async () => {
-  const loader = new Loader({
-    apiKey: props.apiKey,
-    version: 'weekly',
-    libraries: ['places'],
-  });
+  if (!loader) {
+    loader = new Loader({
+      apiKey: process.env.VUE_APP_GOOGLE_MAPS_API_KEY!, // Utilisez la clé API depuis le fichier .env
+      version: 'weekly',
+      libraries: ['places'],
+    });
 
-  await loader.load();
+    await loader.load();
+  }
 
   const input = document.getElementById(props.inputId) as HTMLInputElement;
   autocomplete = new google.maps.places.Autocomplete(input, props.options);

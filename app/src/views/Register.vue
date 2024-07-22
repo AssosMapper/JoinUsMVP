@@ -2,8 +2,8 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import userService from '@/services/usersService';
-import GoogleAutoCompleteComponent from '../components/GoogleAutoCompleteComponent';
-import { useNotificationStore } from '@/store/notificationStore.ts';
+import GoogleAutoCompleteComponent from '@/components/GoogleAutoCompleteComponent.vue';
+import { useNotificationStore } from '@/store/notificationStore';
 
 const router = useRouter();
 const notificationStore = useNotificationStore();
