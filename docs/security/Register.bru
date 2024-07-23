@@ -1,0 +1,24 @@
+meta {
+  name: Register
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{url}}/v1/auth/register
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "firstName":"Houmame",
+    "lastName":"Lazar",
+    "email":"admin@test.com",
+    "password":"1xuH7%K@u7cc3^sG!5U5",
+    "confirmPassword": "1xuH7%K@u7cc3^sG!5U5",
+    "phone":"0638059972",
+    "localisation": "2bis Avenue Aristide Briand Bagneux",
+    "image": "https://picsum.photos/200/300"
+  }
+}
