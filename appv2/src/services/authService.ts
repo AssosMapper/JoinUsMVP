@@ -10,7 +10,7 @@ export const login = async (credentials: ICredentials) => {
   if(error.value){
     throw new Error(error.value);
   }
-  return {data: data.value, response: response.value};
+  return data.value;
 };
 
 export const register = async (register: IRegister) =>{

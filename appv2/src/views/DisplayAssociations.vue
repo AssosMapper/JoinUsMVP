@@ -45,7 +45,7 @@ onMounted(() => {
           Location: {{ association.localisation }}
         </p>
         <p class="block font-sans text-base antialiased font-light leading-relaxed text-inherit">
-          Created on: {{ new Date(association.dateCreated).toLocaleDateString() }}
+          Created on: {{ new Date(association.createdAt).toLocaleDateString() }}
         </p>
         <p class="block font-sans text-base antialiased font-light leading-relaxed text-inherit">
           Members: {{ association.members }}

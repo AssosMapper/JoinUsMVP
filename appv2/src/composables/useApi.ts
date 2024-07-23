@@ -1,4 +1,4 @@
-import {createFetch} from '@vueuse/core';
+import {createFetch, useSessionStorage} from '@vueuse/core';
 import {destr} from 'destr';
 import {useCookies} from "@vueuse/integrations/useCookies";
 
@@ -12,9 +12,12 @@ export const useApi = createFetch({
     options: {
         refetch: true,
         async beforeFetch({options}) {
-            const cookies = useCookies();
-            const accessToken = cookies.get('token');
-
+            const user = useSessionStorage('user').value
+            let accessToken = null;
+            if(user){
+                const data = JSON.parse(user);
+                accessToken = data.token;
+            }
             if (accessToken) {
                 options.headers = {
                     ...options.headers,

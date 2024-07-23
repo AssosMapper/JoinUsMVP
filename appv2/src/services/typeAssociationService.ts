@@ -1,6 +1,8 @@
 import axios from 'axios';
+import {useApiStore} from "@/store/apiUrls.store.ts";
+import {useApi} from "@/composables/useApi.ts";
 
-const API_URL = import.meta.env.VUE_APP_BACKEND_URL;
+const API_URL = import.meta.env.VITE_APP_BACKEND_URL;
 
 const createTypeAssociation = async (typeAssociation: { name: string }, token: string) => {
   const response = await axios.post(`${API_URL}/type-associations`, typeAssociation, {
@@ -11,8 +13,13 @@ const createTypeAssociation = async (typeAssociation: { name: string }, token: s
   return response.data;
 };
 
-const getAllTypeAssociations = () => {
-  return axios.get(`${API_URL}/type-associations`);
+const getAllTypeAssociations = async () => {
+  const apiStore = useApiStore();
+  const {data,error} = await useApi(apiStore.associationTypes.list).json();
+    if(error.value){
+        throw new Error(error.value);
+    }
+    return data.value;
 };
 
 const getTypeAssociationById = (id: number) => {

@@ -31,7 +31,7 @@ export const useUserStore = defineStore('user', {
         async login(credentials: ICredentials) {
             this.loader = true;
             try {
-                const {data} = await authService.login(credentials)
+                const data = await authService.login(credentials)
                 this.token = data?.access_token;
                 this.user = data?.user;
                 this.isAuth = true;
