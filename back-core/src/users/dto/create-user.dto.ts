@@ -1,24 +1,23 @@
-import { IsString, IsEmail, IsDate, IsNumber, IsOptional, MinLength, Matches } from 'class-validator';
+import {IsString, IsEmail, IsDate, IsNumber, IsOptional, MinLength, Matches, IsStrongPassword} from 'class-validator';
+import {IsMatch, IsMatchConstraint} from "../../utils/decorators/IsMatchConstraint.decorator";
 
 export class CreateUserDto {
   @IsString()
-  first_name: string;
+  firstName: string;
 
   @IsString()
-  last_name: string;
+  lastName: string;
 
 
   @IsEmail()
   email: string;
 
   @IsString()
-  @MinLength(8)
-  @Matches(/((?=.*\d)|(?=.*\W+))(?![.\n])(?=.*[A-Z])(?=.*[a-z]).*$/, {
-    message: 'Le mot de passe doit contenir au moins une majuscule, une minuscule, un chiffre ou un caractère spécial',
-  })
+  @IsStrongPassword()
   password: string;
 
   @IsString()
+  @IsMatch('password')
   confirmPassword: string;
 
   @IsString()

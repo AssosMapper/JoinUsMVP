@@ -5,6 +5,7 @@ import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { comparePassword } from '../utils/functions';
+import {RegisterDto} from "./dto/register.dto";
 
 @Injectable()
 export class AuthService {
@@ -55,7 +56,7 @@ export class AuthService {
   /**
    * Register user
    */
-  async register(createUserDto: CreateUserDto) {
-    return await this.userService.create(createUserDto);
+  async register(registerDto: RegisterDto) {
+    return await this.userService.register(registerDto);
   }
 }
