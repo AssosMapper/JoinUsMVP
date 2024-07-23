@@ -22,7 +22,7 @@ const event = ref({
   localisation: '',
   association_id: isAdmin ? null : userStore.associationId,
   user_id: userStore.id,
-  type_event_id: null as number | null,
+  typeEventId: null as number | null,
   isPublic: true,
   organisation: '',
 });
@@ -42,9 +42,9 @@ const fetchEventDetails = async (id: number) => {
       image: eventData.image,
       date: formatDateForInput(eventData.date),
       localisation: eventData.localisation,
-      association_id: eventData.association?.id ?? null,
+      associationId: eventData.association?.id ?? null,
       user_id: eventData.user?.id ?? null,
-      type_event_id: eventData.typeEvent?.id ?? null,
+      typeEventId: eventData.typeEvent?.id ?? null,
       isPublic: eventData.isPublic,
       organisation: eventData.organisation  
     };
@@ -60,7 +60,7 @@ const handleSubmit = async () => {
       event.value.association_id = userStore.associationId;
     }
 
-    if (event.value.association_id === null || event.value.user_id === null || event.value.type_event_id === null) {
+    if (event.value.association_id === null || event.value.user_id === null || event.value.typeEventId === null) {
       alert('Association, User, and Event Type must be selected.');
       return;
     }
@@ -70,7 +70,7 @@ const handleSubmit = async () => {
         ...event.value,
       association_id: event.value.association_id ?? 0,
       user_id: event.value.user_id ?? 0,
-      type_event_id: event.value.type_event_id ?? 0
+      type_event_id: event.value.typeEventId ?? 0
     };
 
     await eventService.updateEvent(selectedEventId.value as number, dataToSend, token);
@@ -253,7 +253,7 @@ watch(selectedEventId, (newId) => {
         <label for="type_event_id" class="block text-sm font-medium leading-6 text-gray-900">Event Type</label>
         <select
           id="type_event_id"
-          v-model="event.type_event_id"
+          v-model="event.typeEventId"
           required
           class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         >

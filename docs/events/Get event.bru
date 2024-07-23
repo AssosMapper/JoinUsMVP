@@ -5,9 +5,13 @@ meta {
 }
 
 get {
-  url: {{url}}/events/5c433575-b7dd-4542-9723-365afe0176d5
+  url: {{url}}/events/:id
   body: none
   auth: none
+}
+
+params:path {
+  id: 
 }
 
 tests {
