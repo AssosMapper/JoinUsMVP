@@ -24,16 +24,26 @@ export const useApiStore = defineStore('api', {
             associationTypes: {
                 list: "/type-associations",
                 detail: "/type-associations/:id",
+                create: "/type-associations"
+
             },
             typeEvents: {
                 list: "/type-events",
+                create: "/type-events",
                 detail: "/type-events/:id",
+                update: "/type-events/:id",
             },
         }
     },
     actions: {
         resolveUrl(url: string, params: Record<string, string>) {
             let resolvedUrl = url;
+            if (!resolvedUrl) {
+                throw new Error('Url not found in the apiStore');
+            }
+            if (url.match(/:\w+/g) && !params) {
+                throw new Error('Url has params but no params are passed');
+            }
             Object.keys(params).forEach((key) => {
                 resolvedUrl = resolvedUrl.replace(`:${key}`, params[key]);
             });

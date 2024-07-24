@@ -4,13 +4,13 @@ import {useApi} from "@/composables/useApi.ts";
 
 const API_URL = import.meta.env.VUE_APP_BACKEND_URL;
 
-const createTypeEvent = async (typeEvent: { name: string }, token: string) => {
-  const response = await axios.post(`${API_URL}/type-events`, typeEvent, {
-    headers: {
-      Authorization: `Bearer ${token}`
+const createTypeEvent = async (typeEvent: any) => {
+  const apiStore = useApiStore();
+    const {data,error,response}= await useApi(apiStore.typeEvents.create,typeEvent).post(typeEvent).json();
+    if (error.value) {
+        throw new Error(error.value);
     }
-  });
-  return response.data;
+    return data.value;
 };
 
 const getAllTypeEvents = async () => {
@@ -22,17 +22,24 @@ const getAllTypeEvents = async () => {
     return data.value;
 };
 
-const getTypeEventById = (id: number) => {
-  return axios.get(`${API_URL}/type-events/${id}`);
+const getTypeEventById = async (id: number) => {
+  const apiStore = useApiStore();
+    const {data,error,response}= await useApi(apiStore.resolveUrl(apiStore.typeEvents.detail,{
+        id:id
+    })).json();
+    if (error.value) {
+        throw new Error(error.value);
+    }
+    return data.value;
 };
 
-const updateTypeEvent = async (id: number, typeEvent: { name: string }, token: string) => {
-  const response = await axios.put(`${API_URL}/type-events/${id}`, typeEvent, {
-    headers: {
-      Authorization: `Bearer ${token}`
+const updateTypeEvent = async (id: string, typeEvent) => {
+  const apiStore = useApiStore();
+    const {data,error,response}= await useApi(apiStore.resolveUrl(apiStore.typeEvents.update,{id:id}),typeEvent).put(typeEvent).json();
+    if (error.value) {
+        throw new Error(error.value);
     }
-  });
-  return response.data;
+    return data.value;
 };
 
 const deleteTypeEvent = async (id: number, token: string) => {

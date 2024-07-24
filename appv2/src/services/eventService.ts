@@ -38,7 +38,9 @@ const getEventsByUserId = async (userId: number) => {
 
 const updateEvent = async (id: string, event: Partial<IEvent>) => {
     const apiStore = useApiStore();
-    const {data, error, response} = await useApi(apiStore.resolveUrl(apiStore.events.update)).put(event).json();
+    const {data, error, response} = await useApi(apiStore.resolveUrl(apiStore.events.update,{
+        id: id
+    })).put(event).json();
     if (error.value) {
         throw new Error(error.value);
     }

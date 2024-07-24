@@ -18,8 +18,7 @@ const availableTypeEvents = ref<{ id: number, name: string }[]>([]);
 
 const fetchTypeEvents = async () => {
   try {
-    const response = await typeEventService.getAllTypeEvents();
-    availableTypeEvents.value = response.data;
+    availableTypeEvents.value = await typeEventService.getAllTypeEvents();
   } catch (error) {
     console.error('Error fetching type events:', error);
   }
@@ -27,8 +26,8 @@ const fetchTypeEvents = async () => {
 
 const fetchTypeEventDetails = async (id: number) => {
   try {
-    const response = await typeEventService.getTypeEventById(id);
-    typeEvent.value = response.data;
+    typeEvent.value = await typeEventService.getTypeEventById(id);
+    console.log('Type Event details:', typeEvent.value);
   } catch (error) {
     console.error('Error fetching type event details:', error);
   }
@@ -36,13 +35,10 @@ const fetchTypeEventDetails = async (id: number) => {
 
 const handleSubmit = async () => {
   try {
-    const token = userStore.access_token;
-    await typeEventService.updateTypeEvent(typeEvent.value.id, typeEvent.value, token);
-    alert('Type Event updated successfully!');
-    router.push('/');
+    await typeEventService.updateTypeEvent(typeEvent.value.id, typeEvent.value);
+    await router.push('/');
   } catch (error) {
     console.error('Error updating type event:', error);
-    alert('There was an error updating the type event.');
   }
 };
 
