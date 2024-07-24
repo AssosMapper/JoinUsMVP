@@ -1,22 +1,34 @@
-import axios from 'axios';
-import { useUserStore } from '@/store';
-import { Login } from '@joinus/interfaces';
+import {useUserStore} from '@/store';
+import {ICredentials, IRegister} from "@/types/security.types.ts";
+import {useApi} from "@/composables/useApi.ts";
+import {useApiStore} from "@/store/apiUrls.store.ts";
 
-const API_URL = process.env.VUE_APP_BACKEND_URL;
 
-const login = async (credentials: Login) => {
-  const response = await axios.post(`${API_URL}/v1/auth/login`, credentials);
-  const userStore = useUserStore();
-  userStore.loginUser(response.data);
-  return response.data;
+export const login = async (credentials: ICredentials) => {
+  const urls = useApiStore();
+  const {data,error,response} = await useApi(urls.security.auth.login).post(credentials).json();
+  if(error.value){
+    throw new Error(error.value);
+  }
+  return data.value;
 };
 
-const logout = () => {
+export const register = async (register: IRegister) =>{
+  const urls = useApiStore();
+  const {data,error}= await useApi(urls.security.auth.register).post(register).json();
+    if(error.value) {
+      throw new Error(error.value);
+    }
+    return data.value;
+}
+
+export const logout = () => {
   const userStore = useUserStore();
-  userStore.logoutUser();
+  userStore.logout();
 };
 
 export default {
   login,
   logout,
+  register
 };

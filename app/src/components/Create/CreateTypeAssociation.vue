@@ -16,10 +16,9 @@ const typeAssociation = ref({
 
 const handleSubmit = async () => {
   try {
-    const token = userStore.access_token;
-    await typeAssociationService.createTypeAssociation(typeAssociation.value, token);
+    await typeAssociationService.createTypeAssociation(typeAssociation.value);
     notificationStore.showNotification("Type d'association créé avec succès !", "success");
-    router.push('/');
+    await router.push('/');
   } catch (error) {
     notificationStore.showNotification("Erreur lors de la création d'un type d'association", "error");
   }
@@ -47,7 +46,6 @@ const handleSubmit = async () => {
         <textarea
           id="description"
           v-model="typeAssociation.description"
-          required
           class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         ></textarea>
       </div>

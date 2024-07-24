@@ -6,7 +6,7 @@ import associationService from '@/services/associationService';
 import typeEventService from '@/services/typeEventService';
 import { useRouter } from 'vue-router';
 import GoogleAutoCompleteComponent from '../GoogleAutoCompleteComponent.vue';
-import { useNotificationStore } from '@/store/notificationStore';
+import { useNotificationStore } from '@/store/notificationStore.ts';
 
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
@@ -20,9 +20,8 @@ const event = ref({
   image: '',
   date: '',
   localisation: '',
-  association_id: isAdmin ? null : userStore.associationId,
-  user_id: userStore.id,
-  type_event_id: null as number | null,
+  associationId: null as string | null,
+  typeEventId: null as string | null,
   isPublic: true,
 });
 
@@ -31,26 +30,14 @@ const typeEvents = ref<{ id: number, name: string }[]>([]);
 
 const handleSubmit = async () => {
   try {
-    const token = userStore.access_token;
-    if (!isAdmin) {
-      event.value.association_id = userStore.associationId;
-    }
-
-    if (event.value.association_id === null || event.value.user_id === null || event.value.type_event_id === null) {
-      notificationStore.showNotification("Association, User, and Event Type must be selected", "error");
-      return;
-    }
-
     const dataToSend = {
       ...event.value,
-      association_id: event.value.association_id ?? 0,
-      user_id: event.value.user_id ?? 0,
-      type_event_id: event.value.type_event_id ?? 0
+      associationId: event.value.associationId,
+      typeEventId: event.value.typeEventId
     };
-
-    await eventService.createEvent(dataToSend, token);
+    await eventService.createEvent(dataToSend);
     notificationStore.showNotification("Evenement créé avec succès !", "success");
-    router.push('/');
+    await router.push('/');
   } catch (error) {
     console.error('Error creating event:', error);
     notificationStore.showNotification("Erreur lors de la création de l'évènement", "error");
@@ -59,8 +46,7 @@ const handleSubmit = async () => {
 
 const fetchAssociations = async () => {
   try {
-    const response = await associationService.getAllAssociations();
-    associations.value = response.data;
+    associations.value = await associationService.getAllAssociations();
   } catch (error) {
     console.error('Error fetching associations:', error);
   }
@@ -68,8 +54,7 @@ const fetchAssociations = async () => {
 
 const fetchTypeEvents = async () => {
   try {
-    const response = await typeEventService.getAllTypeEvents();
-    typeEvents.value = response.data;
+    typeEvents.value = await typeEventService.getAllTypeEvents();
   } catch (error) {
     console.error('Error fetching type events:', error);
   }
@@ -144,7 +129,7 @@ onMounted(() => {
         <label for="association_id" class="block text-sm font-medium leading-6 text-gray-900">Association</label>
         <select
           id="association_id"
-          v-model="event.association_id"
+          v-model="event.associationId"
           required
           class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         >
@@ -158,7 +143,7 @@ onMounted(() => {
         <label for="type_event_id" class="block text-sm font-medium leading-6 text-gray-900">Event Type</label>
         <select
           id="type_event_id"
-          v-model="event.type_event_id"
+          v-model="event.typeEventId"
           required
           class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         >

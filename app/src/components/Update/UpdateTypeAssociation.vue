@@ -18,8 +18,7 @@ const availableTypeAssociations = ref<{ id: number, name: string }[]>([]);
 
 const fetchTypeAssociations = async () => {
   try {
-    const response = await typeAssociationService.getAllTypeAssociations();
-    availableTypeAssociations.value = response.data;
+    availableTypeAssociations.value  = await typeAssociationService.getAllTypeAssociations();
   } catch (error) {
     console.error('Error fetching type associations:', error);
   }
@@ -27,8 +26,7 @@ const fetchTypeAssociations = async () => {
 
 const fetchTypeAssociationDetails = async (id: number) => {
   try {
-    const response = await typeAssociationService.getTypeAssociationById(id);
-    typeAssociation.value = response.data;
+    typeAssociation.value= await typeAssociationService.getTypeAssociationById(id);
   } catch (error) {
     console.error('Error fetching type association details:', error);
   }
@@ -38,12 +36,10 @@ const handleSubmit = async () => {
   try {
     const token = userStore.access_token;
     const { name, description } = typeAssociation.value;
-    await typeAssociationService.updateTypeAssociation(typeAssociation.value.id, { name, description }, token);
-    alert('Type Association updated successfully!');
-    router.push('/');
+    await typeAssociationService.updateTypeAssociation(typeAssociation.value.id, { name, description });
+    await router.push('/');
   } catch (error) {
     console.error('Error updating type association:', error);
-    alert('There was an error updating the type association.');
   }
 };
 

@@ -5,22 +5,17 @@ import associationService from '@/services/associationService';
 
 const router = useRouter();
 
-const associations = ref<{ id: number, name: string, localisation: string, description: string, image: string, dateCreated: string, members: number, types: { id: number, name: string }[] }[]>([]);
+const associations = ref([]);
+const loader = ref(false);
 
 const fetchAssociations = async () => {
+  loader.value = true;
   try {
-    const response = await associationService.getAllAssociations();
-    associations.value = response.data;
+    associations.value = await associationService.getAllAssociations();
   } catch (error) {
     console.error('Error fetching associations:', error);
-  }
-};
-
-const getImageSrc = (associationName: string) => {
-  try {
-    return require(`../assets/associations-images/${associationName.replace(/\s+/g, '').toLowerCase()}.png`);
-  } catch (e) {
-    return require('../assets/associations-images/default.png'); 
+  }finally {
+    loader.value = false;
   }
 };
 
@@ -37,7 +32,7 @@ onMounted(() => {
   <div class="associations-container">
     <div v-for="association in associations" :key="association.id" class="relative flex flex-col mt-6 text-gray-700 bg-white shadow-md bg-clip-border rounded-xl w-96">
       <div class="relative flex justify-center h-56 mx-4 -mt-6 overflow-hidden text-white shadow-lg bg-clip-border rounded-xl bg-blue-gray-500 shadow-blue-gray-500/40">
-        <img :src="getImageSrc(association.name)" alt="card-image" class="height-full" />
+        <img src="/assets/associations-images/default.png" alt="card-image" class="height-full" />
       </div>
       <div class="p-6">
         <h5 class="block mb-2 font-sans text-xl antialiased font-semibold leading-snug tracking-normal text-blue-gray-900">
@@ -50,7 +45,7 @@ onMounted(() => {
           Location: {{ association.localisation }}
         </p>
         <p class="block font-sans text-base antialiased font-light leading-relaxed text-inherit">
-          Created on: {{ new Date(association.dateCreated).toLocaleDateString() }}
+          Created on: {{ new Date(association.createdAt).toLocaleDateString() }}
         </p>
         <p class="block font-sans text-base antialiased font-light leading-relaxed text-inherit">
           Members: {{ association.members }}

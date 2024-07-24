@@ -6,10 +6,10 @@ const components = {
   'UpdateAssociation': defineAsyncComponent(() => import('../components/Update/UpdateAssociation.vue')),
   'CreateEvent': defineAsyncComponent(() => import('../components/Create/CreateEvent.vue')),
   'UpdateEvent': defineAsyncComponent(() => import('../components/Update/UpdateEvent.vue')),
+  'CreateTypeAssociation': defineAsyncComponent(() => import('../components/Create/CreateTypeAssociation.vue')),
+  'UpdateTypeAssociation': defineAsyncComponent(() => import('../components/Update/UpdateTypeAssociation.vue')),
   'CreateTypeEvent': defineAsyncComponent(() => import('../components/Create/CreateTypeEvent.vue')),
   'UpdateTypeEvent': defineAsyncComponent(() => import('../components/Update/UpdateTypeEvent.vue')),
-  'UpdateTypeAssociation': defineAsyncComponent(() => import('../components/Update/UpdateTypeAssociation.vue')),
-  'CreateTypeAssociation': defineAsyncComponent(() => import('../components/Create/CreateTypeAssociation.vue')),
 }
 
 const currentView = shallowRef('CreateAssociation')
