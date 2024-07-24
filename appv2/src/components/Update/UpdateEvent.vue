@@ -56,18 +56,16 @@ const handleSubmit = async () => {
   try {
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const {association, id, association_id, ...dataToSend} = {
+    const {association, id, ...dataToSend} = {
       ...event.value,
       associationId: event.value.associationId,
       typeEventId: event.value.typeEventId
     };
 
     await eventService.updateEvent(selectedEventId.value, dataToSend);
-    alert('Event updated successfully!');
     await router.push('/');
   } catch (error) {
     console.error('Error updating event:', error);
-    alert('There was an error updating the event.');
   }
 };
 
@@ -224,11 +222,11 @@ watch(selectedEventId, (newId) => {
       </div>
 
       <div class="mb-4" v-if="isAdmin">
-        <label for="association_id" class="block text-sm font-medium leading-6 text-gray-900">Attribuer nouvelle
+        <label for="associationId" class="block text-sm font-medium leading-6 text-gray-900">Attribuer nouvelle
           Association</label>
         <select
-            id="association_id"
-            v-model="event.association_id"
+            id="associationId"
+            v-model="event.associationId"
             required
             class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         >

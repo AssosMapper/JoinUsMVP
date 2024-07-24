@@ -16,10 +16,9 @@ const typeEvent = ref({
 
 const handleSubmit = async () => {
   try {
-    const token = userStore.access_token;
-    await typeEventService.createTypeEvent(typeEvent.value, token);
+    await typeEventService.createTypeEvent(typeEvent.value);
     notificationStore.showNotification("Type d'évènement créé avec succès !", "success");
-    router.push('/');
+    await router.push('/');
   } catch (error) {
     console.error('Error creating type event:', error);
     notificationStore.showNotification("Erreur lors de la création d'un type d'évènement !", "error");
@@ -48,7 +47,6 @@ const handleSubmit = async () => {
         <textarea
           id="description"
           v-model="typeEvent.description"
-          required
           class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         ></textarea>
       </div>
