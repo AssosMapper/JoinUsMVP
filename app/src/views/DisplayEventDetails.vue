@@ -35,7 +35,7 @@ const initMap = async () => {
         });
 
         const icon = {
-          url: getImageSrc(event.value.name),
+          url: "/assets/events-images/default.png",
           scaledSize: new google.maps.Size(50, 50),
           origin: new google.maps.Point(0, 0),
           anchor: new google.maps.Point(25, 25)
@@ -56,14 +56,6 @@ const initMap = async () => {
   }
 };
 
-const getImageSrc = (associationName: string) => {
-  try {
-    return require(`../assets/events-images/${title.value.replace(/\s+/g, '').toLowerCase()}.png`);
-  } catch (e) {
-    return require('../assets/events-images/default.png'); 
-  }
-};
-
 onMounted(() => {
   fetchEventDetails();
 });
@@ -75,7 +67,7 @@ onMounted(() => {
       <div class="md:w-1/2 pr-4">
         <h1 class="text-2xl font-bold mb-4">{{ event.titre }}</h1>
         <div class="imageContainer justify-center flex mb-4">
-          <img :src="getImageSrc(event.titre)" alt="Event Image" class="w-64 h-64" />
+          <img src="/assets/events-images/default.png" alt="Event Image" class="w-64 h-64" />
         </div>
         <p class="text-lg mb-2">{{ event.description }}</p>
         <p class="text-lg mb-2">Location: {{ event.localisation }}</p>

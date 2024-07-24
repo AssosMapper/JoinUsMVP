@@ -1,48 +1,11 @@
 {
-  "compilerOptions": {
-    "target": "esnext",
-    "module": "NodeNext",
-    "strict": true,
-    "jsx": "preserve",
-    "moduleResolution": "NodeNext",
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
-    "useDefineForClassFields": true,
-    "sourceMap": true,
-    "baseUrl": ".",
-    "types": [
-      "webpack-env",
-      "google.maps",
-      "@/types"
-    ],
-    "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "@stores/*": ["/app/src/store*"],
-      "@joinus/interfaces": ["../packages/interfaces/src"]
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
     },
-    "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable",
-      "scripthost"
-    ]
-  },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.vue",
-    "tests/**/*.ts",
-    "tests/**/*.tsx",
-    "types/**/*.d.ts"
-  ,
-    "src/utils/loadGoogleMapsApi"
+    {
+      "path": "./tsconfig.node.json"
+    }
   ],
-  "exclude": [
-    "node_modules"
-  ],
-  "typeRoots": ["./node_modules/@types", "./types"]
 }

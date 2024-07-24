@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
-import { useUserStore } from '@/store/usersStore';
+import {ref, onMounted, watch} from 'vue';
+import {useUserStore} from '@/store/usersStore';
 import eventService from '@/services/eventService';
 import associationService from '@/services/associationService';
 import typeEventService from '@/services/typeEventService';
-import { useRouter } from 'vue-router';
+import {useRouter} from 'vue-router';
 import GoogleAutoCompleteComponent from '../GoogleAutoCompleteComponent.vue';
 
 const userStore = useUserStore();
@@ -14,17 +14,15 @@ const isAdmin = userStore.isAdmin;
 const isAssociationManager = userStore.isAssociationManager;
 
 const event = ref({
-  id: 0,
   titre: '',
   description: '',
   image: '',
   date: '',
   localisation: '',
-  association_id: isAdmin ? null : userStore.associationId,
-  user_id: userStore.id,
-  typeEventId: null as number | null,
+  associationId: null as string | null,
+  typeEventId: null as string | null,
   isPublic: true,
-  organisation: '',
+  association: null as any,
 });
 
 const selectedEventId = ref<number | null>(null);
@@ -35,6 +33,7 @@ const events = ref<{ id: number, titre: string }[]>([]);
 const fetchEventDetails = async (id: number) => {
   try {
     const eventData = await eventService.getEventById(id);
+    console.log(eventData)
     event.value = {
       id: eventData.id,
       titre: eventData.titre,
@@ -43,11 +42,11 @@ const fetchEventDetails = async (id: number) => {
       date: formatDateForInput(eventData.date),
       localisation: eventData.localisation,
       associationId: eventData.association?.id ?? null,
-      user_id: eventData.user?.id ?? null,
       typeEventId: eventData.typeEvent?.id ?? null,
       isPublic: eventData.isPublic,
-      organisation: eventData.organisation  
+      association: eventData.association,
     };
+    console.log(event.value.association)
   } catch (error) {
     console.error('Error fetching event details:', error);
   }
@@ -55,37 +54,24 @@ const fetchEventDetails = async (id: number) => {
 
 const handleSubmit = async () => {
   try {
-    const token = userStore.access_token;
-    if (!isAdmin) {
-      event.value.association_id = userStore.associationId;
-    }
-
-    if (event.value.association_id === null || event.value.user_id === null || event.value.typeEventId === null) {
-      alert('Association, User, and Event Type must be selected.');
-      return;
-    }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { organisation, ...dataToSend } = {
-        ...event.value,
-      association_id: event.value.association_id ?? 0,
-      user_id: event.value.user_id ?? 0,
-      type_event_id: event.value.typeEventId ?? 0
+    const {association, id, ...dataToSend} = {
+      ...event.value,
+      associationId: event.value.associationId,
+      typeEventId: event.value.typeEventId
     };
 
-    await eventService.updateEvent(selectedEventId.value as number, dataToSend, token);
-    alert('Event updated successfully!');
-    router.push('/');
+    await eventService.updateEvent(selectedEventId.value, dataToSend);
+    await router.push('/');
   } catch (error) {
     console.error('Error updating event:', error);
-    alert('There was an error updating the event.');
   }
 };
 
 const fetchAssociations = async () => {
   try {
-    const response = await associationService.getAllAssociations();
-    associations.value = response.data;
+    associations.value = await associationService.getAllAssociations();
   } catch (error) {
     console.error('Error fetching associations:', error);
   }
@@ -93,8 +79,7 @@ const fetchAssociations = async () => {
 
 const fetchTypeEvents = async () => {
   try {
-    const response = await typeEventService.getAllTypeEvents();
-    typeEvents.value = response.data;
+    typeEvents.value = await typeEventService.getAllTypeEvents();
   } catch (error) {
     console.error('Error fetching type events:', error);
   }
@@ -140,16 +125,17 @@ watch(selectedEventId, (newId) => {
 </script>
 
 <template>
-  <div class="form-container w-4/5 flex justify-center text-center mx-auto my-10 py-8 border border-gray-300 rounded-lg">
+  <div
+      class="form-container w-4/5 flex justify-center text-center mx-auto my-10 py-8 border border-gray-300 rounded-lg">
     <form class="w-full max-w-md" @submit.prevent="handleSubmit">
       <h2 class="text-2xl font-semibold leading-7 text-gray-900 mb-6">Update Event</h2>
 
       <div v-if="isAdmin" class="mb-4">
         <label for="event-select" class="block text-sm font-medium leading-6 text-gray-900">Select Event</label>
         <select
-          id="event-select"
-          v-model="selectedEventId"
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+            id="event-select"
+            v-model="selectedEventId"
+            class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         >
           <option value="" disabled>Select an event</option>
           <option v-for="event in events" :key="event.id" :value="event.id">
@@ -161,9 +147,9 @@ watch(selectedEventId, (newId) => {
       <div v-if="isAssociationManager" class="mb-4">
         <label for="event-select" class="block text-sm font-medium leading-6 text-gray-900">Select Event</label>
         <select
-          id="event-select"
-          v-model="selectedEventId"
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+            id="event-select"
+            v-model="selectedEventId"
+            class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         >
           <option value="" disabled>Select an event</option>
           <option v-for="event in events" :key="event.id" :value="event.id">
@@ -175,73 +161,74 @@ watch(selectedEventId, (newId) => {
       <div class="mb-4">
         <label for="titre" class="block text-sm font-medium leading-6 text-gray-900">Title</label>
         <input
-          type="text"
-          id="titre"
-          v-model="event.titre"
-          required
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+            type="text"
+            id="titre"
+            v-model="event.titre"
+            required
+            class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         />
       </div>
 
       <div class="mb-4">
         <label for="description" class="block text-sm font-medium leading-6 text-gray-900">Description</label>
         <textarea
-          id="description"
-          v-model="event.description"
-          required
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+            id="description"
+            v-model="event.description"
+            required
+            class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         ></textarea>
       </div>
 
       <div class="mb-4">
         <label for="image" class="block text-sm font-medium leading-6 text-gray-900">Image URL</label>
         <input
-          type="text"
-          id="image"
-          v-model="event.image"
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+            type="text"
+            id="image"
+            v-model="event.image"
+            class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         />
       </div>
 
       <div class="mb-4">
         <label for="date" class="block text-sm font-medium leading-6 text-gray-900">Date</label>
         <input
-          type="datetime-local"
-          id="date"
-          v-model="event.date"
-          required
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+            type="datetime-local"
+            id="date"
+            v-model="event.date"
+            required
+            class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         />
       </div>
 
       <div class="mb-4">
         <label for="localisation" class="block text-sm font-medium leading-6 text-gray-900">Localisation</label>
         <GoogleAutoCompleteComponent
-          id="localisation"
-          v-model="event.localisation"
-          :value="event.localisation"
-          required
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+            id="localisation"
+            v-model="event.localisation"
+            :value="event.localisation"
+            required
+            class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         />
       </div>
 
-         <div v-if="isAdmin" class="mb-4">
+      <div v-if="isAdmin" class="mb-4">
         <label for="association" class="block text-sm font-medium leading-6 text-gray-900">Association</label>
         <div
-          id="association"
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-gray-100"
+            id="association"
+            class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-gray-100"
         >
-          {{ event.organisation.name }}
+          {{ event.association?.name }}
         </div>
       </div>
 
       <div class="mb-4" v-if="isAdmin">
-        <label for="association_id" class="block text-sm font-medium leading-6 text-gray-900">Attribuer nouvelle Association</label>
+        <label for="associationId" class="block text-sm font-medium leading-6 text-gray-900">Attribuer nouvelle
+          Association</label>
         <select
-          id="association_id"
-          v-model="event.association_id"
-          required
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+            id="associationId"
+            v-model="event.associationId"
+            required
+            class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         >
           <option v-for="association in associations" :key="association.id" :value="association.id">
             {{ association.name }}
@@ -252,13 +239,13 @@ watch(selectedEventId, (newId) => {
       <div class="mb-4">
         <label for="type_event_id" class="block text-sm font-medium leading-6 text-gray-900">Event Type</label>
         <select
-          id="type_event_id"
-          v-model="event.typeEventId"
-          required
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+            id="type_event_id"
+            v-model="event.typeEventId"
+            required
+            class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         >
           <option v-for="typeEvent in typeEvents" :key="typeEvent.id" :value="typeEvent.id">
-            {{ typeEvent.name }} 
+            {{ typeEvent.name }}
           </option>
         </select>
       </div>
@@ -266,16 +253,16 @@ watch(selectedEventId, (newId) => {
       <div class="mb-4">
         <label for="isPublic" class="block text-sm font-medium leading-6 text-gray-900">Public Event</label>
         <input
-          type="checkbox"
-          id="isPublic"
-          v-model="event.isPublic"
-          class="mt-1"
+            type="checkbox"
+            id="isPublic"
+            v-model="event.isPublic"
+            class="mt-1"
         />
       </div>
 
       <button
-        type="submit"
-        class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
+          type="submit"
+          class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
       >
         Update Event
       </button>

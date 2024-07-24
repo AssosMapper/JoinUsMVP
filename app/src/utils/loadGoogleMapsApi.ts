@@ -2,7 +2,7 @@ let scriptLoaded = false;
 let scriptLoadingPromise: Promise<void> | null = null;
 
 export function loadGoogleMapsApi(): Promise<void> {
-  const apiKey = process.env.VUE_APP_GOOGLE_MAPS_API_KEY;
+  const apiKey = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
   if (!apiKey) {
     return Promise.reject(new Error("Google Maps API key is missing"));
   }

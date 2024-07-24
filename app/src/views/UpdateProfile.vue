@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { useUserStore } from '../store/usersStore';
+import { useUserStore } from '@/store';
 import userService from '@/services/usersService';
-import GoogleAutoCompleteComponent from '../components/GoogleAutoCompleteComponent';
 import { useNotificationStore } from '@/store/notificationStore.ts';
 
 const router = useRouter();

@@ -8,22 +8,17 @@ const route = useRoute();
 const association = ref<any>(null); // Ajustez le type selon votre interface
 const map = ref<google.maps.Map | null>(null);
 const marker = ref<google.maps.Marker | null>(null);
+const loader = ref(false);
 
 const fetchAssociationDetails = async () => {
+  loader.value = true;
   try {
-    const response = await associationService.getAssociationById(route.params.id);
-    association.value = response.data;
-    initMap();
+    association.value = await associationService.getAssociationById(route.params.id);
+    await initMap();
   } catch (error) {
     console.error('Error fetching association details:', error);
-  }
-};
-
-const getImageSrc = (associationName: string) => {
-  try {
-    return require(`../assets/associations-images/${associationName.replace(/\s+/g, '').toLowerCase()}.png`);
-  } catch (e) {
-    return require('../assets/associations-images/default.png'); 
+  } finally {
+    loader.value = false;
   }
 };
 
@@ -44,7 +39,7 @@ const initMap = async () => {
         });
 
         const icon = {
-          url: getImageSrc(association.value.name),
+          url: "/assets/associations-images/default.png",
           scaledSize: new google.maps.Size(50, 50),
           origin: new google.maps.Point(0, 0),
           anchor: new google.maps.Point(25, 25)
@@ -71,17 +66,20 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="association" class="p-6 bg-white rounded-lg shadow-md">
+  <div v-if="loader">
+    Loading...
+  </div>
+  <div v-else v-if="association" class="p-6 bg-white rounded-lg shadow-md">
     <div class="flex flex-col md:flex-row w-full">
       <div class="md:w-1/2 pr-4">
         <div class="imageContainer justify-center flex mb-4">
-          <img :src="getImageSrc(association.name)" alt="Association Image" class="w-64 h-64" />
+          <img src="/assets/associations-images/default.png" alt="Association Image" class="w-64 h-64" />
         </div>
         <div class="infosContainer">
           <h1 class="text-2xl font-bold mb-4">{{ association.name }}</h1>
           <p class="text-lg mb-2">{{ association.description }}</p>
           <p class="text-lg mb-2">Location: {{ association.localisation }}</p>
-          <p class="text-lg mb-2">Created on: {{ new Date(association.dateCreated).toLocaleDateString() }}</p>
+          <p class="text-lg mb-2">Created on: {{ new Date(association.createdAt).toLocaleDateString() }}</p>
           <p class="text-lg mb-2">Members: {{ association.members }}</p>
           <p class="text-lg mb-2">
             Types: 
@@ -94,9 +92,7 @@ onMounted(() => {
       </div>
     </div>
   </div>
-  <div v-else>
-    Loading...
-  </div>
+
 </template>
 
 <style scoped>

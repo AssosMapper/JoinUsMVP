@@ -5,6 +5,7 @@ import associationService from '@/services/associationService';
 import typeAssociationService from '@/services/typeAssociationService';
 import { useRouter } from 'vue-router';
 import GoogleAutoCompleteComponent from '../GoogleAutoCompleteComponent.vue';
+import {useNotificationStore} from "@/store/notificationStore.ts";
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -31,8 +32,7 @@ const availableTypes = ref<{ id: number, name: string }[]>([]);
 
 const fetchTypes = async () => {
   try {
-    const response = await typeAssociationService.getAllTypeAssociations();
-    availableTypes.value = response.data;
+    availableTypes.value = await typeAssociationService.getAllTypeAssociations();
   } catch (error) {
     console.error('Error fetching types:', error);
   }
@@ -40,8 +40,7 @@ const fetchTypes = async () => {
 
 const fetchAssociations = async () => {
   try {
-    const response = await associationService.getAllAssociations();
-    availableAssociations.value = response.data;
+    availableAssociations.value =  await associationService.getAllAssociations();
   } catch (error) {
     console.error('Error fetching associations:', error);
   }
@@ -49,14 +48,13 @@ const fetchAssociations = async () => {
 
 const fetchAssociationDetails = async (id: number) => {
   try {
-    const response = await associationService.getAssociationById(id);
-    const data = response.data;
+    const assoData = await associationService.getAssociationById(id);
     association.value = {
-      ...data,
-      typeIds: data.types.map((type: any) => type.id),
+      ...assoData,
+      typeIds: assoData.types.map((type: any) => type.id),
       user_id: userStore.id
     };
-    selectedTypeIds.value = data.types.map((type: any) => type.id);
+    selectedTypeIds.value = assoData.types.map((type: any) => type.id);
   } catch (error) {
     console.error('Error fetching association details:', error);
   }
@@ -64,25 +62,23 @@ const fetchAssociationDetails = async (id: number) => {
 
 const handleSubmit = async () => {
   try {
-    const token = userStore.access_token;
-    const { typeIds, ...dataWithoutTypes } = association.value;
-    
+    const { id,createdAt,updatedAt,types, ...rest } = association.value;
+
     const dataToSend = {
-      ...dataWithoutTypes,
+      ...rest,
       typeIds: selectedTypeIds.value,
-      user_id: association.value.user_id as number
+      user_id: association.value.user_id
     };
     
     delete dataToSend.users;
     
     console.log('Data to send:', JSON.stringify(dataToSend, null, 2));
     
-    await associationService.updateAssociation(association.value.id, dataToSend, token);
-    alert('Association updated successfully!');
-    router.push('/');
+    await associationService.updateAssociation(association.value.id, dataToSend);
+    useNotificationStore().showNotification('Association updated successfully', 'success');
+    await router.push('/');
   } catch (error) {
     console.error('Error updating association:', error);
-    alert('There was an error updating the association.');
   }
 };
 
