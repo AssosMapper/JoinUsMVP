@@ -93,10 +93,12 @@ const getEventsForDate = (date: Date) => {
   return eventsByDate.value[date.toDateString()] || [];
 };
 
-const getImageSrc = async (associationName: string) => {
-
-  return '';
+const getImageSrc = (associationName: string) => {
+  if (!associationName) return '/assets/associations-images/default.png';
+  const sanitizedAssociationName = associationName.replace(/\s+/g, '').toLowerCase();
+  return `/assets/associations-images/${sanitizedAssociationName}.png`;
 };
+
 
 const nextMonth = () => {
   currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, 1);
@@ -193,8 +195,8 @@ const goToEventDetails = (id: number) => {
                   <div v-else-if="!isMobile" class="flex overflow-hidden h-4 max-w-[80%] absolute right-2">
                     <img v-for="event in getEventsForDate(day)"
                          :key="event.id"
-                         src="/assets/associations-images/default.png"
-                         :alt="event.organisation?.name || 'Association'"
+                         :src="getImageSrc(event.association?.name || '')"
+                         :alt="event.association?.name || 'Association'"
                          class="w-4 h-4 mr-1"
                     />
                   </div>
