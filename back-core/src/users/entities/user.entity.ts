@@ -1,7 +1,8 @@
-import { Column, DeleteDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne } from 'typeorm';
+import {Column, DeleteDateColumn, Entity, JoinColumn, JoinTable, ManyToMany, ManyToOne, OneToMany} from 'typeorm';
 import { Association } from '../../associations/entities/association.entity';
 import { Role } from '../../roles/entities/role.entity';
 import { EntityStructure } from '../../utils/structures/entity.structure';
+import {Media} from "../../media/entities/media.entity";
 
 @Entity()
 export class User extends EntityStructure{
