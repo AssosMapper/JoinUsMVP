@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {Inject, Injectable, UnauthorizedException} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { LoginDto } from './dto/login.dto';
 import { User } from '../users/entities/user.entity';
@@ -6,12 +6,16 @@ import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { comparePassword } from '../utils/functions';
 import {RegisterDto} from "./dto/register.dto";
+import {Repository} from "typeorm";
+import {Permission} from "../permissions/entities/permission.entity";
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly userService: UsersService,
+    @Inject("USER_REPOSITORY") private readonly userRepository: Repository<User>,
+    @Inject("PERMISSION_REPOSITORY") private readonly permissionRepository: Repository<Permission>,
   ) {}
 
   /**
@@ -40,6 +44,15 @@ export class AuthService {
    */
   async login(loginDto: LoginDto) {
     const user = await this.validate(loginDto.email, loginDto.password);
+    const fullUser = await this.userRepository.findOne({
+        where: {id: user.id},
+        relations: ['roles', 'roles.permissions']
+    })
+    const allPermissions = await this.permissionRepository.find()
+    let permissions = fullUser.roles.map((role) => role.permissions);
+    let flattedPermissions = permissions
+        .flat()
+        .map((permission) => permission.permission);
     return {
       access_token: this.jwtService.sign(
         {
@@ -51,6 +64,10 @@ export class AuthService {
       ),
       expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN,
       user: user,
+      permissions:{
+        available: [...allPermissions.map(permission => permission.permission)],
+        granted: [...flattedPermissions]
+      }
     };
   }
   /**
