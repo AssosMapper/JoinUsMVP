@@ -56,11 +56,37 @@ const deleteEvent = async (id: number, token: string) => {
     return response.data;
 };
 
+const getEventsByAssociationId = async (associationId: string, limit: number) => {
+    const apiStore = useApiStore();
+    const url = `${apiStore.events.byAssociation}?associationId=${associationId}&limit=${limit}`;
+    
+    const { data, error, response } = await useApi(url).json();
+    
+    if (error.value) {
+      throw new Error(error.value);
+    }
+    return data.value;
+  };
+
+  const getEventsByDate = async (date: string, limit: number) => {
+    const apiStore = useApiStore();
+    const url = `${apiStore.events.byDate}?date=${date}&limit=${limit}`;
+  
+    const { data, error } = await useApi(url).json();
+  
+    if (error.value) {
+      throw new Error(error.value);
+    }
+    return data.value;
+  };
+
 export default {
     createEvent,
     getAllEvents,
     getEventById,
     updateEvent,
     deleteEvent,
-    getEventsByUserId
+    getEventsByUserId,
+    getEventsByAssociationId,
+    getEventsByDate
 };

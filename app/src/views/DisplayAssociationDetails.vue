@@ -1,24 +1,28 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import associationService from '@/services/associationService';
-import { loadGoogleMapsApi } from '../utils/loadGoogleMapsApi';
+import eventService from '@/services/eventService';
+import { loadGoogleMapsApi } from '@/utils/loadGoogleMapsApi';
 
 const route = useRoute();
-const association = ref<any>(null); // Ajustez le type selon votre interface
+const association = ref<any>(null);
 const map = ref<google.maps.Map | null>(null);
 const marker = ref<google.maps.Marker | null>(null);
-const loader = ref(false);
+const pastEvents = ref<any[]>([]);
+const todayEvents = ref<any[]>([]);
+const upcomingEvents = ref<any[]>([]);
 
 const fetchAssociationDetails = async () => {
-  loader.value = true;
   try {
-    association.value = await associationService.getAssociationById(route.params.id);
-    await initMap();
+    association.value = await associationService.getAssociationById(route.params.id as string);
+    const events = await eventService.getEventsByAssociationId(association.value.id, 5);
+    pastEvents.value = events.pastEvents;
+    todayEvents.value = events.todayEvents;
+    upcomingEvents.value = events.upcomingEvents;
+    initMap();
   } catch (error) {
     console.error('Error fetching association details:', error);
-  } finally {
-    loader.value = false;
   }
 };
 
@@ -66,14 +70,14 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="loader">
-    Loading...
+  <div v-if="loader" class="flex justify-center items-center h-64">
+    <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
   </div>
-  <div v-else v-if="association" class="p-6 bg-white rounded-lg shadow-md">
+  <div v-else-if="association" class="p-6 bg-white rounded-lg shadow-md">
     <div class="flex flex-col md:flex-row w-full">
       <div class="md:w-1/2 pr-4">
         <div class="imageContainer justify-center flex mb-4">
-          <img src="/assets/associations-images/default.png" alt="Association Image" class="w-64 h-64" />
+          <img src="/assets/associations-images/default.png" alt="Association Image" class="w-64 h-64 object-cover rounded-lg" />
         </div>
         <div class="infosContainer">
           <h1 class="text-2xl font-bold mb-4">{{ association.name }}</h1>
@@ -83,7 +87,7 @@ onMounted(() => {
           <p class="text-lg mb-2">Members: {{ association.members }}</p>
           <p class="text-lg mb-2">
             Types: 
-            <span v-for="type in association.types" :key="type.id" class="mr-2">{{ type.name }}</span>
+            <span v-for="type in association.types" :key="type.id" class="mr-2 inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700">{{ type.name }}</span>
           </p>
         </div>
       </div>
@@ -91,8 +95,34 @@ onMounted(() => {
         <div id="map" class="w-full h-64 md:h-full rounded-lg"></div>
       </div>
     </div>
+    <div class="mt-8">
+      <h2 class="text-xl font-bold mb-4">Today's Events:</h2>
+      <ul class="list-disc pl-5">
+        <li v-for="event in todayEvents" :key="event.id" class="mb-2">
+          <span class="font-semibold">{{ event.titre }}</span> - {{ new Date(event.date).toLocaleDateString() }}
+        </li>
+      </ul>
+      <p v-if="todayEvents.length === 0" class="text-gray-500 italic">No events today.</p>
+    </div>
+    <div class="mt-8">
+      <h2 class="text-xl font-bold mb-4">Past Events:</h2>
+      <ul class="list-disc pl-5">
+        <li v-for="event in pastEvents" :key="event.id" class="mb-2">
+          <span class="font-semibold">{{ event.titre }}</span> - {{ new Date(event.date).toLocaleDateString() }}
+        </li>
+      </ul>
+      <p v-if="pastEvents.length === 0" class="text-gray-500 italic">No past events.</p>
+    </div>
+    <div class="mt-8">
+      <h2 class="text-xl font-bold mb-4">Upcoming Events:</h2>
+      <ul class="list-disc pl-5">
+        <li v-for="event in upcomingEvents" :key="event.id" class="mb-2">
+          <span class="font-semibold">{{ event.titre }}</span> - {{ new Date(event.date).toLocaleDateString() }}
+        </li>
+      </ul>
+      <p v-if="upcomingEvents.length === 0" class="text-gray-500 italic">No upcoming events.</p>
+    </div>
   </div>
-
 </template>
 
 <style scoped>
