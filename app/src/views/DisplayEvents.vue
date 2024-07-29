@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { shallowRef, ref, onMounted, defineAsyncComponent } from 'vue';
 import eventService from '@/services/eventService';
+import EventList from '@/components/EventsList.vue';
 
 const components = {
   'Calendar': defineAsyncComponent(() => import('../components/Calendar.vue')),
@@ -24,8 +25,8 @@ const fetchEventsByDate = async (date, limit) => {
 };
 
 onMounted(() => {
-  const today = new Date().toISOString().split('T')[0]; // Date du jour au format YYYY-MM-DD
-  fetchEventsByDate(today, 5); // Charger les événements avec une limite de 5
+  const today = new Date().toISOString().split('T')[0]; 
+  fetchEventsByDate(today, 5); 
 });
 </script>
 
@@ -37,43 +38,14 @@ onMounted(() => {
     </nav>
     <component :is="components[currentView]"></component>
     
-    <div class="mt-8">
-      <h2 class="text-xl font-bold mb-4">Today's Events:</h2>
-      <ul class="list-disc pl-5">
-        <li v-for="event in todayEvents" :key="event.id" class="mb-2">
-          <span class="font-semibold">{{ event.titre }}</span> - {{ new Date(event.date).toLocaleDateString() }}
-        </li>
-      </ul>
-      <p v-if="todayEvents.length === 0" class="text-gray-500 italic">No events today.</p>
-    </div>
-    
-    <div class="mt-8">
-      <h2 class="text-xl font-bold mb-4">Past Events:</h2>
-      <ul class="list-disc pl-5">
-        <li v-for="event in pastEvents" :key="event.id" class="mb-2">
-          <span class="font-semibold">{{ event.titre }}</span> - {{ new Date(event.date).toLocaleDateString() }}
-        </li>
-      </ul>
-      <p v-if="pastEvents.length === 0" class="text-gray-500 italic">No past events.</p>
-    </div>
-    
-    <div class="mt-8">
-      <h2 class="text-xl font-bold mb-4">Upcoming Events:</h2>
-      <ul class="list-disc pl-5">
-        <li v-for="event in upcomingEvents" :key="event.id" class="mb-2">
-          <span class="font-semibold">{{ event.titre }}</span> - {{ new Date(event.date).toLocaleDateString() }}
-        </li>
-      </ul>
-      <p v-if="upcomingEvents.length === 0" class="text-gray-500 italic">No upcoming events.</p>
-    </div>
+    <EventList title="Today's Events" :events="todayEvents" />
+    <EventList title="Past Events" :events="pastEvents" />
+    <EventList title="Upcoming Events" :events="upcomingEvents" />
   </div>
 </template>
 
 <style scoped>
 .association-manager-interface {
   padding: 20px;
-}
-.mt-8 {
-  margin-top: 20px;
 }
 </style>

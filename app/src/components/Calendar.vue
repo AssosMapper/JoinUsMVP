@@ -214,7 +214,7 @@ const goToEventDetails = (id: number) => {
                  class="justify-center w-full border-b pb-2 border-gray-400 border-dashed flex">
               <div class="flex justify-center items-center">
                 <img src="/assets/associations-images/default.png"
-                     @click="goToAssociationDetails(event.organisation?.id)"
+                     @click="goToAssociationDetails(event.association?.id)"
                      :alt="event.organisation?.name || 'Association'"
                      class="w-12 h-12 mr-4 clickable"
                 />
