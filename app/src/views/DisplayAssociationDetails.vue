@@ -5,6 +5,7 @@ import associationService from '@/services/associationService';
 import eventService from '@/services/eventService';
 import { loadGoogleMapsApi } from '@/utils/loadGoogleMapsApi';
 import EventList from '@/components/EventsList.vue';
+import Loader from '@/components/Loader.vue';
 
 const route = useRoute();
 const association = ref<any>(null);
@@ -13,8 +14,10 @@ const marker = ref<google.maps.Marker | null>(null);
 const pastEvents = ref<any[]>([]);
 const todayEvents = ref<any[]>([]);
 const upcomingEvents = ref<any[]>([]);
+const loader = ref(false);  
 
 const fetchAssociationDetails = async () => {
+  loader.value = true;  
   try {
     association.value = await associationService.getAssociationById(route.params.id as string);
     const events = await eventService.getEventsByAssociationId(association.value.id, 5);
@@ -22,9 +25,10 @@ const fetchAssociationDetails = async () => {
     todayEvents.value = events.todayEvents;
     upcomingEvents.value = events.upcomingEvents;
     initMap();
+    loader.value = false;  
   } catch (error) {
     console.error('Error fetching association details:', error);
-  }
+  } 
 };
 
 const initMap = async () => {
@@ -62,7 +66,7 @@ const initMap = async () => {
     });
   } catch (error) {
     console.error('Error loading Google Maps API:', error);
-  }
+  } 
 };
 
 onMounted(() => {
@@ -71,9 +75,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="loader" class="flex justify-center items-center h-64">
-    <div class="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-gray-900"></div>
-  </div>
+  <Loader v-if="loader" />
   <div v-else-if="association" class="p-6 bg-white rounded-lg shadow-md">
     <div class="flex flex-col md:flex-row w-full">
       <div class="md:w-1/2 pr-4">
