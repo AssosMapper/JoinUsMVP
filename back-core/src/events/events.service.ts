@@ -6,6 +6,7 @@ import { CreateEventDto } from './dto/create-events.dto';
 import { UpdateEventDto } from './dto/update-events.dto';
 import { User } from '../users/entities/user.entity';
 import { TypeEvents } from '../type-events/entities/type-events.entity';
+import { FilterEventsDto } from './dto/filter-events.dto';
 
 @Injectable()
 export class EventsService {
@@ -91,5 +92,46 @@ export class EventsService {
 
   async remove(id: string): Promise<void> {
     await this.eventsRepository.delete(id);
+  }
+
+  async findEventsByAssociationId(associationId: string, limit: number): Promise<{ pastEvents: Event[], todayEvents: Event[], upcomingEvents: Event[] }> {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const endOfToday = new Date();
+    endOfToday.setHours(23, 59, 59, 999);
+
+    const events = await this.eventsRepository.createQueryBuilder('event')
+      .leftJoinAndSelect('event.association', 'association')
+      .leftJoinAndSelect('event.user', 'user')
+      .leftJoinAndSelect('event.typeEvent', 'typeEvent')
+      .where('association.id = :associationId', { associationId })
+      .orderBy('event.date', 'ASC')
+      .getMany();
+
+    const pastEvents = events.filter(event => event.date < today).slice(0, limit);
+    const todayEvents = events.filter(event => event.date >= today && event.date <= endOfToday).slice(0, limit);
+    const upcomingEvents = events.filter(event => event.date > endOfToday).slice(0, limit);
+
+    return { pastEvents, todayEvents, upcomingEvents };
+  }
+
+  async findEventsByDate(date: string, limit: number): Promise<{ pastEvents: Event[], todayEvents: Event[], upcomingEvents: Event[] }> {
+    const targetDate = new Date(date);
+    targetDate.setHours(0, 0, 0, 0);
+    const endOfTargetDate = new Date(date);
+    endOfTargetDate.setHours(23, 59, 59, 999);
+
+    const events = await this.eventsRepository.createQueryBuilder('event')
+      .leftJoinAndSelect('event.association', 'association')
+      .leftJoinAndSelect('event.user', 'user')
+      .leftJoinAndSelect('event.typeEvent', 'typeEvent')
+      .orderBy('event.date', 'ASC')
+      .getMany();
+
+    const pastEvents = events.filter(event => event.date < targetDate).slice(0, limit);
+    const todayEvents = events.filter(event => event.date >= targetDate && event.date <= endOfTargetDate).slice(0, limit);
+    const upcomingEvents = events.filter(event => event.date > endOfTargetDate).slice(0, limit);
+
+    return { pastEvents, todayEvents, upcomingEvents };
   }
 }

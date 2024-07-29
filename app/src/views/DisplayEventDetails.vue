@@ -74,7 +74,6 @@ onMounted(() => {
         <p class="text-lg mb-2">Date: {{ new Date(event.date).toLocaleDateString() }}</p>
         <p class="text-lg mb-2">Time: {{ new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}</p>
         <p class="text-lg mb-2">Public: {{ event.isPublic ? 'Yes' : 'No' }}</p>
-        <!-- Ajoutez d'autres détails si nécessaire -->
       </div>
       <div class="md:w-1/2 mt-4 md:mt-0">
         <div id="map" class="w-full h-64 md:h-full rounded-lg"></div>
