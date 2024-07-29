@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router';
 import associationService from '@/services/associationService';
 import eventService from '@/services/eventService';
 import { loadGoogleMapsApi } from '@/utils/loadGoogleMapsApi';
+import EventList from '@/components/EventsList.vue';
 
 const route = useRoute();
 const association = ref<any>(null);
@@ -95,33 +96,9 @@ onMounted(() => {
         <div id="map" class="w-full h-64 md:h-full rounded-lg"></div>
       </div>
     </div>
-    <div class="mt-8">
-      <h2 class="text-xl font-bold mb-4">Today's Events:</h2>
-      <ul class="list-disc pl-5">
-        <li v-for="event in todayEvents" :key="event.id" class="mb-2">
-          <span class="font-semibold">{{ event.titre }}</span> - {{ new Date(event.date).toLocaleDateString() }}
-        </li>
-      </ul>
-      <p v-if="todayEvents.length === 0" class="text-gray-500 italic">No events today.</p>
-    </div>
-    <div class="mt-8">
-      <h2 class="text-xl font-bold mb-4">Past Events:</h2>
-      <ul class="list-disc pl-5">
-        <li v-for="event in pastEvents" :key="event.id" class="mb-2">
-          <span class="font-semibold">{{ event.titre }}</span> - {{ new Date(event.date).toLocaleDateString() }}
-        </li>
-      </ul>
-      <p v-if="pastEvents.length === 0" class="text-gray-500 italic">No past events.</p>
-    </div>
-    <div class="mt-8">
-      <h2 class="text-xl font-bold mb-4">Upcoming Events:</h2>
-      <ul class="list-disc pl-5">
-        <li v-for="event in upcomingEvents" :key="event.id" class="mb-2">
-          <span class="font-semibold">{{ event.titre }}</span> - {{ new Date(event.date).toLocaleDateString() }}
-        </li>
-      </ul>
-      <p v-if="upcomingEvents.length === 0" class="text-gray-500 italic">No upcoming events.</p>
-    </div>
+    <EventList title="Today's Events" :events="todayEvents" />
+    <EventList title="Past Events" :events="pastEvents" />
+    <EventList title="Upcoming Events" :events="upcomingEvents" />
   </div>
 </template>
 
