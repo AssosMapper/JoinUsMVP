@@ -1,25 +1,34 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useRoute } from 'vue-router';
 import associationService from '@/services/associationService';
-import { loadGoogleMapsApi } from '../utils/loadGoogleMapsApi';
+import eventService from '@/services/eventService';
+import { loadGoogleMapsApi } from '@/utils/loadGoogleMapsApi';
+import EventList from '@/components/EventsList.vue';
+import Loader from '@/components/Loader.vue';
 
 const route = useRoute();
-const association = ref<any>(null); // Ajustez le type selon votre interface
+const association = ref<any>(null);
 const map = ref<google.maps.Map | null>(null);
 const marker = ref<google.maps.Marker | null>(null);
-const loader = ref(false);
+const pastEvents = ref<any[]>([]);
+const todayEvents = ref<any[]>([]);
+const upcomingEvents = ref<any[]>([]);
+const loader = ref(false);  
 
 const fetchAssociationDetails = async () => {
-  loader.value = true;
+  loader.value = true;  
   try {
-    association.value = await associationService.getAssociationById(route.params.id);
-    await initMap();
+    association.value = await associationService.getAssociationById(route.params.id as string);
+    const events = await eventService.getEventsByAssociationId(association.value.id, 5);
+    pastEvents.value = events.pastEvents;
+    todayEvents.value = events.todayEvents;
+    upcomingEvents.value = events.upcomingEvents;
+    initMap();
+    loader.value = false;  
   } catch (error) {
     console.error('Error fetching association details:', error);
-  } finally {
-    loader.value = false;
-  }
+  } 
 };
 
 const initMap = async () => {
@@ -57,7 +66,7 @@ const initMap = async () => {
     });
   } catch (error) {
     console.error('Error loading Google Maps API:', error);
-  }
+  } 
 };
 
 onMounted(() => {
@@ -66,14 +75,12 @@ onMounted(() => {
 </script>
 
 <template>
-  <div v-if="loader">
-    Loading...
-  </div>
-  <div v-else v-if="association" class="p-6 bg-white rounded-lg shadow-md">
+  <Loader v-if="loader" />
+  <div v-else-if="association" class="p-6 bg-white rounded-lg shadow-md">
     <div class="flex flex-col md:flex-row w-full">
       <div class="md:w-1/2 pr-4">
         <div class="imageContainer justify-center flex mb-4">
-          <img src="/assets/associations-images/default.png" alt="Association Image" class="w-64 h-64" />
+          <img src="/assets/associations-images/default.png" alt="Association Image" class="w-64 h-64 object-cover rounded-lg" />
         </div>
         <div class="infosContainer">
           <h1 class="text-2xl font-bold mb-4">{{ association.name }}</h1>
@@ -83,7 +90,7 @@ onMounted(() => {
           <p class="text-lg mb-2">Members: {{ association.members }}</p>
           <p class="text-lg mb-2">
             Types: 
-            <span v-for="type in association.types" :key="type.id" class="mr-2">{{ type.name }}</span>
+            <span v-for="type in association.types" :key="type.id" class="mr-2 inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700">{{ type.name }}</span>
           </p>
         </div>
       </div>
@@ -91,8 +98,10 @@ onMounted(() => {
         <div id="map" class="w-full h-64 md:h-full rounded-lg"></div>
       </div>
     </div>
+    <EventList title="Today's Events" :events="todayEvents" />
+    <EventList title="Past Events" :events="pastEvents" />
+    <EventList title="Upcoming Events" :events="upcomingEvents" />
   </div>
-
 </template>
 
 <style scoped>
