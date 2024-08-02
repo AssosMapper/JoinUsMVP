@@ -16,20 +16,35 @@ export class RoleSeedService {
 
   async seed() {
     await this.drop();
-    let superPermission = await this.permissionRepository.findOne({
+
+    const superPermission = await this.permissionRepository.findOne({
       where: { permission: '*' },
     });
+
     if (!superPermission) {
       console.log('Permission * not found');
       return;
     }
-    //create roles
-    let roles = [] as Array<Role>;
+
+    const allPermissions = await this.permissionRepository.find();
+    const excludedPermissions = ['typeevents', 'typeassociation', 'user'];
+    const associationManagerPermissions = allPermissions.filter(
+      (perm) => !excludedPermissions.some((excl) => perm.permission.startsWith(excl)),
+    );
+
+    // Create roles
+    const roles = [] as Array<Role>;
+
     let role = new Role();
     role.name = 'SuperAdmin';
-    // assign permission with name * to SuperAdmin
     role.permissions = [superPermission];
     roles.push(role);
+
+    role = new Role();
+    role.name = 'AssociationManager';
+    role.permissions = associationManagerPermissions;
+    roles.push(role);
+
     console.log('Seeding roles...');
     await this.roleRepository.save(roles);
     console.log('Seeded roles...');
