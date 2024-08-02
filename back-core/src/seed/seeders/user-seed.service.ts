@@ -1,4 +1,3 @@
-// seed/user.seed.service.ts
 import { Inject, Injectable } from '@nestjs/common';
 import { User } from '../../users/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -6,7 +5,6 @@ import { Role } from '../../roles/entities/role.entity';
 import { OnDev } from '../../utils/decorators/on-dev.decorator';
 import { faker } from '@faker-js/faker';
 import { hashPassword } from '../../utils/functions';
-
 
 @Injectable()
 export class UserSeedService {
@@ -30,22 +28,39 @@ export class UserSeedService {
       user.password = faker.internet.password();
       users.push(user);
     }
-    //create custom user
-    //find role SuperAdmin
-    let superAdminRole = await this.roleRepository.findOne({
+
+    // Create SuperAdmin user
+    const superAdminRole = await this.roleRepository.findOne({
       where: { name: 'SuperAdmin' },
     });
     if (!superAdminRole) {
       console.log('Role SuperAdmin not found');
       return;
     }
-    const user = new User();
+    let user = new User();
     user.first_name = 'Admin';
     user.last_name = 'Admin';
     user.email = 'admin@test.com';
     user.password = await hashPassword('Password123!');
     user.roles = [superAdminRole];
     users.push(user);
+
+    // Create AssociationManager user
+    const associationManagerRole = await this.roleRepository.findOne({
+      where: { name: 'AssociationManager' },
+    });
+    if (!associationManagerRole) {
+      console.log('Role AssociationManager not found');
+      return;
+    }
+    user = new User();
+    user.first_name = 'Manager';
+    user.last_name = 'Association';
+    user.email = 'associationmanager@test.com';
+    user.password = await hashPassword('Password123!');
+    user.roles = [associationManagerRole];
+    users.push(user);
+
     console.log('Seeding users...');
     await this.userRepository.save(users);
     console.log('Seeded users...');
