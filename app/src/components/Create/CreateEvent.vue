@@ -13,6 +13,7 @@ const notificationStore = useNotificationStore();
 const router = useRouter();
 
 const isAdmin = userStore.isAdmin;
+const isAssociationManager = userStore.isAssociationManager;
 
 const event = ref({
   titre: '',
@@ -23,6 +24,7 @@ const event = ref({
   associationId: null as string | null,
   typeEventId: null as string | null,
   isPublic: true,
+  isValid: false, // New field for event validation
 });
 
 const associations = ref<{ id: number, name: string }[]>([]);
@@ -30,10 +32,12 @@ const typeEvents = ref<{ id: number, name: string }[]>([]);
 
 const handleSubmit = async () => {
   try {
+    // Déterminer si l'événement est validé ou non en fonction du rôle de l'utilisateur
+    event.value.isValid = isAdmin || isAssociationManager;
     const dataToSend = {
       ...event.value,
       associationId: event.value.associationId,
-      typeEventId: event.value.typeEventId
+      typeEventId: event.value.typeEventId,
     };
     await eventService.createEvent(dataToSend);
     notificationStore.showNotification("Evenement créé avec succès !", "success");
@@ -125,7 +129,7 @@ onMounted(() => {
         />
       </div>
 
-      <div class="mb-4" v-if="isAdmin">
+      <div class="mb-4" v-if="isAdmin || isAssociationManager">
         <label for="association_id" class="block text-sm font-medium leading-6 text-gray-900">Association</label>
         <select
           id="association_id"
@@ -153,16 +157,6 @@ onMounted(() => {
         </select>
       </div>
 
-      <div class="mb-4">
-        <label for="isPublic" class="block text-sm font-medium leading-6 text-gray-900">Public Event</label>
-        <input
-          type="checkbox"
-          id="isPublic"
-          v-model="event.isPublic"
-          class="mt-1"
-        />
-      </div>
-
       <button
         type="submit"
         class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
@@ -174,5 +168,4 @@ onMounted(() => {
 </template>
 
 <style scoped>
-/* Add any component-specific styles here */
 </style>

@@ -28,4 +28,7 @@ export class CreateEventDto {
 
   @IsBoolean()
   isPublic: boolean;
+
+  @IsBoolean()  
+  isValid?: boolean;
 }

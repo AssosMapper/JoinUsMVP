@@ -36,4 +36,7 @@ export class Event extends EntityStructure{
 
   @Column()
   isPublic: boolean;
+
+  @Column({ default: false }) 
+  isValid: boolean;
 }

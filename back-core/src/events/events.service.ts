@@ -63,15 +63,17 @@ export class EventsService {
     event.association = association;
     event.user = user;
     event.typeEvent = typeEvent;
-    event.isPublic = true;
+    event.isPublic = createEventDto.isPublic;
+    event.isValid = createEventDto.isValid;
 
     return this.eventsRepository.save(event);
   }
 
   async update(id: string, updateEventDto: UpdateEventDto): Promise<Event> {
     const existingEvent = await this.findOne(id);
-    if (!existingEvent)
+    if (!existingEvent) {
       throw new NotFoundException(`Event with ID ${id} not found`);
+    }
     if (updateEventDto.associationId) {
       const association = await this.associationRepository.findOne({ where: { id: updateEventDto.associationId } });
       if (!association) {
@@ -87,7 +89,7 @@ export class EventsService {
       existingEvent.typeEvent = typeEvent;
     }
     Object.assign(existingEvent, updateEventDto);
-   return await this.eventsRepository.save(existingEvent);
+    return await this.eventsRepository.save(existingEvent);
   }
 
   async remove(id: string): Promise<void> {
@@ -105,6 +107,7 @@ export class EventsService {
       .leftJoinAndSelect('event.user', 'user')
       .leftJoinAndSelect('event.typeEvent', 'typeEvent')
       .where('association.id = :associationId', { associationId })
+      .andWhere('event.isValid = true')  // Only return valid events
       .orderBy('event.date', 'ASC')
       .getMany();
 
@@ -125,6 +128,7 @@ export class EventsService {
       .leftJoinAndSelect('event.association', 'association')
       .leftJoinAndSelect('event.user', 'user')
       .leftJoinAndSelect('event.typeEvent', 'typeEvent')
+      .andWhere('event.isValid = true')  // Only return valid events
       .orderBy('event.date', 'ASC')
       .getMany();
 

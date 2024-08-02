@@ -18,10 +18,10 @@ export const useUserStore = defineStore('user', {
             return !!this.isAuth;
         },
         isAdmin(): boolean {
-            return true;
+            return false;
         },
         isAssociationManager(): boolean {
-            return true;
+            return false;
         },
         fullName(): string {
             return `${this.user.first_name} ${this.user.last_name}`.trim();
