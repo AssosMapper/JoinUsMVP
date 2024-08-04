@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, Req } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { CurrentUserId } from 'src/utils/decorators/current-user-id.decorator';
 
 @Controller('users')
 export class UsersController {
@@ -13,6 +14,13 @@ export class UsersController {
   @Get()
   findAll(): Promise<User[]> {
     return this.usersService.findAll();
+  }
+
+  @Get('me')
+  @BearAuthToken()
+  @ApiBearerAuth()
+  async getProfile(@Req() req: any): Promise<User> {
+    return this.usersService.findOne(req.user.userId);
   }
 
   @Get(':id')

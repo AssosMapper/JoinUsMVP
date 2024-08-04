@@ -27,8 +27,22 @@ export const logout = () => {
   userStore.logout();
 };
 
+export const getProfile = async (token: string) => {
+  const urls = useApiStore();
+  const { data, error } = await useApi(urls.security.auth.profile, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  }).get().json();
+  if (error.value) {
+    throw new Error(error.value);
+  }
+  return data.value;
+};
+
 export default {
   login,
   logout,
-  register
+  register,
+  getProfile
 };

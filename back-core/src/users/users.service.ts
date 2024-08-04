@@ -23,16 +23,20 @@ export class UsersService {
         return this.usersRepository.find();
     }
 
-    async findOne(id: string): Promise<User | undefined> {
+    async findOne(id: string): Promise<User> {
+        if (id === 'me') {
+          console.error('Invalid id "me" passed to findOne');
+          throw new NotFoundException('Invalid user ID');
+        }
         const user = await this.usersRepository.findOne({
-            where: {id},
-            relations: ['roles'],
+          where: { id },
+          relations: ['roles'],
         });
         if (!user) {
-            throw new NotFoundException(`User with ID ${id} not found`);
+          throw new NotFoundException(`User with ID ${id} not found`);
         }
         return user;
-    }
+      }
 
     async create(createUserDto: CreateUserDto): Promise<User> {
 
