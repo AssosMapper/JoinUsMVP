@@ -44,12 +44,24 @@ export const useUserStore = defineStore('user', {
         logout() {
             this.$reset();
         },
+        // async refetchUser() {
+        //     await this.login({
+        //         email: "admin@test.com",
+        //         password: "Password123!"
+        //     });
+        // },
         async refetchUser() {
-            await this.login({
-                email: "admin@test.com",
-                password: "Password123!"
-            });
-        },
+            this.loader = true;
+            try {
+              const data = await authService.getProfile(this.token);
+              this.user = data;
+            } catch (e) {
+              throw new Error(e.message);
+            } finally {
+              this.loader = false;
+            }
+          },
+      
         async register(register: IRegister) {
             this.loader = true;
             try {
@@ -65,14 +77,11 @@ export const useUserStore = defineStore('user', {
         storage: sessionStorage,
         paths: ['token'],
         async afterRestore(context) {
-            if (context.store.$state.token) {
-                const data = await authService.login({
-                    email: "admin@test.com",
-                    password: "Password123!"
-                });
-                context.store.$state.user = data.user;
-                context.store.$state.isAuth = true;
-            }
+          if (context.store.$state.token) {
+            const data = await authService.getProfile(context.store.$state.token);
+            context.store.$state.user = data;
+            context.store.$state.isAuth = true;
+          }
         },
     }
 });
