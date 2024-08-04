@@ -16,7 +16,6 @@ async function bootstrap() {
     optionsSuccessStatus: 204,
   });
 
-  // Utilisez morgan pour la journalisation HTTP
   app.use(morgan('dev'));
 
   /**

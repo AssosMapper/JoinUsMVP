@@ -44,12 +44,6 @@ export const useUserStore = defineStore('user', {
         logout() {
             this.$reset();
         },
-        // async refetchUser() {
-        //     await this.login({
-        //         email: "admin@test.com",
-        //         password: "Password123!"
-        //     });
-        // },
         async refetchUser() {
             this.loader = true;
             try {
