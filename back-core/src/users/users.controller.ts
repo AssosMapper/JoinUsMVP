@@ -5,7 +5,6 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { CurrentUserId } from 'src/utils/decorators/current-user-id.decorator';
 
 @Controller('users')
 export class UsersController {
