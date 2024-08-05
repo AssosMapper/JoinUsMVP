@@ -32,6 +32,10 @@ export class RoleSeedService {
       (perm) => !excludedPermissions.some((excl) => perm.permission.startsWith(excl)),
     );
 
+    const eventPermissions = allPermissions.filter(
+      (perm) => perm.permission.startsWith('events'),
+    );
+
     // Create roles
     const roles = [] as Array<Role>;
 
@@ -43,6 +47,11 @@ export class RoleSeedService {
     role = new Role();
     role.name = 'AssociationManager';
     role.permissions = associationManagerPermissions;
+    roles.push(role);
+
+    role = new Role();
+    role.name = 'EventsManager';
+    role.permissions = eventPermissions;
     roles.push(role);
 
     console.log('Seeding roles...');

@@ -61,6 +61,22 @@ export class UserSeedService {
     user.roles = [associationManagerRole];
     users.push(user);
 
+    // Create EventsManager user
+    const eventsManagerRole = await this.roleRepository.findOne({
+      where: { name: 'EventsManager' },
+    });
+    if (!eventsManagerRole) {
+      console.log('Role EventsManager not found');
+      return;
+    }
+    user = new User();
+    user.first_name = 'Events';
+    user.last_name = 'Manager';
+    user.email = 'eventsmanager@test.com';
+    user.password = await hashPassword('Password123!');
+    user.roles = [eventsManagerRole];
+    users.push(user);
+
     console.log('Seeding users...');
     await this.userRepository.save(users);
     console.log('Seeded users...');
