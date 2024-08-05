@@ -1,7 +1,6 @@
-import {defineStore} from 'pinia';
-import {ICredentials, IRegister} from "@/types/security.types.ts";
+import { defineStore } from 'pinia';
+import { ICredentials, IRegister } from "@/types/security.types.ts";
 import authService from "@/services/authService.ts";
-
 
 export const useUserStore = defineStore('user', {
     state() {
@@ -9,19 +8,20 @@ export const useUserStore = defineStore('user', {
             loader: false,
             token: '',
             isAuth: false,
-            user: {},
+            user: {
+                roles: [] 
+            },
         };
     },
     getters: {
-        //TODO: gerer les bons getters
         isAuthenticated(): boolean {
             return !!this.isAuth;
         },
         isAdmin(): boolean {
-            return false;
+            return this.user.roles?.some(role => role.name === 'SuperAdmin') ?? false;
         },
         isAssociationManager(): boolean {
-            return false;
+            return this.user.roles?.some(role => role.name === 'AssociationManager') ?? false;
         },
         fullName(): string {
             return `${this.user.first_name} ${this.user.last_name}`.trim();
@@ -31,32 +31,37 @@ export const useUserStore = defineStore('user', {
         async login(credentials: ICredentials) {
             this.loader = true;
             try {
-                const data = await authService.login(credentials)
+                const data = await authService.login(credentials);
                 this.token = data?.access_token;
                 this.user = data?.user;
                 this.isAuth = true;
             } catch (e) {
-                throw new Error(e.message)
+                throw new Error(e.message);
             } finally {
                 this.loader = false;
             }
         },
         logout() {
-            // useSessionStorage('user').clear();
             this.$reset();
         },
         async refetchUser() {
-            await this.login({
-                email: "admin@test.com",
-                password: "Password123!"
-            })
-        },
-        async register(register: IRegister){
             this.loader = true;
             try {
-                await authService.register(register)
+              const data = await authService.getProfile(this.token);
+              this.user = data;
             } catch (e) {
-                throw new Error("Inscription failed")
+              throw new Error(e.message);
+            } finally {
+              this.loader = false;
+            }
+          },
+      
+        async register(register: IRegister) {
+            this.loader = true;
+            try {
+                await authService.register(register);
+            } catch (e) {
+                throw new Error("Inscription failed");
             } finally {
                 this.loader = false;
             }
@@ -66,14 +71,11 @@ export const useUserStore = defineStore('user', {
         storage: sessionStorage,
         paths: ['token'],
         async afterRestore(context) {
-            if (context.store.$state.token) {
-                const data = await authService.login({
-                    email: "admin@test.com",
-                    password: "Password123!"
-                })
-                context.store.$state.user = data.user;
-                context.store.$state.isAuth = true;
-            }
+          if (context.store.$state.token) {
+            const data = await authService.getProfile(context.store.$state.token);
+            context.store.$state.user = data;
+            context.store.$state.isAuth = true;
+          }
         },
     }
 });

@@ -2,6 +2,8 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
+import * as morgan from 'morgan';
+import * as dotenv from 'dotenv';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -14,6 +16,9 @@ async function bootstrap() {
     preflightContinue: false,
     optionsSuccessStatus: 204,
   });
+
+  app.use(morgan(process.env.LOG_LEVEL));
+
   /**
    * The ValidationPipe is a built-in pipe that uses the class-validator library to perform validation on the incoming request payload.
    */
@@ -24,12 +29,14 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
+
   /**
    * Using versioning
    */
   app.enableVersioning({
     type: VersioningType.URI,
   });
+
   /**
    * Documentation using Swagger
    */
