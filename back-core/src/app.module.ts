@@ -23,6 +23,7 @@ import { LoggingMiddleware } from './utils/middlewares/logging.middleware';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AllExceptionsFilter } from './utils/all-exceptions.filter';
 import { LoggingInterceptor } from './utils/logging.interceptor';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
@@ -39,7 +40,8 @@ import { LoggingInterceptor } from './utils/logging.interceptor';
     PermissionsModule,
     AuthModule,
     RolesModule,
-    MediaModule
+    MediaModule,
+    ProfileModule
   ],
   providers: [
     {
