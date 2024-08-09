@@ -24,7 +24,7 @@ const event = ref({
   associationId: null as string | null,
   typeEventId: null as string | null,
   isPublic: true,
-  isValid: false, // New field for event validation
+  isValid: false,
 });
 
 const associations = ref<{ id: number, name: string }[]>([]);
@@ -32,7 +32,6 @@ const typeEvents = ref<{ id: number, name: string }[]>([]);
 
 const handleSubmit = async () => {
   try {
-    // Déterminer si l'événement est validé ou non en fonction du rôle de l'utilisateur
     event.value.isValid = isAdmin || isAssociationManager;
     const dataToSend = {
       ...event.value,

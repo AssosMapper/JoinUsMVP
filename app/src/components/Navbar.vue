@@ -11,6 +11,7 @@ const first_name = computed(() => userStore.first_name)
 const isAuthenticated = computed(() => userStore.isAuthenticated)
 const isAdmin = computed(() => userStore.isAdmin)
 const isAssociationManager = computed(() => userStore.isAssociationManager)
+const isEventsManager = computed(() => userStore.isEventsManager)
 
 const logout = () => {
   userStore.logout()
@@ -30,6 +31,9 @@ const logout = () => {
     </router-link>
     <router-link v-if="(isAdmin || isAssociationManager) && isAuthenticated" to="/associationManagerInterface"
                  class="cursor-pointer">Association Interface |
+    </router-link>
+    <router-link v-if="(isAdmin || isEventsManager) && isAuthenticated" to="/eventsManagerInterface"
+                 class="cursor-pointer">Events Interface |
     </router-link>
     <template v-if="isAuthenticated">
       <span @click.prevent="logout" class="cursor-pointer">Logout</span> |

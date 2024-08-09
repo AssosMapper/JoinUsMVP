@@ -36,6 +36,17 @@ export class RoleSeedService {
       (perm) => perm.permission.startsWith('events'),
     );
 
+    const userPermissions = [...eventPermissions];
+    
+    // Add permission for updating roles to user role
+    const roleUpdatePermission = await this.permissionRepository.findOne({
+      where: { permission: 'role:update' },
+    });
+
+    if (roleUpdatePermission) {
+      userPermissions.push(roleUpdatePermission);
+    }
+
     // Create roles
     const roles = [] as Array<Role>;
 
@@ -52,6 +63,11 @@ export class RoleSeedService {
     role = new Role();
     role.name = 'EventsManager';
     role.permissions = eventPermissions;
+    roles.push(role);
+
+    role = new Role();
+    role.name = 'User';
+    role.permissions = userPermissions;
     roles.push(role);
 
     console.log('Seeding roles...');

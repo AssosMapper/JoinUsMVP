@@ -104,22 +104,32 @@ export class UsersService {
         await this.usersRepository.delete(id);
     }
 
-    async register(registerDto: RegisterDto) {
-        const existingUser = await this.usersRepository.findOne({
-            where: {email: registerDto.email},
-        });
-        if(existingUser){
-            throw new ConflictException(`User with email ${registerDto.email} already exists`);
-        }
-        const hashedPassword = await hashPassword(registerDto.password);
-        const newUser = new User();
-        newUser.password = hashedPassword;
-        newUser.email = registerDto.email;
-        newUser.first_name = registerDto.firstName;
-        newUser.last_name = registerDto.lastName;
-        newUser.phone = registerDto.phone;
-        newUser.localisation = registerDto.localisation;
-        newUser.image = registerDto.image;
-        return this.usersRepository.save(newUser);
+ async register(registerDto: RegisterDto) {
+    const existingUser = await this.usersRepository.findOne({
+        where: { email: registerDto.email },
+    });
+    if(existingUser){
+        throw new ConflictException(`User with email ${registerDto.email} already exists`);
     }
+
+    const hashedPassword = await hashPassword(registerDto.password);
+    
+    const userRole = await this.rolesRepository.findOne({ where: { name: 'User' } });
+    if (!userRole) {
+        throw new NotFoundException(`Role 'User' not found`);
+    }
+
+    const newUser = new User();
+    newUser.password = hashedPassword;
+    newUser.email = registerDto.email;
+    newUser.first_name = registerDto.firstName;
+    newUser.last_name = registerDto.lastName;
+    newUser.phone = registerDto.phone;
+    newUser.localisation = registerDto.localisation;
+    newUser.image = registerDto.image;
+    newUser.roles = [userRole]; 
+    
+    return this.usersRepository.save(newUser);
+}
+
 }

@@ -23,6 +23,12 @@ const goToDetails = (id: number) => {
   router.push({ name: 'AssociationDetails', params: { id } });
 };
 
+const getImageSrc = (associationName: string) => {
+  if (!associationName) return '/assets/associations-images/default.png';
+  const sanitizedAssociationName = associationName.replace(/\s+/g, '').toLowerCase();
+  return `/assets/associations-images/${sanitizedAssociationName}.png`;
+};
+
 onMounted(() => {
   fetchAssociations();
 });
@@ -32,7 +38,7 @@ onMounted(() => {
   <div class="associations-container">
     <div v-for="association in associations" :key="association.id" class="relative flex flex-col mt-6 text-gray-700 bg-white shadow-md bg-clip-border rounded-xl w-96">
       <div class="relative flex justify-center h-56 mx-4 -mt-6 overflow-hidden text-white shadow-lg bg-clip-border rounded-xl bg-blue-gray-500 shadow-blue-gray-500/40">
-        <img src="/assets/associations-images/default.png" alt="card-image" class="height-full" />
+        <img :src=getImageSrc(association.name) alt="Association Image" class="w-64 h-64 object-cover rounded-lg" />
       </div>
       <div class="p-6">
         <h5 class="block mb-2 font-sans text-xl antialiased font-semibold leading-snug tracking-normal text-blue-gray-900">
