@@ -2,18 +2,22 @@
 import { shallowRef, defineAsyncComponent } from 'vue'
 
 const components = {
-  'ManageEvents': defineAsyncComponent(() => import('../components/Update/UpdateAssociation.vue'))
+  'CreateEvent': defineAsyncComponent(() => import('../components/Create/CreateEvent.vue')),
+  'UpdateEvent': defineAsyncComponent(() => import('../components/Update/UpdateEvent.vue')),
+  'UpdateAssociation': defineAsyncComponent(() => import('../components/Update/UpdateAssociation.vue'))
 }
 
 const currentView = shallowRef('CreateEvent')
 </script>
 
 <template>
-  <div class="events-manager-interface">
-    <h1>Interface events manager</h1>
+  <div class="association-manager-interface">
+    <h1>Interface association manager</h1>
     
     <nav>
-      <button @click="currentView = 'ManageEvents'">Manage Events</button> |
+      <button @click="currentView = 'CreateEvent'">Create Event</button> |
+      <button @click="currentView = 'UpdateEvent'">Update Event</button> |
+      <button @click="currentView = 'UpdateAssociation'">Update Association</button> |
     </nav>
 
     <component :is="components[currentView]"></component>

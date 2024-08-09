@@ -94,7 +94,7 @@ router.beforeEach((to, from, next) => {
         // TODO : envoyer vers page 404
         next('/login');
         alert("Vous devez être gestionnaire d'association pour accéder à cette page. Veuillez vous connecter.");
-    } else if (to.meta.requiresEventsManager && (!isAuthenticated || (!isAssociationManager && !isAdmin))) {
+    } else if (to.meta.requiresEventsManager && (!isAuthenticated || (!isEventsManager && !isAdmin))) {
         // TODO : envoyer vers page 404
         next('/login');
         alert("Vous devez être gestionnaire d'events pour accéder à cette page. Veuillez vous connecter.");
