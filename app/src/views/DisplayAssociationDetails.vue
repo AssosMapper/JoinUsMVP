@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import associationService from '@/services/associationService';
 import eventService from '@/services/eventService';
@@ -14,29 +14,42 @@ const marker = ref<google.maps.Marker | null>(null);
 const pastEvents = ref<any[]>([]);
 const todayEvents = ref<any[]>([]);
 const upcomingEvents = ref<any[]>([]);
-const loader = ref(false);  
+const loader = ref(false);
 
 const fetchAssociationDetails = async () => {
-  loader.value = true;  
+  loader.value = true;
   try {
     association.value = await associationService.getAssociationById(route.params.id as string);
     const events = await eventService.getEventsByAssociationId(association.value.id, 5);
     pastEvents.value = events.pastEvents;
     todayEvents.value = events.todayEvents;
     upcomingEvents.value = events.upcomingEvents;
-    initMap();
-    loader.value = false;  
+    await nextTick(); // Ensure DOM is rendered before initializing the map
+    await initMap();
   } catch (error) {
     console.error('Error fetching association details:', error);
-  } 
+  } finally {
+    loader.value = false;
+  }
+};
+
+const getImageSrc = (associationName: string) => {
+  if (!associationName) return '/assets/associations-images/default.png';
+  const sanitizedAssociationName = associationName.replace(/\s+/g, '').toLowerCase();
+  return `/assets/associations-images/${sanitizedAssociationName}.png`;
 };
 
 const initMap = async () => {
   if (!association.value || !association.value.localisation) return;
 
   try {
+
     await loadGoogleMapsApi();
     const mapElement = document.getElementById("map") as HTMLElement;
+    
+    if (!mapElement) {
+      return;
+    }
 
     const geocoder = new google.maps.Geocoder();
     geocoder.geocode({ address: association.value.localisation }, (results, status) => {
@@ -61,12 +74,11 @@ const initMap = async () => {
           icon: icon
         });
       } else {
-        console.error('Geocode was not successful for the following reason: ' + status);
       }
     });
   } catch (error) {
     console.error('Error loading Google Maps API:', error);
-  } 
+  }
 };
 
 onMounted(() => {
@@ -76,11 +88,11 @@ onMounted(() => {
 
 <template>
   <Loader v-if="loader" />
-  <div v-else-if="association" class="p-6 bg-white rounded-lg shadow-md">
+  <div v-if="association" class="p-6 bg-white rounded-lg shadow-md">
     <div class="flex flex-col md:flex-row w-full">
       <div class="md:w-1/2 pr-4">
         <div class="imageContainer justify-center flex mb-4">
-          <img src="/assets/associations-images/default.png" alt="Association Image" class="w-64 h-64 object-cover rounded-lg" />
+          <img :src=getImageSrc(association.name) alt="Association Image" class="w-64 h-64 object-cover rounded-lg" />
         </div>
         <div class="infosContainer">
           <h1 class="text-2xl font-bold mb-4">{{ association.name }}</h1>
