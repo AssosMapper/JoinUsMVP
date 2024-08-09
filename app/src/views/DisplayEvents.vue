@@ -6,6 +6,7 @@ import EventList from '@/components/EventsList.vue';
 const components = {
   'Calendar': defineAsyncComponent(() => import('../components/Calendar.vue')),
   'Map': defineAsyncComponent(() => import('../components/Map.vue')),
+  'CreateEvent': defineAsyncComponent(() => import('../components/Create/CreateEvent.vue')),
 };
 
 const currentView = shallowRef('Calendar');
@@ -34,7 +35,8 @@ onMounted(() => {
   <div class="association-manager-interface">    
     <nav>
       <button @click="currentView = 'Calendar'">Calendar</button> |
-      <button @click="currentView = 'Map'">Map</button> 
+      <button @click="currentView = 'Map'">Map</button> |
+      <button @click="currentView = 'CreateEvent'">Submit Event</button> 
     </nav>
     <component :is="components[currentView]"></component>
     

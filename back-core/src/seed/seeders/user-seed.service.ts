@@ -3,7 +3,6 @@ import { User } from '../../users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { Role } from '../../roles/entities/role.entity';
 import { OnDev } from '../../utils/decorators/on-dev.decorator';
-import { faker } from '@faker-js/faker';
 import { hashPassword } from '../../utils/functions';
 
 @Injectable()
@@ -19,15 +18,6 @@ export class UserSeedService {
   async seed() {
     await this.drop();
     const users = [];
-    // for (let i = 0; i < 100; i++) {
-    //   const user = new User();
-    //   user.first_name = faker.person.firstName();
-    //   user.last_name = faker.person.lastName();
-    //   user.email = faker.internet.email();
-    //   user.phone = faker.phone.number();
-    //   user.password = faker.internet.password();
-    //   users.push(user);
-    // }
 
     // Create SuperAdmin user
     const superAdminRole = await this.roleRepository.findOne({

@@ -33,6 +33,11 @@ const typeEvents = ref<{ id: number, name: string }[]>([]);
 const handleSubmit = async () => {
   try {
     event.value.isValid = isAdmin || isAssociationManager;
+    
+    if (isAssociationManager && userStore.user.association?.id) {
+      event.value.associationId = userStore.user.association.id;
+    }
+
     const dataToSend = {
       ...event.value,
       associationId: event.value.associationId,
@@ -128,7 +133,7 @@ onMounted(() => {
         />
       </div>
 
-      <div class="mb-4" v-if="isAdmin || isAssociationManager">
+      <div class="mb-4" v-if="isAdmin">
         <label for="association_id" class="block text-sm font-medium leading-6 text-gray-900">Association</label>
         <select
           id="association_id"
