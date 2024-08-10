@@ -8,7 +8,7 @@ import { UpdateTypeAssociationDto } from './dto/update-type-association.dto';
 @Injectable()
 export class TypeAssociationsService {
   constructor(
-    @Inject('TYPEASSOCIATIONS_REPOSITORY')
+    @Inject('TYPE_ASSOCIATIONS_REPOSITORY')
     private typeAssociationsRepository: Repository<TypeAssociations>,
   ) {}
 

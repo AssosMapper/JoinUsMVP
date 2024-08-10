@@ -15,7 +15,7 @@ export class EventsService {
     private eventsRepository: Repository<Event>,
     @Inject('ASSOCIATION_REPOSITORY')
     private associationRepository: Repository<Association>,
-    @Inject('TYPEEVENTS_REPOSITORY')
+    @Inject('TYPE_EVENTS_REPOSITORY')
     private typeEventsRepository: Repository<TypeEvents>,
   ) {}
 

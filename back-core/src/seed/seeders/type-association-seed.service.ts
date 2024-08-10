@@ -15,6 +15,8 @@ export class TypeAssociationsSeedService {
   async seed() {
     console.log('Starting TypeAssociations seed...');
 
+    await this.drop();
+
     const types = [
       { name: "Écologie", description: "Associations engagées pour la protection de l'environnement." },
       { name: "Droits sociaux", description: "Associations défendant les droits sociaux et l'égalité." },
@@ -34,4 +36,8 @@ export class TypeAssociationsSeedService {
     console.log('Seeded type associations...');
   }
 
+  async drop() {
+    console.log('Dropping type associations...');
+    //TODO drop()
+  }
 }

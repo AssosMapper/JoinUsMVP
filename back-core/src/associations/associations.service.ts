@@ -13,7 +13,7 @@ export class AssociationsService {
     private associationsRepository: Repository<Association>,
     @Inject('USER_REPOSITORY')
     private usersRepository: Repository<User>,
-    @Inject('TYPEASSOCIATIONS_REPOSITORY')
+    @Inject('TYPE_ASSOCIATIONS_REPOSITORY')
     private typeAssociationsRepository: Repository<TypeAssociations>,
   ) {}
 
