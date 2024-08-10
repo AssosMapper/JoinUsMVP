@@ -1,109 +1,63 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { Repository, DataSource } from 'typeorm';
-import { Association } from '../associations/entities/association.entity';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { In, Repository } from 'typeorm';
+import { Association } from './entities/association.entity';
+import { CreateAssociationDto } from './dto/create-association.dto';
+import { UpdateAssociationDto } from './dto/update-association.dto';
+import { User } from '../users/entities/user.entity';
 import { TypeAssociations } from '../type-associations/entities/type-associations.entity';
-import { OnDev } from '../utils/decorators/on-dev.decorator';
 
 @Injectable()
-export class AssociationSeedService {
+export class AssociationsService {
   constructor(
     @Inject('ASSOCIATION_REPOSITORY')
-    private readonly associationRepository: Repository<Association>,
+    private associationsRepository: Repository<Association>,
+    @Inject('USER_REPOSITORY')
+    private usersRepository: Repository<User>,
     @Inject('TYPE_ASSOCIATIONS_REPOSITORY')
-    private readonly typeAssociationsRepository: Repository<TypeAssociations>,
-    @Inject('DATA_SOURCE')
-    private readonly datasource: DataSource,
-  ) {
-    console.log('AssociationSeedService initialized');
+    private typeAssociationsRepository: Repository<TypeAssociations>,
+  ) {}
+
+  findAll(): Promise<Association[]> {
+    return this.associationsRepository.find({ relations: ['users', 'types'] });
   }
 
-  @OnDev()
-  async seed() {
-    console.log('Starting seed method...');
-
-    await this.drop();
-
-    try {
-      console.log('Retrieving types...');
-      const types = await this.typeAssociationsRepository.find();
-      console.log('Types retrieved:', types);
-      
-      // Définir les associations de base
-      const baseAssociations = [
-        {
-          name: "Urgence Palestine",
-          localisation: "11 boulevard Voltaire, 75004 Paris, France",
-          description: "From River to the Sea, Palestine will be free",
-          image: "freepalestine.png",
-          types: []
-        },
-        {
-          name: "NPA - Nouveau Parti Anticapitaliste",
-          localisation: "5 Rue Monge, 75005 Paris, France",
-          description: "Pour le peuple, contre le patronat et la finance",
-          image: "NPA.png",
-          types: []
-        },
-        {
-          name: "Extinction Rebellion",
-          localisation: "60 Av. des Ternes, 75017 Paris, France",
-          description: "Pour le vivant, sous toutes ses formes",
-          image: "extinctionrebellion.png",
-          types: []
-        }
-      ];
-
-      // Créer les associations `join-us-{typeassociation}` pour chaque type
-      const associationsToCreate = types.map(type => {
-        const association = new Association();
-        association.name = `join-us-${type.name.toLowerCase()}`;
-        association.localisation = "Localisation par défaut";
-        association.description = `Association pour ${type.name.toLowerCase()}`;
-        association.image = `${type.name.toLowerCase()}.png`;
-        association.types = [type];
-        return association;
-      });
-
-      // Ajouter les associations de base à la liste
-      baseAssociations.forEach(baseAssoc => {
-        const association = new Association();
-        association.name = baseAssoc.name;
-        association.localisation = baseAssoc.localisation;
-        association.description = baseAssoc.description;
-        association.image = baseAssoc.image;
-        association.types = baseAssoc.types;
-        associationsToCreate.push(association);
-      });
-
-      // Sauvegarder toutes les nouvelles associations
-      if (associationsToCreate.length > 0) {
-        console.log('Seeding associations...');
-        await this.associationRepository.save(associationsToCreate);
-        console.log('Seeded associations:', associationsToCreate);
-      } else {
-        console.log('No new associations to seed.');
-      }
-
-    } catch (error) {
-      console.error('Error during type retrieval or association creation:', error);
+  async findOne(id: string): Promise<Association> {
+    const association = await this.associationsRepository.findOne({ where: { id }, relations: ['users', 'types'] });
+    if (!association) {
+      throw new NotFoundException(`Association with ID ${id} not found`);
     }
+    return association;
   }
 
-  async drop() {
-    console.log('Dropping associations...');
-    const queryRunner = this.datasource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    try {
-      await queryRunner.query(`DELETE FROM association_types_associations_type_associations`);
-      await queryRunner.query(`DELETE FROM association`);
-      await queryRunner.commitTransaction();
-      console.log('Dropped associations...');
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw err;
-    } finally {
-      await queryRunner.release();
+  async create(user: User,createAssociationDto: CreateAssociationDto): Promise<Association> {
+    const types = await this.typeAssociationsRepository.findBy({ id: In(createAssociationDto.typeIds) });
+
+    const association = new Association();
+    association.name = createAssociationDto.name;
+    association.description = createAssociationDto.description;
+    association.image = createAssociationDto.image;
+    association.localisation = createAssociationDto.localisation;
+    association.users = [user];
+    association.types = types;
+    association.members = createAssociationDto.members;
+    return this.associationsRepository.save(association);
+  }
+
+  async update(id: string, updateAssociationDto: UpdateAssociationDto): Promise<Association> {
+    const existingAssociation = await this.findOne(id);
+    if (!existingAssociation) {
+      throw new NotFoundException(`Association with ID ${id} not found`);
     }
+  
+    if (Array.isArray(updateAssociationDto.typeIds)) {
+      existingAssociation.types = await this.typeAssociationsRepository.findBy({ id: In(updateAssociationDto.typeIds) });
+    }
+  
+    Object.assign(existingAssociation, updateAssociationDto);
+    return await this.associationsRepository.save(existingAssociation);
+  }
+
+  async remove(id: string): Promise<void> {
+    await this.associationsRepository.delete(id);
   }
 }
