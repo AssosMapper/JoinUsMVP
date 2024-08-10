@@ -15,8 +15,6 @@ export class TypeAssociationsSeedService {
   async seed() {
     console.log('Starting TypeAssociations seed...');
 
-    await this.drop();
-
     const types = [
       { name: "Écologie", description: "Associations engagées pour la protection de l'environnement." },
       { name: "Droits sociaux", description: "Associations défendant les droits sociaux et l'égalité." },
@@ -36,23 +34,4 @@ export class TypeAssociationsSeedService {
     console.log('Seeded type associations...');
   }
 
-  async drop() {
-    console.log('Dropping type associations...');
-    const queryRunner = this.datasource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    try {
-      const typeAssociationsMetadata = this.datasource.getMetadata(TypeAssociations);
-      const joinTableName = typeAssociationsMetadata.manyToManyRelations[0].joinTableName;
-      
-      await queryRunner.commitTransaction();
-      console.log('Dropped type associations and their relations...');
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      console.error('Error dropping type associations:', err);
-      throw err;
-    } finally {
-      await queryRunner.release();
-    }
-  }
 }
