@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { TypeEvents } from '../../type-events/entities/type-events.entity';
-import { DataSource } from 'typeorm';
 
 @Injectable()
 export class TypeEventsSeedService {
@@ -42,6 +41,18 @@ export class TypeEventsSeedService {
 
   async drop() {
     console.log('Dropping type events...');
-    //TODO drop()
+    const queryRunner = this.datasource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      await queryRunner.query(`DELETE FROM type_events`);
+      await queryRunner.commitTransaction();
+      console.log('Dropped type events...');
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }
