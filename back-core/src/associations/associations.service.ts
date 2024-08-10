@@ -29,6 +29,14 @@ export class AssociationsService {
     return association;
   }
 
+  async findByName(name: string): Promise<Association> {
+    const association = await this.associationsRepository.findOne({ where: { name }, relations: ['types'] });
+    if (!association) {
+      throw new NotFoundException(`Association with name ${name} not found`);
+    }
+    return association;
+  }  
+
   async create(user: User,createAssociationDto: CreateAssociationDto): Promise<Association> {
     const types = await this.typeAssociationsRepository.findBy({ id: In(createAssociationDto.typeIds) });
 
