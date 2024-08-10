@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { Association } from '../../associations/entities/association.entity';
+import { TypeAssociations } from '../../type-associations/entities/type-associations.entity';
 import { OnDev } from '../../utils/decorators/on-dev.decorator';
 
 @Injectable()
@@ -8,42 +9,97 @@ export class AssociationSeedService {
   constructor(
     @Inject('ASSOCIATION_REPOSITORY')
     private readonly associationRepository: Repository<Association>,
-  ) {}
+    @Inject('TYPE_ASSOCIATIONS_REPOSITORY')
+    private readonly typeAssociationsRepository: Repository<TypeAssociations>,
+    @Inject('DATA_SOURCE')
+    private readonly datasource: DataSource,
+  ) {
+    console.log('AssociationSeedService initialized');
+  }
 
   @OnDev()
   async seed() {
+    console.log('Starting seed method...');
+
     await this.drop();
-    const associations = [];
 
-    const association1 = new Association();
-    association1.name = "Urgence Palestine";
-    association1.localisation = "11 boulevard Voltaire, 75004 Paris, France";
-    association1.description = "From River to the Sea, Palestine will be free";
-    association1.image = "freepalestine.png";
-    associations.push(association1);
+    try {
+      console.log('Retrieving types...');
+      const types = await this.typeAssociationsRepository.find();
+      console.log('Types retrieved:', types);
+      
+      const baseAssociations = [
+        {
+          name: "Urgence Palestine",
+          localisation: "11 boulevard Voltaire, 75004 Paris, France",
+          description: "From River to the Sea, Palestine will be free",
+          image: "freepalestine.png",
+          types: []
+        },
+        {
+          name: "NPA - Nouveau Parti Anticapitaliste",
+          localisation: "5 Rue Monge, 75005 Paris, France",
+          description: "Pour le peuple, contre le patronat et la finance",
+          image: "NPA.png",
+          types: []
+        },
+        {
+          name: "Extinction Rebellion",
+          localisation: "60 Av. des Ternes, 75017 Paris, France",
+          description: "Pour le vivant, sous toutes ses formes",
+          image: "extinctionrebellion.png",
+          types: []
+        }
+      ];
 
-    const association2 = new Association();
-    association2.name = "NPA - Nouveau Parti Anticapitaliste";
-    association2.localisation = "5 Rue Monge, 75005 Paris, France";
-    association2.description = "Pour le peuple, contre le patronat et la finance";
-    association2.image = "NPA.png";
-    associations.push(association2);
+      const associationsToCreate = types.map(type => {
+        const association = new Association();
+        association.name = `join-us-${type.name.toLowerCase()}`;
+        association.localisation = "Localisation par défaut";
+        association.description = `Association pour ${type.name.toLowerCase()}`;
+        association.image = `${type.name.toLowerCase()}.png`;
+        association.types = [type];
+        return association;
+      });
 
-    const association3 = new Association();
-    association3.name = "Extinction Rebellion";
-    association3.localisation = "60 Av. des Ternes, 75017 Paris, France";
-    association3.description = "Pour le vivant, sous toutes ses formes";
-    association3.image = "extinctionrebellion.png";
-    associations.push(association3);
+      baseAssociations.forEach(baseAssoc => {
+        const association = new Association();
+        association.name = baseAssoc.name;
+        association.localisation = baseAssoc.localisation;
+        association.description = baseAssoc.description;
+        association.image = baseAssoc.image;
+        association.types = baseAssoc.types;
+        associationsToCreate.push(association);
+      });
 
-    console.log('Seeding associations...');
-    await this.associationRepository.save(associations);
-    console.log('Seeded associations...');
+      if (associationsToCreate.length > 0) {
+        console.log('Seeding associations...');
+        await this.associationRepository.save(associationsToCreate);
+        console.log('Seeded associations:', associationsToCreate);
+      } else {
+        console.log('No new associations to seed.');
+      }
+
+    } catch (error) {
+      console.error('Error during type retrieval or association creation:', error);
+    }
   }
 
-  private async drop() {
-    console.log('Dropping associations...');
-    await this.associationRepository.delete({});
-    console.log('Dropped associations...');
+  async drop() {
+    console.log('Dropping associations created by types...');
+    const queryRunner = this.datasource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      await queryRunner.query(`DELETE FROM association_types_type_associations WHERE associationId IN (SELECT id FROM association WHERE name LIKE 'join-us-%')`);
+      await queryRunner.query(`DELETE FROM association WHERE name LIKE 'join-us-%'`);
+      await queryRunner.commitTransaction();
+      console.log('Dropped associations created by types...');
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
   }
 }
