@@ -14,6 +14,8 @@ import { validationSchema } from '../utils/config/config';
 import { Role } from '../roles/entities/role.entity';
 import { Association } from '../associations/entities/association.entity';
 import { DatabaseModule } from '../utils/database/database.module';
+import { TypeEventsSeedService } from './seeders/type-event-seed.service';
+import { TypeEvents } from '../type-events/entities/type-events.entity';
 
 @Module({
   providers: [
@@ -22,6 +24,7 @@ import { DatabaseModule } from '../utils/database/database.module';
     PermissionSeedService,
     AssociationSeedService,
     TypeAssociationsSeedService,
+    TypeEventsSeedService,
     DatabaseProvider,
   ],
   imports: [
@@ -29,24 +32,8 @@ import { DatabaseModule } from '../utils/database/database.module';
       isGlobal: true,
       validationSchema: validationSchema,
     }),
-    DatabaseModule.forRoot([User, Role, Permission, Association, TypeAssociations]),
+    DatabaseModule.forRoot([User, Role, Permission, Association, TypeAssociations, TypeEvents]),
     UsersModule,
   ],
 })
-export class SeedModule {
-  constructor(
-    private typeAssociationsSeedService: TypeAssociationsSeedService,
-    private userSeedService: UserSeedService,
-    private roleSeedService: RoleSeedService,
-    private permissionSeedService: PermissionSeedService,
-    private associationSeedService: AssociationSeedService
-  ) {}
-
-  async onModuleInit() {
-    await this.permissionSeedService.seed();
-    await this.roleSeedService.seed();
-    await this.typeAssociationsSeedService.seed();
-    await this.associationSeedService.seed();
-    await this.userSeedService.seed();
-  }
-}
+export class SeedModule {}
