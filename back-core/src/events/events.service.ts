@@ -19,8 +19,28 @@ export class EventsService {
     private typeEventsRepository: Repository<TypeEvents>,
   ) {}
 
-  findAll(): Promise<Event[]> {
-    return this.eventsRepository.find({ relations: ['association', 'user', 'typeEvent'] });
+  async findAll(isValid?: boolean, page: number = 1, limit: number = 10): Promise<{ data: Event[], total: number, page: number, limit: number }> {
+    const query = this.eventsRepository.createQueryBuilder('event')
+      .leftJoinAndSelect('event.association', 'association')
+      .leftJoinAndSelect('event.user', 'user')
+      .leftJoinAndSelect('event.typeEvent', 'typeEvent');
+
+    if (typeof isValid === 'boolean') {
+      query.andWhere('event.isValid = :isValid', { isValid });
+    }
+
+    query.orderBy('event.date', 'ASC')
+      .skip((page - 1) * limit)  
+      .take(limit);  
+
+    const [data, total] = await query.getManyAndCount();  
+
+    return {
+      data,  
+      total,  
+      page,   
+      limit  
+    };
   }
 
   async findOne(id: string): Promise<Event> {
@@ -128,7 +148,7 @@ export class EventsService {
       .leftJoinAndSelect('event.association', 'association')
       .leftJoinAndSelect('event.user', 'user')
       .leftJoinAndSelect('event.typeEvent', 'typeEvent')
-      .andWhere('event.isValid = true')  // Only return valid events
+      .andWhere('event.isValid = true')  
       .orderBy('event.date', 'ASC')
       .getMany();
 
@@ -137,5 +157,21 @@ export class EventsService {
     const upcomingEvents = events.filter(event => event.date > endOfTargetDate).slice(0, limit);
 
     return { pastEvents, todayEvents, upcomingEvents };
+  }
+
+  async findEventsByMonth(year: number, month: number): Promise<Event[]> {
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0, 23, 59, 59, 999); // Dernier jour du mois
+  
+    const events = await this.eventsRepository.createQueryBuilder('event')
+      .leftJoinAndSelect('event.association', 'association')
+      .leftJoinAndSelect('event.user', 'user')
+      .leftJoinAndSelect('event.typeEvent', 'typeEvent')
+      .where('event.date BETWEEN :startDate AND :endDate', { startDate, endDate })
+      .andWhere('event.isValid = true')  // Optionnel : ne récupérer que les événements validés
+      .orderBy('event.date', 'ASC')
+      .getMany();
+  
+    return events;
   }
 }

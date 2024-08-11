@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Put, UseGuards, Query, DefaultValuePipe, ParseIntPipe, BadRequestException } from '@nestjs/common';
 import { EventsService } from './events.service';
 import { Event } from './entities/event.entity';
 import { CreateEventDto } from './dto/create-events.dto';
@@ -15,8 +15,15 @@ export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Get()
-  findAll(): Promise<Event[]> {
-    return this.eventsService.findAll();
+  @ApiQuery({ name: 'isValid', required: false, type: Boolean })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  async findAll(
+    @Query('isValid') isValid?: boolean,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
+  ): Promise<{ data: Event[], total: number, page: number, limit: number }> {
+    return this.eventsService.findAll(isValid, page, limit);
   }
 
   @Get('/by-association')
@@ -37,6 +44,17 @@ export class EventsController {
     @Query('limit') limit: number
   ): Promise<{ pastEvents: Event[], todayEvents: Event[], upcomingEvents: Event[] }> {
     return this.eventsService.findEventsByDate(date, limit);
+  }
+
+  @Get('by-month')
+  async getEventsByMonth(
+    @Query('year') year: string,
+    @Query('month') month: string,
+  ): Promise<Event[]> {
+    const yearNum = parseInt(year, 10);
+    const monthNum = parseInt(month, 10);
+    
+    return this.eventsService.findEventsByMonth(yearNum, monthNum);
   }
 
   @Get(':id')

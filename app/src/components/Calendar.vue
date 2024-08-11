@@ -9,15 +9,19 @@ const currentDate = ref(new Date());
 const selectedDate = ref(new Date());
 const isMobile = ref(window.innerWidth < 768);
 const loader = ref(false);
+
 const fetchEvents = async () => {
-  loader.value = true
-  try {
-    events.value = await eventService.getAllEvents();
-  } catch (error) {
-    console.error('Error fetching events:', error);
-  } finally {
-    loader.value = false;
-  }
+    loader.value = true;
+    try {
+        const year = currentDate.value.getFullYear();
+        const month = currentDate.value.getMonth() + 1;
+
+        events.value = await eventService.getEventsByMonth(year, month, "true");
+    } catch (error) {
+        console.error('Error fetching events:', error);
+    } finally {
+        loader.value = false;
+    }
 };
 
 onMounted(() => {
@@ -99,13 +103,14 @@ const getImageSrc = (associationName: string) => {
   return `/assets/associations-images/${sanitizedAssociationName}.png`;
 };
 
-
 const nextMonth = () => {
   currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, 1);
+  fetchEvents(); // Recharger les événements pour le nouveau mois
 };
 
 const previousMonth = () => {
   currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() - 1, 1);
+  fetchEvents(); // Recharger les événements pour le nouveau mois
 };
 
 const selectDate = (date: Date) => {
