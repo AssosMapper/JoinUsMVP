@@ -58,9 +58,10 @@ const handleSubmit = async () => {
 
     const dataToSend = {
       ...event.value,
-      associationId: event.value.associationId,
+      associationId: userStore.user.association?.id,
       typeEventId: event.value.typeEventId,
     };
+    console.log(dataToSend);
     await eventService.createEvent(dataToSend);
     notificationStore.showNotification("Evenement créé avec succès !", "success");
     await router.push('/');
