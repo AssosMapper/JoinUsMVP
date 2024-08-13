@@ -52,13 +52,21 @@ export class EventsController {
     @Query('month') month: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
-    @Query('isValid') isValid?: boolean,
+    @Query('isValid') isValid?: string,  
   ): Promise<{ data: Event[], total: number, page: number, limit: number }> {
     const yearNum = parseInt(year, 10);
     const monthNum = parseInt(month, 10);
-    
-    return this.eventsService.findEventsByMonth(yearNum, monthNum, page, limit, isValid);
-  }  
+  
+    let isValidBoolean: boolean | undefined = undefined;
+    if (isValid === 'true') {
+      isValidBoolean = true;
+    } else if (isValid === 'false') {
+      isValidBoolean = false;
+    }
+  
+    return this.eventsService.findEventsByMonth(yearNum, monthNum, page, limit, isValidBoolean);
+  }
+  
 
   @Get(':id')
   findOne(@Param('id') id: string): Promise<Event> {

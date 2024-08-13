@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import eventService from "../services/eventService.ts";
 
+const router = useRouter();
 const events = ref([]); 
 const currentDate = ref(new Date()); 
 const selectedDate = ref(new Date()); 
@@ -36,7 +38,6 @@ const fetchEvents = async (isValid: boolean | undefined = undefined) => {
         loader.value = false;
     }
 };
-
 
 const changeTab = (tab: string) => {
     selectedTab.value = tab;
@@ -81,14 +82,34 @@ const previousPage = () => {
 };
 
 const selectedDateEvents = computed(() => {
-    const filteredEvents = events.value.filter(event => {
+    return events.value.filter(event => {
         const eventDate = new Date(event.date);
-        console.log(`Comparing selectedDate (${selectedDate.value.toDateString()}) with eventDate (${eventDate.toDateString()})`);
         return eventDate.toDateString() === selectedDate.value.toDateString();
     });
-    console.log('Selected Date Events:', filteredEvents);
-    return filteredEvents;
 });
+
+const goToEventDetails = (id: number) => {
+    router.push({ name: 'EventDetails', params: { id } });
+};
+
+const toggleEventValidation = async (event) => {
+    const confirmationMessage = event.isValid
+        ? 'Voulez-vous vraiment invalider cet événement ?'
+        : 'Voulez-vous vraiment valider cet événement ?';
+    
+    if (confirm(confirmationMessage)) {
+        try {
+            const updatedEvent = { isValid: !event.isValid };  
+            await eventService.updateEvent(event.id, updatedEvent);
+            alert('L\'événement a été mis à jour avec succès.');
+            fetchEvents(selectedTab.value === 'valid' ? true : selectedTab.value === 'declined' ? false : undefined);
+        } catch (error) {
+            console.error('Erreur lors de la mise à jour de l\'événement :', error);
+            alert('Une erreur est survenue lors de la mise à jour.');
+        }
+    }
+};
+
 
 onMounted(() => {
     fetchEvents(); 
@@ -103,100 +124,48 @@ const currentMonthYear = computed(() => {
 </script>
 
 <template>
-  <div class="events-manager-interface">
-    <h1>Interface Events Manager</h1>
+  <div class="p-5">
+    <h1 class="text-2xl font-bold mb-5">Interface Events Manager</h1>
     
-    <nav>
-      <button @click="changeTab('all')" :class="{ active: selectedTab === 'all' }">Tous les événements</button> |
-      <button @click="changeTab('valid')" :class="{ active: selectedTab === 'valid' }">Événements validés</button> |
-      <button @click="changeTab('declined')" :class="{ active: selectedTab === 'declined' }">Événements déclinés</button>
+    <nav class="mb-4">
+      <button @click="changeTab('all')" :class="{'font-bold text-blue-600': selectedTab === 'all'}" class="mr-2">Tous les événements</button> |
+      <button @click="changeTab('valid')" :class="{'font-bold text-blue-600': selectedTab === 'valid'}" class="mx-2">Événements validés</button> |
+      <button @click="changeTab('declined')" :class="{'font-bold text-blue-600': selectedTab === 'declined'}" class="ml-2">Événements déclinés</button>
     </nav>
 
-    <div class="month-navigation">
-      <button @click="previousMonth">Mois précédent</button>
-      <span>{{ currentMonthYear }}</span>
-      <button @click="nextMonth">Mois suivant</button>
+    <div class="flex items-center justify-between mb-4">
+      <button @click="previousMonth" class="text-gray-600 hover:text-gray-800">Mois précédent</button>
+      <span class="text-lg font-semibold">{{ currentMonthYear }}</span>
+      <button @click="nextMonth" class="text-gray-600 hover:text-gray-800">Mois suivant</button>
     </div>
 
-    <div v-if="loader" class="loader">Chargement...</div>
+    <div v-if="loader" class="text-center text-lg">Chargement...</div>
 
     <div v-else class="events-list">
-      <div v-if="events.length === 0" class="no-events">Aucun événement trouvé pour ce mois.</div>
+      <div v-if="events.length === 0" class="text-center text-gray-500">Aucun événement trouvé pour ce mois.</div>
       <ul v-else>
-        <li v-for="event in events" :key="event.id">
-          <h3>{{ event.titre }}</h3>
-          <p>{{ event.date }}</p>
-          <p>{{ event.description }}</p>
-          <p>Localisation: {{ event.localisation }}</p>
-          <p>Association: {{ event.association?.name }}</p>
+        <li v-for="event in events" :key="event.id" class="cursor-pointer p-4 border-b border-gray-200 hover:bg-gray-50 flex justify-between items-center">
+          <div @click="goToEventDetails(event.id)" class="flex-1">
+            <h3 class="text-xl font-semibold">{{ event.titre }}</h3>
+            <p class="text-sm text-gray-600">{{ event.date | formatDate }}</p>
+            <p class="text-base">{{ event.description }}</p>
+            <p class="text-sm text-gray-500">Localisation: {{ event.localisation }}</p>
+            <p class="text-sm text-gray-500">Association: {{ event.association?.name }}</p>
+          </div>
+          <button
+            @click="toggleEventValidation(event)"
+            :class="event.isValid ? 'bg-green-500 hover:bg-green-600' : 'bg-red-500 hover:bg-red-600'"
+            class="text-white font-semibold py-2 px-4 rounded">
+            {{ event.isValid ? 'Invalider' : 'Valider' }}
+          </button>
         </li>
       </ul>
     </div>
 
-    <div class="pagination" v-if="totalPages > 1">
-      <button @click="previousPage" :disabled="currentPage === 1">Précédent</button>
-      <span>Page {{ currentPage }} sur {{ totalPages }}</span>
-      <button @click="nextPage" :disabled="currentPage === totalPages">Suivant</button>
+    <div class="flex justify-center items-center mt-4" v-if="totalPages > 1">
+      <button @click="previousPage" :disabled="currentPage === 1" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50">Précédent</button>
+      <span class="mx-4">Page {{ currentPage }} sur {{ totalPages }}</span>
+      <button @click="nextPage" :disabled="currentPage === totalPages" class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50">Suivant</button>
     </div>
   </div>
 </template>
-
-<style scoped>
-.events-manager-interface {
-  padding: 20px;
-}
-
-nav {
-  margin-bottom: 20px;
-}
-
-button {
-  padding: 10px;
-  margin: 5px;
-  cursor: pointer;
-}
-
-button.active {
-  font-weight: bold;
-  color: blue;
-}
-
-.month-navigation {
-  margin-bottom: 20px;
-}
-
-.loader {
-  text-align: center;
-  font-size: 18px;
-}
-
-.events-list ul {
-  list-style-type: none;
-  padding: 0;
-}
-
-.events-list li {
-  margin-bottom: 10px;
-  padding: 10px;
-  border: 1px solid #ddd;
-}
-
-.pagination {
-  margin-top: 20px;
-  text-align: center;
-}
-
-.pagination button {
-  padding: 5px 10px;
-}
-
-.pagination span {
-  margin: 0 10px;
-}
-
-.no-events {
-  text-align: center;
-  color: #999;
-  font-size: 16px;
-}
-</style>
