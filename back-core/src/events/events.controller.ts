@@ -50,12 +50,15 @@ export class EventsController {
   async getEventsByMonth(
     @Query('year') year: string,
     @Query('month') month: string,
-  ): Promise<Event[]> {
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
+    @Query('isValid') isValid?: boolean,
+  ): Promise<{ data: Event[], total: number, page: number, limit: number }> {
     const yearNum = parseInt(year, 10);
     const monthNum = parseInt(month, 10);
     
-    return this.eventsService.findEventsByMonth(yearNum, monthNum);
-  }
+    return this.eventsService.findEventsByMonth(yearNum, monthNum, page, limit, isValid);
+  }  
 
   @Get(':id')
   findOne(@Param('id') id: string): Promise<Event> {
