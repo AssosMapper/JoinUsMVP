@@ -159,19 +159,31 @@ export class EventsService {
     return { pastEvents, todayEvents, upcomingEvents };
   }
 
-  async findEventsByMonth(year: number, month: number): Promise<Event[]> {
+  async findEventsByMonth(year: number, month: number, page: number = 1, limit: number = 10, isValid?: boolean): Promise<{ data: Event[], total: number, page: number, limit: number }> {
     const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 0, 23, 59, 59, 999); // Dernier jour du mois
-  
-    const events = await this.eventsRepository.createQueryBuilder('event')
-      .leftJoinAndSelect('event.association', 'association')
-      .leftJoinAndSelect('event.user', 'user')
-      .leftJoinAndSelect('event.typeEvent', 'typeEvent')
-      .where('event.date BETWEEN :startDate AND :endDate', { startDate, endDate })
-      .andWhere('event.isValid = true')  // Optionnel : ne récupérer que les événements validés
-      .orderBy('event.date', 'ASC')
-      .getMany();
-  
-    return events;
-  }
+    const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+
+    const query = this.eventsRepository.createQueryBuilder('event')
+        .leftJoinAndSelect('event.association', 'association')
+        .leftJoinAndSelect('event.user', 'user')
+        .leftJoinAndSelect('event.typeEvent', 'typeEvent')
+        .where('event.date BETWEEN :startDate AND :endDate', { startDate, endDate })
+        .orderBy('event.date', 'ASC')
+        .skip((page - 1) * limit)  
+        .take(limit);
+
+    if (isValid !== undefined) {
+        query.andWhere('event.isValid = :isValid', { isValid });
+    }
+
+    const [data, total] = await query.getManyAndCount();
+
+    return {
+        data,
+        total,
+        page,
+        limit,
+    };
+}
+
 }

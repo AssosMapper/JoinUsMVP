@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import {computed, onMounted, ref} from 'vue';
-import {useRouter} from 'vue-router';
+import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import eventService from "../services/eventService.ts";
 
 const router = useRouter();
@@ -9,129 +9,161 @@ const currentDate = ref(new Date());
 const selectedDate = ref(new Date());
 const isMobile = ref(window.innerWidth < 768);
 const loader = ref(false);
+const currentPage = ref(1);
+const totalPages = ref(1);
+const pageSize = ref(10);
 
-const fetchEvents = async () => {
+const fetchEvents = async (isValid: boolean = true) => {
     loader.value = true;
     try {
         const year = currentDate.value.getFullYear();
         const month = currentDate.value.getMonth() + 1;
 
-        events.value = await eventService.getEventsByMonth(year, month, "true");
+        const response = await eventService.getEventsByMonth(year, month, currentPage.value, pageSize.value, isValid);
+
+        if (Array.isArray(response)) {
+            events.value = response;
+            totalPages.value = 1;
+        } else if (response && response.data) {
+            events.value = response.data;
+            totalPages.value = Math.ceil(response.total / pageSize.value);
+        } else {
+            events.value = [];
+            totalPages.value = 1;
+        }
     } catch (error) {
-        console.error('Error fetching events:', error);
+        console.error('Erreur lors de la récupération des événements :', error);
     } finally {
         loader.value = false;
     }
 };
 
+const nextPage = () => {
+    if (currentPage.value < totalPages.value) {
+        currentPage.value++;
+        fetchEvents();
+    }
+};
+
+const previousPage = () => {
+    if (currentPage.value > 1) {
+        currentPage.value--;
+        fetchEvents();
+    }
+};
+
 onMounted(() => {
-  fetchEvents();
-  window.addEventListener('resize', () => {
-    isMobile.value = window.innerWidth < 768;
-  });
+    fetchEvents(true);
+    window.addEventListener('resize', () => {
+        isMobile.value = window.innerWidth < 768;
+    });
 });
 
 const currentMonthYear = computed(() => {
-  return currentDate.value.toLocaleString('default', {month: 'long', year: 'numeric'});
+    return currentDate.value.toLocaleString('default', { month: 'long', year: 'numeric' });
 });
 
 const calendarDays = computed(() => {
-  const year = currentDate.value.getFullYear();
-  const month = currentDate.value.getMonth();
-  const firstDay = new Date(year, month, 1);
-  const lastDay = new Date(year, month + 1, 0);
+    const year = currentDate.value.getFullYear();
+    const month = currentDate.value.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
 
-  const days = [];
-  const week = [];
+    const days = [];
+    const week = [];
 
-  for (let i = 0; i < firstDay.getDay(); i++) {
-    week.push(new Date(year, month, -i));
-  }
-  week.reverse();
-
-  for (let i = 1; i <= lastDay.getDate(); i++) {
-    week.push(new Date(year, month, i));
-    if (week.length === 7) {
-      days.push(week.slice());
-      week.length = 0;
+    for (let i = 0; i < firstDay.getDay(); i++) {
+        week.push(new Date(year, month, -i));
     }
-  }
+    week.reverse();
 
-  if (week.length > 0) {
-    for (let i = 1; week.length < 7; i++) {
-      week.push(new Date(year, month + 1, i));
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+        week.push(new Date(year, month, i));
+        if (week.length === 7) {
+            days.push(week.slice());
+            week.length = 0;
+        }
     }
-    days.push(week);
-  }
 
-  return days;
+    if (week.length > 0) {
+        for (let i = 1; week.length < 7; i++) {
+            week.push(new Date(year, month + 1, i));
+        }
+        days.push(week);
+    }
+
+    return days;
 });
 
 const selectedDateEvents = computed(() => {
-  return events.value.filter(event => {
-    const eventDate = new Date(event.date);
-    return eventDate.toDateString() === selectedDate.value.toDateString();
-  });
+    return events.value.filter(event => {
+        const eventDate = new Date(event.date);
+        return eventDate.toDateString() === selectedDate.value.toDateString();
+    });
 });
 
 const getEventCountForDate = (date: Date) => {
-  return events.value.filter(event => {
-    const eventDate = new Date(event.date);
-    return eventDate.toDateString() === date.toDateString();
-  }).length;
+    return events.value.filter(event => {
+        const eventDate = new Date(event.date);
+        return eventDate.toDateString() === date.toDateString();
+    }).length;
 };
 
 const eventsByDate = computed(() => {
-  const eventsMap: { [key: string]: Event[] } = {};
-  events.value.forEach(event => {
-    const eventDate = new Date(event.date).toDateString();
-    if (!eventsMap[eventDate]) {
-      eventsMap[eventDate] = [];
+    const eventsMap: { [key: string]: Event[] } = {};
+    if (events.value.length > 0) {
+        events.value.forEach(event => {
+            const eventDate = new Date(event.date).toDateString();
+            if (!eventsMap[eventDate]) {
+                eventsMap[eventDate] = [];
+            }
+            eventsMap[eventDate].push(event);
+        });
     }
-    eventsMap[eventDate].push(event);
-  });
-  return eventsMap;
+    return eventsMap;
 });
 
 const getEventsForDate = (date: Date) => {
-  return eventsByDate.value[date.toDateString()] || [];
+    return eventsByDate.value[date.toDateString()] || [];
 };
 
 const getImageSrc = (associationName: string) => {
-  if (!associationName) return '/assets/associations-images/default.png';
-  const sanitizedAssociationName = associationName.replace(/\s+/g, '').toLowerCase();
-  return `/assets/associations-images/${sanitizedAssociationName}.png`;
+    if (!associationName) return '/assets/associations-images/default.png';
+    const sanitizedAssociationName = associationName.replace(/\s+/g, '').toLowerCase();
+    return `/assets/associations-images/${sanitizedAssociationName}.png`;
 };
 
 const nextMonth = () => {
-  currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, 1);
-  fetchEvents(); // Recharger les événements pour le nouveau mois
+    currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() + 1, 1);
+    currentPage.value = 1;
+    fetchEvents(true);
 };
 
 const previousMonth = () => {
-  currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() - 1, 1);
-  fetchEvents(); // Recharger les événements pour le nouveau mois
+    currentDate.value = new Date(currentDate.value.getFullYear(), currentDate.value.getMonth() - 1, 1);
+    currentPage.value = 1;
+    fetchEvents(true);
 };
 
 const selectDate = (date: Date) => {
-  selectedDate.value = date;
+    selectedDate.value = date;
 };
 
 const isSelectedDate = (date: Date) => {
-  return date.toDateString() === selectedDate.value.toDateString();
+    return date.toDateString() === selectedDate.value.toDateString();
 };
 
 const formatTime = (dateString: string) => {
-  const date = new Date(dateString);
-  return date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    const date = new Date(dateString);
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 };
 
 const goToAssociationDetails = (id: number) => {
-  router.push({name: 'AssociationDetails', params: {id}});
+    router.push({ name: 'AssociationDetails', params: { id } });
 };
 
 const goToEventDetails = (id: number) => {
-  router.push({name: 'EventDetails', params: {id}});
+    router.push({ name: 'EventDetails', params: { id } });
 };
 </script>
 
@@ -167,47 +199,47 @@ const goToEventDetails = (id: number) => {
         <div class="flex items-center justify-between pt-4 md:pt-6 overflow-x-auto">
           <table class="w-full">
             <thead>
-            <tr class="h-10">
-              <th v-for="day in ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di']" :key="day">
-                <div class="w-full flex justify-center">
-                  <p class="text-base font-medium text-center text-gray-800 dark:text-gray-100">{{ day }}</p>
-                </div>
-              </th>
-            </tr>
+              <tr class="h-10">
+                <th v-for="day in ['Lu', 'Ma', 'Me', 'Je', 'Ve', 'Sa', 'Di']" :key="day">
+                  <div class="w-full flex justify-center">
+                    <p class="text-base font-medium text-center text-gray-800 dark:text-gray-100">{{ day }}</p>
+                  </div>
+                </th>
+              </tr>
             </thead>
             <tbody>
-            <tr v-for="week in calendarDays" :key="week[0].toISOString()">
-              <td v-for="day in week" :key="day.toISOString()" class="relative">
-                <div
-                    @click="selectDate(day)"
-                    class="px-1 md:px-2 py-3 cursor-pointer flex w-full justify-between items-center border border-gray-200 dark:border-gray-600 h-12"
-                    :class="{'bg-indigo-700 rounded-lg': isSelectedDate(day)}"
-                >
-                  <p
-                      class="text-sm md:text-base font-medium"
-                      :class="{
-                        'text-gray-500 dark:text-gray-100': day.getMonth() === currentDate.getMonth(),
-                        'text-gray-300': day.getMonth() !== currentDate.getMonth(),
-                        'text-white': isSelectedDate(day)
-                      }"
+              <tr v-for="week in calendarDays" :key="week[0].toISOString()">
+                <td v-for="day in week" :key="day.toISOString()" class="relative">
+                  <div
+                      @click="selectDate(day)"
+                      class="px-1 md:px-2 py-3 cursor-pointer flex w-full justify-between items-center border border-gray-200 dark:border-gray-600 h-12"
+                      :class="{'bg-indigo-700 rounded-lg': isSelectedDate(day)}"
                   >
-                    {{ day.getDate() }}
-                  </p>
-                  <div v-if="isMobile && getEventCountForDate(day) > 0"
-                       class="absolute top-1/2 right-2 transform -translate-y-1/2 bg-green-500 rounded-full w-5 h-5 flex items-center justify-center text-white text-xs">
-                    {{ getEventCountForDate(day) }}
+                    <p
+                        class="text-sm md:text-base font-medium"
+                        :class="{
+                          'text-gray-500 dark:text-gray-100': day.getMonth() === currentDate.getMonth(),
+                          'text-gray-300': day.getMonth() !== currentDate.getMonth(),
+                          'text-white': isSelectedDate(day)
+                        }"
+                    >
+                      {{ day.getDate() }}
+                    </p>
+                    <div v-if="isMobile && getEventCountForDate(day) > 0"
+                         class="absolute top-1/2 right-2 transform -translate-y-1/2 bg-green-500 rounded-full w-5 h-5 flex items-center justify-center text-white text-xs">
+                      {{ getEventCountForDate(day) }}
+                    </div>
+                    <div v-else-if="!isMobile" class="flex overflow-hidden h-4 max-w-[80%] absolute right-2">
+                      <img v-for="event in getEventsForDate(day)"
+                           :key="event.id"
+                           :src="getImageSrc(event.association?.name || '')"
+                           :alt="event.association?.name || 'Association'"
+                           class="w-4 h-4 mr-1"
+                      />
+                    </div>
                   </div>
-                  <div v-else-if="!isMobile" class="flex overflow-hidden h-4 max-w-[80%] absolute right-2">
-                    <img v-for="event in getEventsForDate(day)"
-                         :key="event.id"
-                         :src="getImageSrc(event.association?.name || '')"
-                         :alt="event.association?.name || 'Association'"
-                         class="w-4 h-4 mr-1"
-                    />
-                  </div>
-                </div>
-              </td>
-            </tr>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -218,9 +250,9 @@ const goToEventDetails = (id: number) => {
             <div v-for="event in selectedDateEvents" :key="event.id"
                  class="justify-center w-full border-b pb-2 border-gray-400 border-dashed flex">
               <div class="flex justify-center items-center">
-                <img src="/assets/associations-images/default.png"
+                <img :src="getImageSrc(event.association?.name || '')"
                      @click="goToAssociationDetails(event.association?.id)"
-                     :alt="event.organisation?.name || 'Association'"
+                     :alt="event.association?.name || 'Association'"
                      class="w-12 h-12 mr-4 clickable"
                 />
               </div>

@@ -86,21 +86,27 @@ const getEventsByAssociationId = async (associationId: string, limit: number) =>
     return data.value;
   };
 
-  const getEventsByMonth = async (year: number, month: number, isValid?: boolean) => {
+  const getEventsByMonth = async (year: number, month: number, page: number = 1, limit: number = 10, isValid?: boolean) => {
     const apiStore = useApiStore();
-    let url = `${apiStore.events.byMonth}?year=${year}&month=${month}`;
+    let url = `${apiStore.events.byMonth}?year=${year}&month=${month}&page=${page}&limit=${limit}`;
     
     if (isValid !== undefined) {
         url += `&isValid=${isValid}`;
     }
 
+
     const { data, error, response } = await useApi(url).json();
 
     if (error.value) {
+        console.error('Error:', error.value);
         throw new Error(error.value);
     }
+
+    console.log('Response Data:', data.value);
+
     return data.value;
 };
+
 
 export default {
     createEvent,
