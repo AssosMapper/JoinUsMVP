@@ -24,6 +24,7 @@ const getAllAssociations = async () => {
   return data.value;
 };
 
+
 const updateAssociation = async (id: string, association: IUpdateAssociation) => {
   const apiStore = useApiStore();
     const {data,error,response}=await useApi(apiStore.resolveUrl(apiStore.associations.detail,{
@@ -45,9 +46,22 @@ const getAssociationById = async (id: string)=> {
   }
   return data.value;
 };
+
+const getAssociationByName = async (name: string) => {
+  const apiStore = useApiStore();
+  const {data, error, response} = await useApi(apiStore.resolveUrl(apiStore.associations.byName, {
+    name: name
+  })).json();
+  if (error.value) {
+    throw new Error(error.value);
+  }
+  return data.value;
+};
+
 export default {
   createAssociation,
   getAllAssociations,
   updateAssociation,
-  getAssociationById
+  getAssociationById,
+  getAssociationByName
 };

@@ -8,7 +8,7 @@ import { UpdateTypeEventDto } from './dto/update-type-event.dto';
 @Injectable()
 export class TypeEventsService {
   constructor(
-    @Inject('TYPEEVENTS_REPOSITORY')
+    @Inject('TYPE_EVENTS_REPOSITORY')
     private readonly typeEventsRepository: Repository<TypeEvents>,
   ) {}
 

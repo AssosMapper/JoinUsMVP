@@ -3,7 +3,6 @@ import { User } from '../../users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { Role } from '../../roles/entities/role.entity';
 import { OnDev } from '../../utils/decorators/on-dev.decorator';
-import { faker } from '@faker-js/faker';
 import { hashPassword } from '../../utils/functions';
 
 @Injectable()
@@ -19,15 +18,6 @@ export class UserSeedService {
   async seed() {
     await this.drop();
     const users = [];
-    for (let i = 0; i < 100; i++) {
-      const user = new User();
-      user.first_name = faker.person.firstName();
-      user.last_name = faker.person.lastName();
-      user.email = faker.internet.email();
-      user.phone = faker.phone.number();
-      user.password = faker.internet.password();
-      users.push(user);
-    }
 
     // Create SuperAdmin user
     const superAdminRole = await this.roleRepository.findOne({
@@ -59,6 +49,22 @@ export class UserSeedService {
     user.email = 'associationmanager@test.com';
     user.password = await hashPassword('Password123!');
     user.roles = [associationManagerRole];
+    users.push(user);
+
+    // Create EventsManager user
+    const eventsManagerRole = await this.roleRepository.findOne({
+      where: { name: 'EventsManager' },
+    });
+    if (!eventsManagerRole) {
+      console.log('Role EventsManager not found');
+      return;
+    }
+    user = new User();
+    user.first_name = 'Events';
+    user.last_name = 'Manager';
+    user.email = 'eventsmanager@test.com';
+    user.password = await hashPassword('Password123!');
+    user.roles = [eventsManagerRole];
     users.push(user);
 
     console.log('Seeding users...');

@@ -6,11 +6,15 @@ import { DatabaseProvider } from './databaseProvider';
 @Module({})
 export class DatabaseModule {
   static forRoot(entities: any[]): DynamicModule {
-    const providers = entities.map((entity) => ({
-      provide: `${entity.name.toUpperCase()}_REPOSITORY`,
-      useFactory: (dataSource: DataSource) => dataSource.getRepository(entity),
-      inject: ['DATA_SOURCE'],
-    }));
+    const providers = entities.map((entity) => {
+      const entityName = entity.name.replace(/([a-z])([A-Z])/g, '$1_$2').toUpperCase();
+
+      return {
+        provide: `${entityName}_REPOSITORY`,
+        useFactory: (dataSource: DataSource) => dataSource.getRepository(entity),
+        inject: ['DATA_SOURCE'],
+      };
+    });
 
     return {
       module: DatabaseModule,

@@ -23,6 +23,12 @@ export const useUserStore = defineStore('user', {
         isAssociationManager(): boolean {
             return this.user.roles?.some(role => role.name === 'AssociationManager') ?? false;
         },
+        isEventsManager(): boolean {
+            return this.user.roles?.some(role => role.name === 'EventsManager') ?? false;
+        },
+        isUser(): boolean {
+            return this.user.roles?.some(role => role.name === 'User') ?? false;
+        },
         fullName(): string {
             return `${this.user.first_name} ${this.user.last_name}`.trim();
         }

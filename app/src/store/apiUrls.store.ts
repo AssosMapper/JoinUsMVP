@@ -17,12 +17,14 @@ export const useApiStore = defineStore('api', {
                 update: '/events/:id',
                 delete: '/events/:id',
                 byAssociation: '/events/by-association',
-                byDate: '/events/by-date' 
+                byDate: '/events/by-date',
+                byMonth: '/events/by-month'  
             },
             associations: {
                 list: "/associations",
                 detail: "/associations/:id",
                 create: "/associations",
+                byName: "/associations/by-name/:name",  
             },
             associationTypes: {
                 list: "/type-associations",

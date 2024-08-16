@@ -10,9 +10,15 @@ const createEvent = async (event: IEvent) => {
     const {data, error, response} = await useApi(useApiStore().events.create).post(event).json();
 };
 
-const getAllEvents = async () => {
+const getAllEvents = async (isValid?: boolean, page: number = 1, limit: number = 10) => {
     const urls = useApiStore();
-    const {data, error, response} = await useApi(urls.events.list).json();
+    let url = `${urls.events.list}?page=${page}&limit=${limit}`;
+    
+    if (isValid !== undefined) {
+        url += `&isValid=${isValid}`;
+    }
+
+    const {data, error, response} = await useApi(url).json();
     if (error.value) {
         throw new Error(error.value);
     }
@@ -80,6 +86,28 @@ const getEventsByAssociationId = async (associationId: string, limit: number) =>
     return data.value;
   };
 
+  const getEventsByMonth = async (year: number, month: number, page: number = 1, limit: number = 10, isValid?: boolean) => {
+    const apiStore = useApiStore();
+    let url = `${apiStore.events.byMonth}?year=${year}&month=${month}&page=${page}&limit=${limit}`;
+    
+    if (isValid !== undefined) {
+        url += `&isValid=${isValid}`;
+    }
+
+
+    const { data, error, response } = await useApi(url).json();
+
+    if (error.value) {
+        console.error('Error:', error.value);
+        throw new Error(error.value);
+    }
+
+    console.log('Response Data:', data.value);
+
+    return data.value;
+};
+
+
 export default {
     createEvent,
     getAllEvents,
@@ -88,5 +116,6 @@ export default {
     deleteEvent,
     getEventsByUserId,
     getEventsByAssociationId,
-    getEventsByDate
+    getEventsByDate,
+    getEventsByMonth
 };

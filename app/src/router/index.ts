@@ -1,5 +1,5 @@
-import {createRouter, createWebHistory, RouteRecordRaw} from 'vue-router';
-import {useUserStore} from '@/store';
+import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
+import { useUserStore } from '@/store';
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -35,13 +35,13 @@ const routes: Array<RouteRecordRaw> = [
     {
         path: '/adminInterface',
         name: 'AdminInterface',
-        meta: {requiresAdmin: true},
+        meta: { requiresAdmin: true },
         component: () => import('../views/AdminInterface.vue'),
     },
     {
         path: '/associationManagerInterface',
         name: 'AssociationManagerInterface',
-        meta: {requiresAssociationManager: true},
+        meta: { requiresAssociationManager: true },
         component: () => import('../views/AssociationManagerInterface.vue'),
     },
     {
@@ -65,7 +65,13 @@ const routes: Array<RouteRecordRaw> = [
         name: 'AssociationDetails',
         component: () => import('../views/DisplayAssociationDetails.vue'),
         props: true
-    }
+    },
+    {
+        path: '/eventsManagerInterface',
+        name: 'EventsManagerInterface',
+        meta: { requiresEventsManager: true },
+        component: () => import('../views/EventsManagerInterface.vue'),
+    },
 ];
 
 const router = createRouter({
@@ -78,13 +84,20 @@ router.beforeEach((to, from, next) => {
     const isAuthenticated = userStore.isAuthenticated;
     const isAdmin = userStore.isAdmin;
     const isAssociationManager = userStore.isAssociationManager;
+    const isEventsManager = userStore.isEventsManager;
 
-    if (to.name === 'AdminInterface' && (!isAuthenticated || !isAdmin)) {
+    if (to.meta.requiresAdmin && (!isAuthenticated || !isAdmin)) {
+        // TODO : envoyer vers page 404
         next('/login');
-        alert("Veuillez vous connecter.");
-    } else if (to.name === 'AssociationManagerInterface' && (!isAuthenticated || (!isAssociationManager && !isAdmin))) {
+        alert("Vous devez être administrateur pour accéder à cette page. Veuillez vous connecter.");
+    } else if (to.meta.requiresAssociationManager && (!isAuthenticated || (!isAssociationManager && !isAdmin))) {
+        // TODO : envoyer vers page 404
         next('/login');
-        alert("Veuillez vous connecter.");
+        alert("Vous devez être gestionnaire d'association pour accéder à cette page. Veuillez vous connecter.");
+    } else if (to.meta.requiresEventsManager && (!isAuthenticated || (!isEventsManager && !isAdmin))) {
+        // TODO : envoyer vers page 404
+        next('/login');
+        alert("Vous devez être gestionnaire d'events pour accéder à cette page. Veuillez vous connecter.");
     } else {
         next();
     }
