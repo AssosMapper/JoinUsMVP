@@ -95,7 +95,6 @@ const fetchTypeAssociations = async () => {
   }
 };
 
-// Watcher pour suivre la sélection du type d'association
 watch(selectedTypeAssociation, async () => {
   await fetchAssociationByType();
 });

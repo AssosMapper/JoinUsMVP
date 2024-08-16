@@ -23,7 +23,6 @@ export class RolesService {
       },
     });
     if (existingRole) {
-      // throw duplicate error
       throw new HttpException('Role with this name already exists', 409);
     }
     const role = new Role();

@@ -38,7 +38,7 @@ export class PermissionSeedService {
       permission.permission = (entity + ':delete').toLowerCase();
       policies.push(permission);
     }
-    //create permissions
+
     console.log('Seeding permissions...');
     await this.permissionRepository.save(policies);
     console.log('Seeded permissions...');
