@@ -24,10 +24,12 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { AllExceptionsFilter } from './utils/all-exceptions.filter';
 import { LoggingInterceptor } from './utils/logging.interceptor';
 import { ProfileModule } from './profile/profile.module';
+import { AssociationApplicationsModule } from './association-applications/association-applications.module';
+import {AssociationApplication} from "./association-applications/entities/association-application.entity";
 
 @Module({
   imports: [
-    DatabaseModule.forRoot([User, Association, Event, TypeEvents, TypeAssociations, Permission, Role, Media]),
+    DatabaseModule.forRoot([User, Association, Event, TypeEvents, TypeAssociations, Permission, Role, Media,AssociationApplication]),
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: validationSchema,
@@ -41,7 +43,9 @@ import { ProfileModule } from './profile/profile.module';
     AuthModule,
     RolesModule,
     MediaModule,
-    ProfileModule
+    ProfileModule,
+    AssociationApplicationsModule,
+
   ],
   providers: [
     {

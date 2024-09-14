@@ -18,11 +18,14 @@ export class Association extends EntityStructure {
   @Column({ nullable: true })
   image: string;
 
-  @OneToMany(() => User, user => user.association)
+  @ManyToMany(() => User, user => user.associations)
   users: Array<User>;
 
   @Column({ nullable: true, type: 'int' })
   members: number;
+
+  @Column({ length: 255, nullable: true })
+  applicationQuestion: string;
 
   @ManyToMany(() => TypeAssociations, typeAssociation => typeAssociation.associations)
   @JoinTable()

@@ -27,7 +27,7 @@ export class AssociationSeedService {
       console.log('Retrieving types...');
       const types = await this.typeAssociationsRepository.find();
       console.log('Types retrieved:', types);
-      
+      const questions = ["Quel anecdote avez vous avec l'association ?","Quel est le mot de passe et par qui il est donné ?"]
       const baseAssociations = [
         {
           name: "Urgence Palestine",
@@ -59,6 +59,7 @@ export class AssociationSeedService {
         association.description = `Association pour ${type.name.toLowerCase()}`;
         association.image = `${type.name.toLowerCase()}.png`;
         association.types = [type];
+        association.applicationQuestion = questions[Math.floor(Math.random() * questions.length)];
         return association;
       });
 
