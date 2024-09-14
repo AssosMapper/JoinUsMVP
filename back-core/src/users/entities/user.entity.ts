@@ -31,9 +31,9 @@ export class User extends EntityStructure{
   @DeleteDateColumn()
   deletedAt: Date;
 
-  @ManyToOne(() => Association, association => association.users)
-  @JoinColumn()
-  association: Association;
+  @ManyToMany(() => Association, association => association.users)
+  @JoinTable()
+  associations: Array<Association>;
 
   @ManyToMany(() => Role, (role) => role.users, {
     cascade: ['remove'],

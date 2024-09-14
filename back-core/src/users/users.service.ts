@@ -59,7 +59,7 @@ export class UsersService {
         const newUser = new User();
         newUser.password = hashedPassword;
         newUser.roles = [role];
-        newUser.association = association;
+        newUser.associations = [association];
         newUser.email = createUserDto.email;
         newUser.first_name = createUserDto.firstName;
         newUser.last_name = createUserDto.lastName;
@@ -72,7 +72,7 @@ export class UsersService {
     async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
         const existingUser = await this.usersRepository.findOne({
             where: {id},
-            relations: ['roles', 'association'],
+            relations: ['roles', 'associations'],
         });
         if (!existingUser) {
             throw new NotFoundException(`User with ID ${id} not found`);
@@ -96,7 +96,7 @@ export class UsersService {
     async findByEmail(email: string): Promise<User | undefined> {
         return this.usersRepository.findOne({
             where: {email},
-            relations: ['roles', 'association'],
+            relations: ['roles', 'associations'],
         });
     }
 
