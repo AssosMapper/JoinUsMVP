@@ -1,9 +1,20 @@
-import { Body, Controller, Delete, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Param,
+  Patch,
+  Post,
+  Get,
+} from '@nestjs/common';
 import { AssociationApplicationsService } from './association-applications.service';
 import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
 import { JoinAssociationDto } from './dto/join-association.dto';
 import { CurrentUserId } from '../utils/decorators/current-user-id.decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { User } from '../users/entities/user.entity';
+import { ApplicationStatus } from './entities/association-application.entity';
+import { UpdateApplicationStatusDto } from './dto/update-application-status.dto';
 
 @Controller('association-applications')
 @BearAuthToken()
@@ -20,7 +31,16 @@ export class AssociationApplicationsController {
   ) {
     return this.applicationService.joinAssociation(userId, joinAssociationDto);
   }
-
+  @Patch(':id')
+  async updateApplicationStatus(
+    @Param('id') id: string,
+    @Body() updateApplicationStatusDto: UpdateApplicationStatusDto,
+  ) {
+    return this.applicationService.updateApplicationStatus(
+      id,
+      updateApplicationStatusDto,
+    );
+  }
   @Delete(':id')
   async cancelApplication(
     @CurrentUserId() userId: string,
@@ -29,7 +49,11 @@ export class AssociationApplicationsController {
     return this.applicationService.cancelApplication(userId, id);
   }
 
-  /**
-   * @todo Add denyApplication and acceptApplication routes
-   */
+  @Get('current/:associationId')
+  async getCurrentApplication(
+    @CurrentUserId() userId: string,
+    @Param('associationId') associationId: string,
+  ) {
+    return this.applicationService.getCurrentApplication(userId, associationId);
+  }
 }

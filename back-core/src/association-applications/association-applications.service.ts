@@ -12,6 +12,7 @@ import {
 import { User } from '../users/entities/user.entity';
 import { Association } from '../associations/entities/association.entity';
 import { JoinAssociationDto } from './dto/join-association.dto';
+import { UpdateApplicationStatusDto } from './dto/update-application-status.dto';
 
 @Injectable()
 export class AssociationApplicationsService {
@@ -88,40 +89,60 @@ export class AssociationApplicationsService {
     await this.associationApplicationRepository.remove(application);
     return { message: 'Application cancelled successfully' };
   }
+
+  async updateApplicationStatus(
+    id,
+    updateApplicationStatusDto: UpdateApplicationStatusDto,
+  ) {
+    const { status } = updateApplicationStatusDto;
+    const application = await this.associationApplicationRepository.findOne({
+      where: { id: id },
+      relations: ['user.associations', 'association'],
+    });
+
+    if (!application) throw new NotFoundException('Candidature non trouvée');
+
+    if (
+      application.user.associations.some(
+        (a) => a.id === application.association.id,
+      )
+    )
+      throw new ConflictException({
+        message: `Cet utilisateur est déjà dans cette association`,
+      });
+
+    application.status = status;
+
+    if (status === ApplicationStatus.APPROVED) {
+      application.user.associations.push(application.association);
+      await this.userRepository.save(application.user);
+    }
+
+    return this.associationApplicationRepository.save(application);
+  }
+  async getCurrentApplication(userId: string, associationId: string) {
+    let application = await this.associationApplicationRepository.findOne({
+      where: {
+        user: { id: userId },
+        association: { id: associationId },
+        status: ApplicationStatus.IN_PROGRESS,
+      },
+    });
+    if (!application) throw new NotFoundException('Candidature non trouvée');
+    return application;
+  }
   /*
-        async updateApplicationStatus(applicationId: string, updateStatusDto: UpdateApplicationStatusDto) {
-            const { status, applicationAnswer } = updateStatusDto;
-            const application = await this.associationApplicationRepository.findOne({
-                where: { id: applicationId },
-                relations: ['user', 'association'],
-            });
+  async getApplicationsByAssociation(associationId: string) {
+    return this.associationApplicationRepository.find({
+      where: { association: { id: associationId } },
+      relations: ['user'],
+    });
+  }
 
-            if (!application)
-                throw new NotFoundException('Application not found');
-
-            application.status = status;
-            if (applicationAnswer)
-                application.applicationAnswer = applicationAnswer;
-
-            if (status === ApplicationStatus.APPROVED) {
-                application.user.association = application.association;
-                await this.userRepository.save(application.user);
-            }
-
-            return this.associationApplicationRepository.save(application);
-        }
-
-        async getApplicationsByAssociation(associationId: string) {
-            return this.associationApplicationRepository.find({
-                where: { association: { id: associationId } },
-                relations: ['user'],
-            });
-        }
-
-        async getApplicationsByUser(userId: string) {
-            return this.associationApplicationRepository.find({
-                where: { user: { id: userId } },
-                relations: ['association'],
-            });
-        }*/
+  async getApplicationsByUser(userId: string) {
+    return this.associationApplicationRepository.find({
+      where: { user: { id: userId } },
+      relations: ['association'],
+    });
+  }*/
 }

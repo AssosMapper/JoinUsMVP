@@ -1,0 +1,1 @@
+export type ApplicationStatus = '0' | '1' | '2';
