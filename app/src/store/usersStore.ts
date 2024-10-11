@@ -9,7 +9,11 @@ export const useUserStore = defineStore('user', {
             token: '',
             isAuth: false,
             user: {
-                roles: [] 
+                id: '',
+                first_name: '',
+                last_name: '',
+                roles: [] as any[],  
+                association: [] as any[]  
             },
         };
     },

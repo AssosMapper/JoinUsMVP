@@ -20,7 +20,7 @@ const association = ref({
   localisation: '',
   description: '',
   image: '',
-  user_id: userStore.id,
+  user_id: userStore.user.id,
   typeIds: [] as number[],
   members: 0,
 });
@@ -46,7 +46,7 @@ const fetchAssociations = async () => {
   }
 };
 
-const fetchAssociationDetails = async (id: number) => {
+const fetchAssociationDetails = async (id: string) => {
   try {
     const assoData = await associationService.getAssociationById(id);
     association.value = {
@@ -87,8 +87,8 @@ onMounted(async () => {
   if (isAdmin) {
     fetchAssociations();
   } else if (isAssociationManager) {
-    if (userStore.associationId !== null) {
-      selectedAssociationId.value = userStore.associationId;
+    if (userStore.user.association.id !== null) {
+      selectedAssociationId.value = userStore.user.association.id;
       fetchAssociationDetails(userStore.associationId);
     }
   }
@@ -189,6 +189,7 @@ watch(selectedAssociationId, (newId) => {
 
       <button
         type="submit"
+        :disabled="selectedTypeIds.length === 0"
         class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
       >
         Update

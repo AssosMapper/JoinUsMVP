@@ -24,7 +24,7 @@ const event = ref({
   date: '',
   localisation: '',
   associationId: null as string | null,
-  typeEventId: null as string | null,
+  typeEventId: null as string | null, 
   isPublic: true,
   isValid: false,
 });
@@ -58,9 +58,12 @@ const handleSubmit = async () => {
 
     const dataToSend = {
       ...event.value,
-      associationId: userStore.user.association?.id,
-      typeEventId: event.value.typeEventId,
+      associationId: userStore.user?.association?.id || null, 
+      typeEventId: event.value.typeEventId, 
     };
+    if (!userStore.user?.association) {
+      dataToSend.associationId = null;
+    }
     console.log(dataToSend);
     await eventService.createEvent(dataToSend);
     notificationStore.showNotification("Evenement créé avec succès !", "success");
@@ -81,7 +84,8 @@ const fetchAssociations = async () => {
 
 const fetchTypeEvents = async () => {
   try {
-    typeEvents.value = await typeEventService.getAllTypeEvents();
+    const response: { id: number; name: string }[] = await typeEventService.getAllTypeEvents();
+    typeEvents.value = response;
   } catch (error) {
     console.error('Error fetching type events:', error);
   }
