@@ -9,13 +9,13 @@ import {useNotificationStore} from "@/store/notificationStore.ts";
 
 const userStore = useUserStore();
 const router = useRouter();
-
-
 const isAdmin = userStore.isAdmin;
 const isAssociationManager = userStore.isAssociationManager;
 
 const association = ref({
-  id: 0,
+  id: '',
+  createdAt: '',
+  updatedAt: '',
   name: '',
   localisation: '',
   description: '',
@@ -23,9 +23,11 @@ const association = ref({
   user_id: userStore.user.id,
   typeIds: [] as number[],
   members: 0,
+  types: '',
+  users: [] as any[] | undefined,  
 });
 
-const selectedAssociationId = ref<number | null>(null);
+const selectedAssociationId = ref<string | null>(null);
 const selectedTypeIds = ref<number[]>([]);
 const availableAssociations = ref<{ id: number, name: string }[]>([]);
 const availableTypes = ref<{ id: number, name: string }[]>([]);
@@ -52,7 +54,6 @@ const fetchAssociationDetails = async (id: string) => {
     association.value = {
       ...assoData,
       typeIds: assoData.types.map((type: any) => type.id),
-      user_id: userStore.id
     };
     selectedTypeIds.value = assoData.types.map((type: any) => type.id);
   } catch (error) {
@@ -70,9 +71,11 @@ const handleSubmit = async () => {
       user_id: association.value.user_id
     };
     
-    delete dataToSend.users;
+    if ('users' in dataToSend) {
+      delete dataToSend.users;
+    }
     
-    console.log('Data to send:', JSON.stringify(dataToSend, null, 2));
+    // console.log('Data to send:', JSON.stringify(dataToSend, null, 2));
     
     await associationService.updateAssociation(association.value.id, dataToSend);
     useNotificationStore().showNotification('Association updated successfully', 'success');
@@ -89,7 +92,7 @@ onMounted(async () => {
   } else if (isAssociationManager) {
     if (userStore.user.association.id !== null) {
       selectedAssociationId.value = userStore.user.association.id;
-      fetchAssociationDetails(userStore.associationId);
+      fetchAssociationDetails(userStore.user.association.id);
     }
   }
 });
@@ -190,6 +193,7 @@ watch(selectedAssociationId, (newId) => {
       <button
         type="submit"
         :disabled="selectedTypeIds.length === 0"
+
         class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
       >
         Update

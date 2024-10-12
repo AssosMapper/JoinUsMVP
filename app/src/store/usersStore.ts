@@ -13,8 +13,12 @@ export const useUserStore = defineStore('user', {
                 first_name: '',
                 last_name: '',
                 roles: [] as any[],  
-                association: [] as any[]  
-            },
+                association: {
+                  id: '',  
+                  name: '', 
+                }  
+              }
+              
         };
     },
     getters: {
@@ -45,8 +49,13 @@ export const useUserStore = defineStore('user', {
                 this.token = data?.access_token;
                 this.user = data?.user;
                 this.isAuth = true;
-            } catch (e) {
-                throw new Error(e.message);
+            } catch (e: unknown) {
+                // Vérification que l'erreur est bien de type Error
+                if (e instanceof Error) {
+                    throw new Error(e.message);
+                } else {
+                    throw new Error("Une erreur inconnue s'est produite.");
+                }
             } finally {
                 this.loader = false;
             }
@@ -57,21 +66,28 @@ export const useUserStore = defineStore('user', {
         async refetchUser() {
             this.loader = true;
             try {
-              const data = await authService.getProfile(this.token);
-              this.user = data;
-            } catch (e) {
-              throw new Error(e.message);
+                const data = await authService.getProfile(this.token);
+                this.user = data;
+            } catch (e: unknown) {
+                if (e instanceof Error) {
+                    throw new Error(e.message);
+                } else {
+                    throw new Error("Une erreur inconnue s'est produite.");
+                }
             } finally {
-              this.loader = false;
+                this.loader = false;
             }
-          },
-      
+        },
         async register(register: IRegister) {
             this.loader = true;
             try {
                 await authService.register(register);
-            } catch (e) {
-                throw new Error("Inscription failed");
+            } catch (e: unknown) {
+                if (e instanceof Error) {
+                    throw new Error("Inscription failed: " + e.message);
+                } else {
+                    throw new Error("Une erreur inconnue s'est produite.");
+                }
             } finally {
                 this.loader = false;
             }
