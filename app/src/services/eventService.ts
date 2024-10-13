@@ -1,13 +1,12 @@
 import axios from 'axios';
-import {Event} from '@joinus/interfaces';
 import {useApi} from "@/composables/useApi.ts";
 import {useApiStore} from "@/store/apiUrls.store.ts";
-import {IEvent} from "@/types/event.types.ts";
+import {Event} from "@/types/event.types.ts";
 
 const API_URL = import.meta.env.VITE_APP_BACKEND_URL;
 
-const createEvent = async (event: IEvent) => {
-    const {data, error, response} = await useApi(useApiStore().events.create).post(event).json();
+const createEvent = async (event: Event) => {
+    const {} = await useApi(useApiStore().events.create).post(event).json();
 };
 
 const getAllEvents = async (isValid?: boolean, page: number = 1, limit: number = 10) => {

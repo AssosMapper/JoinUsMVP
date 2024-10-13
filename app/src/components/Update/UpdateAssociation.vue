@@ -5,27 +5,32 @@ import associationService from '@/services/associationService';
 import typeAssociationService from '@/services/typeAssociationService';
 import { useRouter } from 'vue-router';
 import GoogleAutoCompleteComponent from '../GoogleAutoCompleteComponent.vue';
-import {useNotificationStore} from "@/store/notificationStore.ts";
+import { useNotificationStore } from "@/store/notificationStore.ts";
 
 const userStore = useUserStore();
 const router = useRouter();
+const notificationStore = useNotificationStore();
 
-
-const isAdmin = userStore.isAdmin;
-const isAssociationManager = userStore.isAssociationManager;
+const isLoading = ref(true);
+const isAdmin = ref(userStore.isAdmin);
+const isAssociationManager = ref(userStore.isAssociationManager);
 
 const association = ref({
-  id: 0,
+  id: '',
+  createdAt: '',
+  updatedAt: '',
   name: '',
   localisation: '',
   description: '',
   image: '',
-  user_id: userStore.id,
+  user_id: userStore.user.id,
   typeIds: [] as number[],
   members: 0,
+  types: '',
+  users: [] as any[] | undefined,
 });
 
-const selectedAssociationId = ref<number | null>(null);
+const selectedAssociationId = ref<string | null>(null);
 const selectedTypeIds = ref<number[]>([]);
 const availableAssociations = ref<{ id: number, name: string }[]>([]);
 const availableTypes = ref<{ id: number, name: string }[]>([]);
@@ -40,19 +45,18 @@ const fetchTypes = async () => {
 
 const fetchAssociations = async () => {
   try {
-    availableAssociations.value =  await associationService.getAllAssociations();
+    availableAssociations.value = await associationService.getAllAssociations();
   } catch (error) {
     console.error('Error fetching associations:', error);
   }
 };
 
-const fetchAssociationDetails = async (id: number) => {
+const fetchAssociationDetails = async (id: string) => {
   try {
     const assoData = await associationService.getAssociationById(id);
     association.value = {
       ...assoData,
       typeIds: assoData.types.map((type: any) => type.id),
-      user_id: userStore.id
     };
     selectedTypeIds.value = assoData.types.map((type: any) => type.id);
   } catch (error) {
@@ -62,20 +66,22 @@ const fetchAssociationDetails = async (id: number) => {
 
 const handleSubmit = async () => {
   try {
-    const { id,createdAt,updatedAt,types, ...rest } = association.value;
+    const { id, createdAt, updatedAt, types, ...rest } = association.value;
 
     const dataToSend = {
       ...rest,
       typeIds: selectedTypeIds.value,
-      user_id: association.value.user_id
+      user_id: association.value.user_id,
     };
-    
-    delete dataToSend.users;
-    
+
+    if ('users' in dataToSend) {
+      delete dataToSend.users;
+    }
+
     console.log('Data to send:', JSON.stringify(dataToSend, null, 2));
-    
+
     await associationService.updateAssociation(association.value.id, dataToSend);
-    useNotificationStore().showNotification('Association updated successfully', 'success');
+    notificationStore.showNotification('Association mise à jour avec succès', 'success');
     await router.push('/');
   } catch (error) {
     console.error('Error updating association:', error);
@@ -83,27 +89,43 @@ const handleSubmit = async () => {
 };
 
 onMounted(async () => {
-  fetchTypes();
-  if (isAdmin) {
-    fetchAssociations();
-  } else if (isAssociationManager) {
-    if (userStore.associationId !== null) {
-      selectedAssociationId.value = userStore.associationId;
-      fetchAssociationDetails(userStore.associationId);
+  console.log(userStore.user.association?.id);
+  try {
+    isLoading.value = true;
+    await fetchTypes();
+
+    // Assurez-vous que les données utilisateur sont bien chargées
+    if (userStore.isAuth && userStore.user.association?.id) {
+      selectedAssociationId.value = userStore.user.association.id;
+      await fetchAssociationDetails(userStore.user.association.id);
+    } else if (isAdmin.value) {
+      await fetchAssociations();
+    } else if (isAssociationManager.value) {
+      if (userStore.user.association?.id !== null) {
+        selectedAssociationId.value = userStore.user.association.id;
+        await fetchAssociationDetails(userStore.user.association.id);
+      }
     }
+  } catch (error) {
+    console.error('Error during initialization:', error);
+  } finally {
+    isLoading.value = false;
   }
 });
+
 
 watch(selectedAssociationId, (newId) => {
   if (newId !== null) {
     fetchAssociationDetails(newId);
   }
 });
-
 </script>
 
 <template>
-  <div class="form-container w-4/5 flex justify-center text-center mx-auto my-10 py-8 border border-gray-300 rounded-lg">
+  <div v-if="isLoading" class="flex justify-center items-center h-screen">
+    <p>Loading...</p>
+  </div>
+  <div v-else class="form-container w-4/5 flex justify-center text-center mx-auto my-10 py-8 border border-gray-300 rounded-lg">
     <form class="w-full max-w-md" @submit.prevent="handleSubmit">
       <h2 class="text-2xl font-semibold leading-7 text-gray-900 mb-6">Update Association</h2>
 
@@ -189,6 +211,7 @@ watch(selectedAssociationId, (newId) => {
 
       <button
         type="submit"
+        :disabled="selectedTypeIds.length === 0"
         class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
       >
         Update

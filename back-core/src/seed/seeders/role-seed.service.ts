@@ -38,7 +38,6 @@ export class RoleSeedService {
 
     const userPermissions = [...eventPermissions];
     
-    // Add permission for updating roles to user role
     const roleUpdatePermission = await this.permissionRepository.findOne({
       where: { permission: 'role:update' },
     });
@@ -47,7 +46,6 @@ export class RoleSeedService {
       userPermissions.push(roleUpdatePermission);
     }
 
-    // Create roles
     const roles = [] as Array<Role>;
 
     let role = new Role();

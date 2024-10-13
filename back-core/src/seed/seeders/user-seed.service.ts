@@ -19,7 +19,6 @@ export class UserSeedService {
     await this.drop();
     const users = [];
 
-    // Create SuperAdmin user
     const superAdminRole = await this.roleRepository.findOne({
       where: { name: 'SuperAdmin' },
     });
@@ -35,7 +34,6 @@ export class UserSeedService {
     user.roles = [superAdminRole];
     users.push(user);
 
-    // Create AssociationManager user
     const associationManagerRole = await this.roleRepository.findOne({
       where: { name: 'AssociationManager' },
     });
@@ -51,7 +49,6 @@ export class UserSeedService {
     user.roles = [associationManagerRole];
     users.push(user);
 
-    // Create EventsManager user
     const eventsManagerRole = await this.roleRepository.findOne({
       where: { name: 'EventsManager' },
     });

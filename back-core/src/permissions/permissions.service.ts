@@ -9,7 +9,6 @@ export class PermissionsService {
     private readonly permissionRepository: Repository<Permission>,
   ) {}
   async createMany(data: Array<Permission>) {
-    //create many permissions
     return this.permissionRepository.save(data);
   }
 }
