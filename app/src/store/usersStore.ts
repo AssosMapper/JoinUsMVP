@@ -6,9 +6,9 @@ export const useUserStore = defineStore('user', {
     state() {
         return {
             loader: false,
-            token: '',
-            isAuth: false,
-            user: {
+            token: '',   // Stocke le token d'authentification
+            isAuth: false,  // Vérifie si l'utilisateur est authentifié
+            user: {       // Informations de l'utilisateur
                 id: '',
                 first_name: '',
                 last_name: '',
@@ -17,8 +17,7 @@ export const useUserStore = defineStore('user', {
                   id: '',  
                   name: '', 
                 }  
-              }
-              
+            }
         };
     },
     getters: {
@@ -46,11 +45,13 @@ export const useUserStore = defineStore('user', {
             this.loader = true;
             try {
                 const data = await authService.login(credentials);
-                this.token = data?.access_token;
-                this.user = data?.user;
-                this.isAuth = true;
+                this.token = data?.access_token; // Stocke le token renvoyé après login
+                this.user = data?.user;  // Stocke les infos utilisateur
+                this.isAuth = true;      // Indique que l'utilisateur est authentifié
+
+                // Ajout du console.log après le login
+                console.log('État du store après login:', this.$state);
             } catch (e: unknown) {
-                // Vérification que l'erreur est bien de type Error
                 if (e instanceof Error) {
                     throw new Error(e.message);
                 } else {
@@ -61,13 +62,16 @@ export const useUserStore = defineStore('user', {
             }
         },
         logout() {
-            this.$reset();
+            this.$reset();  // Réinitialise le store à son état initial lors de la déconnexion
         },
         async refetchUser() {
             this.loader = true;
             try {
                 const data = await authService.getProfile(this.token);
-                this.user = data;
+                this.user = data;  // Met à jour les informations utilisateur si le token est valide
+
+                // Ajout du console.log après la réactualisation
+                console.log('État du store après réactualisation:', this.$state);
             } catch (e: unknown) {
                 if (e instanceof Error) {
                     throw new Error(e.message);
@@ -93,15 +97,25 @@ export const useUserStore = defineStore('user', {
             }
         }
     },
+    // Activation de la persistance du store
     persist: {
-        storage: sessionStorage,
-        paths: ['token'],
+        storage: sessionStorage,  // Utilisation du sessionStorage pour conserver les données
+        paths: ['token'],         // Persiste uniquement le token
         async afterRestore(context) {
-          if (context.store.$state.token) {
-            const data = await authService.getProfile(context.store.$state.token);
-            context.store.$state.user = data;
-            context.store.$state.isAuth = true;
-          }
-        },
+            if (context.store.$state.token) {
+                try {
+                    // Si le token est restauré, récupère les infos utilisateur
+                    const data = await authService.getProfile(context.store.$state.token);
+                    context.store.$state.user = data;
+                    context.store.$state.isAuth = true;  // Réauthentifie l'utilisateur
+
+                    // Ajout du console.log après la restauration des données
+                    console.log('État du store après restauration:', context.store.$state);
+                } catch (error) {
+                    console.error("Erreur lors de la restauration de l'état utilisateur :", error);
+                    context.store.$reset();  // Réinitialise en cas de problème
+                }
+            }
+        }
     }
 });
