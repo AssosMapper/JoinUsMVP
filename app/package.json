@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.6",
+    "@primevue/themes": "^4.1.0",
     "@vee-validate/i18n": "^4.13.2",
     "@vueuse/core": "^10.11.0",
     "@vueuse/integrations": "^10.11.0",
@@ -17,6 +18,8 @@
     "destr": "^2.0.3",
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.1",
+    "primevue": "^4.1.0",
+    "tailwindcss-primeui": "^0.3.4",
     "universal-cookie": "^7",
     "vee-validate": "^4.13.2",
     "vue": "^3.4.31",

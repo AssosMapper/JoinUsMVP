@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import { ICredentials, IRegister } from "@/types/security.types.ts";
 import authService from "@/services/authService.ts";
+import associationService from "@/services/associationService.ts";
+import {IAssociation} from "@/types/association.types.ts";
 
 export const useUserStore = defineStore('user', {
     state() {
@@ -9,7 +11,8 @@ export const useUserStore = defineStore('user', {
             token: '',
             isAuth: false,
             user: {
-                roles: [] 
+                roles: [],
+                associations: []
             },
         };
     },
@@ -20,6 +23,7 @@ export const useUserStore = defineStore('user', {
         isAdmin(): boolean {
             return this.user.roles?.some(role => role.name === 'SuperAdmin') ?? false;
         },
+
         isAssociationManager(): boolean {
             return this.user.roles?.some(role => role.name === 'AssociationManager') ?? false;
         },
@@ -46,6 +50,9 @@ export const useUserStore = defineStore('user', {
             } finally {
                 this.loader = false;
             }
+        },
+        getAssociation(associationId: string): IAssociation | null {
+            return this.user.associations?.find(association => association.id === associationId) ?? null;
         },
         logout() {
             this.$reset();

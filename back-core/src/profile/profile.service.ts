@@ -5,7 +5,8 @@ import { User } from '../users/entities/user.entity';
 @Injectable()
 export class ProfileService {
   constructor(
-    @Inject('USER_REPOSITORY') private readonly usersRepository: Repository<User>,
+    @Inject('USER_REPOSITORY')
+    private readonly usersRepository: Repository<User>,
   ) {}
 
   async findOne(userId: string): Promise<User> {
@@ -15,7 +16,7 @@ export class ProfileService {
     }
     const user = await this.usersRepository.findOne({
       where: { id: userId },
-      relations: ['roles'],
+      relations: ['roles', 'associations'],
     });
     if (!user) {
       throw new NotFoundException(`User with ID ${userId} not found`);

@@ -2,12 +2,15 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import associationService from '@/services/associationService';
+import associationApplicationService from "@/services/associationApplicationService.ts";
+import {useUserStore} from "@/store";
+import AssociationApplicationFormModal from "@/components/AssociationApplication/AssociationApplicationFormModal.vue";
 
 const router = useRouter();
 
 const associations = ref([]);
 const loader = ref(false);
-
+const userStore = useUserStore();
 const fetchAssociations = async () => {
   loader.value = true;
   try {
@@ -19,6 +22,19 @@ const fetchAssociations = async () => {
   }
 };
 
+const fetchAssociationApplications = async ()  => {
+  loader.value = true;
+  const associationsIds = associations.value.map(association => association.id);
+
+  try {
+    const applications = await associationApplicationService.getApplicationsByAssociations(associationsIds);
+
+  } catch (error) {
+    console.error('Error fetching association applications:', error);
+  }finally {
+    loader.value = false;
+  }
+};
 const goToDetails = (id: number) => {
   router.push({ name: 'AssociationDetails', params: { id } });
 };
@@ -29,8 +45,9 @@ const getImageSrc = (associationName: string) => {
   return `/assets/associations-images/${sanitizedAssociationName}.png`;
 };
 
-onMounted(() => {
-  fetchAssociations();
+onMounted(async () => {
+  await fetchAssociations();
+  await fetchAssociationApplications();
 });
 </script>
 
@@ -60,11 +77,16 @@ onMounted(() => {
           Types: <span v-for="type in association.types" :key="type.id">{{ type.name }}</span>
         </p>
       </div>
-      <div class="p-6 pt-0">
-        <button @click="goToDetails(association.id)" class="align-middle select-none font-sans font-bold text-center uppercase transition-all disabled:opacity-50 disabled:shadow-none disabled:pointer-events-none text-xs py-3 px-6 rounded-lg bg-gray-900 text-white shadow-md shadow-gray-900/10 hover:shadow-lg hover:shadow-gray-900/20 focus:opacity-[0.85] focus:shadow-none active:opacity-[0.85] active:shadow-none" type="button">
-          Read More
-        </button>
+
+      <div class="p-6 pt-0 flex flex-row justify-center gap-3 items-center">
+        <Button @click="goToDetails(association.id)"  type="button">
+          En savoir plus
+        </Button>
+
+          <AssociationApplicationFormModal v-if="userStore.getAssociation(association.id)"/>
+
       </div>
+
     </div>
   </div>
 </template>

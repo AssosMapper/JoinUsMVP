@@ -4,7 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import {
   ApplicationStatus,
   AssociationApplication,
@@ -130,6 +130,30 @@ export class AssociationApplicationsService {
     });
     if (!application) throw new NotFoundException('Candidature non trouvée');
     return application;
+  }
+  async getApplicationsByAssociations(
+    userId: string,
+    associationIds: string[],
+  ) {
+    const applications = await this.associationApplicationRepository.find({
+      where: {
+        user: { id: userId },
+        association: { id: In(associationIds) },
+      },
+    });
+    const mostRecentApplications = Object.values(
+      applications.reduce((acc, app) => {
+        if (
+          !acc[app.association.id] ||
+          app.createdAt > acc[app.association.id].createdAt
+        ) {
+          acc[app.association.id] = app;
+        }
+        return acc;
+      }, {}),
+    );
+
+    return mostRecentApplications;
   }
   /*
   async getApplicationsByAssociation(associationId: string) {

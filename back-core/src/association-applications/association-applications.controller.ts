@@ -6,6 +6,8 @@ import {
   Patch,
   Post,
   Get,
+  ParseArrayPipe,
+  Query,
 } from '@nestjs/common';
 import { AssociationApplicationsService } from './association-applications.service';
 import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
@@ -48,7 +50,20 @@ export class AssociationApplicationsController {
   ) {
     return this.applicationService.cancelApplication(userId, id);
   }
-
+  @Get('by-associations')
+  async getApplicationsByAssociations(
+    @CurrentUserId() userId: string,
+    @Query(
+      'associationIds',
+      new ParseArrayPipe({ items: String, separator: ',' }),
+    )
+    associationIds: string[],
+  ) {
+    return this.applicationService.getApplicationsByAssociations(
+      userId,
+      associationIds,
+    );
+  }
   @Get('current/:associationId')
   async getCurrentApplication(
     @CurrentUserId() userId: string,

@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { AssociationsService } from './associations.service';
 import { CreateAssociationDto } from './dto/create-association.dto';
 import { UpdateAssociationDto } from './dto/update-association.dto';
@@ -28,13 +38,19 @@ export class AssociationsController {
 
   @Post()
   @BearAuthToken()
-  create(@CurrentUserId() user: User,@Body() createAssociationDto: CreateAssociationDto): Promise<Association> {
-    return this.associationsService.create(user,createAssociationDto);
+  create(
+    @CurrentUserId() user: User,
+    @Body() createAssociationDto: CreateAssociationDto,
+  ): Promise<Association> {
+    return this.associationsService.create(user, createAssociationDto);
   }
 
   @Put(':id')
   @BearAuthToken()
-  update(@Param('id') id: string, @Body() updateAssociationDto: UpdateAssociationDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateAssociationDto: UpdateAssociationDto,
+  ) {
     return this.associationsService.update(id, updateAssociationDto);
   }
 
