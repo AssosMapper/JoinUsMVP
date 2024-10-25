@@ -5,7 +5,7 @@ import GoogleAutoCompleteComponent from '../GoogleAutoCompleteComponent.vue';
 import {useUserStore} from "@/store";
 import {useNotificationStore} from "@/store/notificationStore.ts";
 import typeAssociationService from "@/services/typeAssociationService.ts";
-import {IAssociation} from "@/types/association.types.ts";
+import {Association} from "@/types/association.types.ts";
 import associationService from "@/services/associationService.ts";
 
 const userStore = useUserStore();
@@ -14,7 +14,7 @@ const notificationStore = useNotificationStore();
 const loader = ref(false);
 const userId = userStore.id !== null ? userStore.id : 0;
 
-const association = ref<IAssociation>({
+const association = ref<Association>({
   name: '',
   localisation: '',
   description: '',

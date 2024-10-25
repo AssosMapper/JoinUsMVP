@@ -14,8 +14,6 @@ import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
 import { JoinAssociationDto } from './dto/join-association.dto';
 import { CurrentUserId } from '../utils/decorators/current-user-id.decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { User } from '../users/entities/user.entity';
-import { ApplicationStatus } from './entities/association-application.entity';
 import { UpdateApplicationStatusDto } from './dto/update-application-status.dto';
 
 @Controller('association-applications')

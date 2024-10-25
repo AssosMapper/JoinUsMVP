@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AssociationApplication, ApplicationStatus } from '../../association-applications/entities/association-application.entity';
+import { AssociationApplication } from '../../association-applications/entities/association-application.entity';
+import { ApplicationStatus } from '@joinus/packages/src/enums/association-applications.enum';
 import { User } from '../../users/entities/user.entity';
 import { Association } from '../../associations/entities/association.entity';
 

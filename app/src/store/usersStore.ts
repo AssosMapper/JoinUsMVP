@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { ICredentials, IRegister } from "@/types/security.types.ts";
 import authService from "@/services/authService.ts";
 import associationService from "@/services/associationService.ts";
-import {IAssociation} from "@/types/association.types.ts";
+import {Association} from "@/types/association.types.ts";
 
 export const useUserStore = defineStore('user', {
     state() {
@@ -51,7 +51,7 @@ export const useUserStore = defineStore('user', {
                 this.loader = false;
             }
         },
-        getAssociation(associationId: string): IAssociation | null {
+        getAssociation(associationId: string): Association | null {
             return this.user.associations?.find(association => association.id === associationId) ?? null;
         },
         logout() {

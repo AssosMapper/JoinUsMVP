@@ -2,11 +2,11 @@ import axios from 'axios';
 import { Association } from '@joinus/interfaces';
 import {useApiStore} from "@/store/apiUrls.store.ts";
 import {useApi} from "@/composables/useApi.ts";
-import {IAssociation} from "@/types/association.types.ts";
+import {Association} from "@/types/association.types.ts";
 
 const API_URL = import.meta.env.VUE_APP_BACKEND_URL;
 
-const createAssociation = async (association: IAssociation, token: string) => {
+const createAssociation = async (association: Association, token: string) => {
   const apiStore = useApiStore();
   const {data,error,response}=await useApi(apiStore.associations.create).post(association).json();
     if(error.value){

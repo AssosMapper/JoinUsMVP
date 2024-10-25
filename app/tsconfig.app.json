@@ -23,12 +23,14 @@
     "noFallthroughCasesInSwitch": true,
     "paths": {
       "@/*": [
-        "src/*"
+        "./src/*"
       ],
       "@stores/*": ["/app/src/store*"],
-      "@joinus/interfaces": ["../packages/interfaces/src"]
+      "@joinus/interfaces": ["../packages/interfaces/src"],
+      "@joinus/enum": ["../packages/enum"],
+      "@joinus/validations": ["../packages/validations"],
     },
     "types": ["node"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue",]
 }

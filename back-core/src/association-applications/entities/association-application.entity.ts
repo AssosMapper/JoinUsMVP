@@ -2,12 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { EntityStructure } from '../../utils/structures/entity.structure';
 import { User } from '../../users/entities/user.entity';
 import { Association } from '../../associations/entities/association.entity';
-
-export enum ApplicationStatus {
-  IN_PROGRESS = '0',
-  APPROVED = '1',
-  DENIED = '2',
-}
+import { ApplicationStatus } from '@joinus/packages/src/enums/association-applications.enum';
 
 @Entity()
 export class AssociationApplication extends EntityStructure {

@@ -1,5 +1,5 @@
 import { IsEnum, IsString } from 'class-validator';
-import { ApplicationStatus } from '../entities/association-application.entity';
+import { ApplicationStatus } from '@joinus/packages/src/enums/association-applications.enum';
 
 export class UpdateApplicationStatusDto {
   @IsEnum(ApplicationStatus)

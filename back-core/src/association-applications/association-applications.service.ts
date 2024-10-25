@@ -5,10 +5,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { In, Repository } from 'typeorm';
-import {
-  ApplicationStatus,
-  AssociationApplication,
-} from './entities/association-application.entity';
+import {  AssociationApplication} from './entities/association-application.entity';
+import { ApplicationStatus } from '../../../packages/src/enums/association-applications.enum';
 import { User } from '../users/entities/user.entity';
 import { Association } from '../associations/entities/association.entity';
 import { JoinAssociationDto } from './dto/join-association.dto';

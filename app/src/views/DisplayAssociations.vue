@@ -5,10 +5,13 @@ import associationService from '@/services/associationService';
 import associationApplicationService from "@/services/associationApplicationService.ts";
 import {useUserStore} from "@/store";
 import AssociationApplicationFormModal from "@/components/AssociationApplication/AssociationApplicationFormModal.vue";
+import { Association } from '@/types/association.types';
+import { AssociationApplication } from '@/types/association-application.types';
 
 const router = useRouter();
 
-const associations = ref([]);
+const associations = ref<Association[]>([]);
+const associationApplications = ref<AssociationApplication[]>([]);
 const loader = ref(false);
 const userStore = useUserStore();
 const fetchAssociations = async () => {
@@ -27,8 +30,7 @@ const fetchAssociationApplications = async ()  => {
   const associationsIds = associations.value.map(association => association.id);
 
   try {
-    const applications = await associationApplicationService.getApplicationsByAssociations(associationsIds);
-
+    associationApplications.value = await associationApplicationService.getApplicationsByAssociations(associationsIds);;
   } catch (error) {
     console.error('Error fetching association applications:', error);
   }finally {
@@ -82,8 +84,13 @@ onMounted(async () => {
         <Button @click="goToDetails(association.id)"  type="button">
           En savoir plus
         </Button>
-
-          <AssociationApplicationFormModal v-if="userStore.getAssociation(association.id)"/>
+          
+          <AssociationApplicationFormModal 
+            :applicationQuestion="association.applicationQuestion"
+            :associationId="association.id"
+            :associationApplication="associationApplications.find(application => application.associationId === association.id)" 
+            v-if="!userStore.getAssociation(association.id)"
+            />
 
       </div>
 
