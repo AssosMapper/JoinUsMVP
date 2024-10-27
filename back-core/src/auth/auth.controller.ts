@@ -1,10 +1,10 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { LoginDto } from './dto/login.dto';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { ApiTags } from '@nestjs/swagger';
 import {RegisterDto} from "./dto/register.dto";
-
+import {test as testSchema} from '@shared/validations/test';
 @ApiTags('Authentification')
 @Controller({
   path: 'auth',

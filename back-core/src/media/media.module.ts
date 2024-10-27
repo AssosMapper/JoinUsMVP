@@ -11,6 +11,7 @@ import { UsersModule } from '../users/users.module';
     UsersModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', '..', 'uploads'),
+      serveRoot: '/uploads',
       serveStaticOptions: {
         index: false,
       },

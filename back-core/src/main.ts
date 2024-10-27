@@ -6,6 +6,7 @@ import * as morgan from 'morgan';
 import * as dotenv from 'dotenv';
 
 async function bootstrap() {
+  
   const app = await NestFactory.create(AppModule);
   /**
    * Enable CORS
