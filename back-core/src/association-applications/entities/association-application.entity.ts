@@ -2,7 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { EntityStructure } from '../../utils/structures/entity.structure';
 import { User } from '../../users/entities/user.entity';
 import { Association } from '../../associations/entities/association.entity';
-import { ApplicationStatus } from '@shared/enums/association-applications.enum';
+import { ApplicationStatus } from '@shared/types/association-applications';
 
 @Entity()
 export class AssociationApplication extends EntityStructure {

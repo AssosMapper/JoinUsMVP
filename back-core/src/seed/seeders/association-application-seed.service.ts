@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AssociationApplication } from '../../association-applications/entities/association-application.entity';
-import { ApplicationStatus } from '@shared/enums/association-applications.enum';
+import { ApplicationStatus } from '@shared/types/association-applications';
 import { User } from '../../users/entities/user.entity';
 import { Association } from '../../associations/entities/association.entity';
 

@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { In, Repository } from 'typeorm';
 import {  AssociationApplication} from './entities/association-application.entity';
-import { ApplicationStatus } from '@shared/enums/association-applications.enum';
+import { ApplicationStatus } from '@shared/types/association-applications';
 import { User } from '../users/entities/user.entity';
 import { Association } from '../associations/entities/association.entity';
 import { JoinAssociationDto } from './dto/join-association.dto';
