@@ -37,7 +37,7 @@ const handleSubmit = async () => {
     await router.push('/');
   } catch (error) {
     console.error('Error creating association:', error);
-    notificationStore.showNotification("Erreur lors de la création de l'association", "error");
+    notificationStore.showNotification("Erreur lors de la création de l'association", "danger");
   } finally {
     loader.value = false;
   }

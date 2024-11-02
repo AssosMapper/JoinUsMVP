@@ -4,8 +4,10 @@ import FloatLabel from 'primevue/floatlabel';
 import { computed, onMounted, ref } from 'vue';
 import associationApplicationService from '@/services/associationApplicationService';
 import { useForm } from 'vee-validate';
-import { JoinAssociationDto, joinAssociationSchema } from 'joinus-shared/validations/association-applications.validation';
-
+import { joinAssociationSchema } from '@shared/validations/association-applications.validation';
+import { JoinAssociationDto } from '@shared/dto/association-applications.dto';
+import JnsField from '@/components/ui/JnsField.vue';
+import { useNotificationStore } from '@/store/notificationStore';
 
 const props = defineProps<{
   associationApplication?: AssociationApplication,
@@ -16,31 +18,27 @@ const props = defineProps<{
 
 const visible = ref(false);
 
-const { handleSubmit, resetForm, values, errors } = useForm<JoinAssociationDto>({
+const notificationStore = useNotificationStore();
+const { handleSubmit, resetForm, errors, defineField } = useForm<JoinAssociationDto>({
   validationSchema: joinAssociationSchema,
-  validateOnMount: false,
-  
   initialValues: {
-    applicationAnswer: props.associationApplication?.applicationAnswer || '',
+    applicationAnswer: props.associationApplication?.applicationAnswer || undefined,
     associationId: props.associationId 
   }
 });
 const isSubmitting = ref(false);
 
-const sendButtonText = computed(() => {
-  if (props.associationApplication?.status === ApplicationStatus.IN_PROGRESS)
-   return "Editer ma candidature";
-  return "Envoyer ma candidature";
-})
 
-const showButtonText = computed(() => {
-  if (props.associationApplication?.status === ApplicationStatus.IN_PROGRESS)
-   return "Voir ma candidature";
-  return "Postuler";
-})
+
+
+const [applicationAnswer,applicationAnswerAttrs] = defineField('applicationAnswer');
+
+
 
 const onSubmit = handleSubmit(async (formValues: JoinAssociationDto) => {
   isSubmitting.value = true
+  notificationStore.showNotification("test", "error")
+
   try {
       await associationApplicationService.joinAssociation({
         associationId: props.associationId,
@@ -48,12 +46,11 @@ const onSubmit = handleSubmit(async (formValues: JoinAssociationDto) => {
       });
     
     visible.value = false;
-    resetForm();
   } catch (error) {
-    console.error('Error submitting application:', error);
   }finally {
      isSubmitting.value = false
   }
+
 });
 
 const handleCancel = async () => {
@@ -68,6 +65,18 @@ const handleCancel = async () => {
   }
 }
 
+
+const sendButtonText = computed(() => {
+  if (props.associationApplication?.status === ApplicationStatus.IN_PROGRESS)
+   return "Editer ma candidature";
+  return "Envoyer ma candidature";
+})
+
+const showButtonText = computed(() => {
+  if (props.associationApplication?.status === ApplicationStatus.IN_PROGRESS)
+   return "Voir ma candidature";
+  return "Postuler";
+})
 </script>
 
 
@@ -81,18 +90,20 @@ const handleCancel = async () => {
     <form @submit="onSubmit" class="flex flex-col gap-4">
       <span>{{ props.applicationQuestion }}</span>
     
-      <FloatLabel variant="in" class="w-full">
-        <Textarea 
-          id="applicationAnswer" 
-          v-model="values.applicationAnswer"
-          rows="5" 
-          cols="30"
-          class="w-full"
-          :class="{ 'p-invalid': errors.applicationAnswer }"
-          autoResize />
-        <label for="applicationAnswer">Votre réponse</label>
-      </FloatLabel>
-      <small class="p-error" v-if="errors.applicationAnswer">{{ errors.applicationAnswer }}</small>
+      <JnsField :errorMessage="errors.applicationAnswer">
+        <FloatLabel variant="in" class="w-full">
+          <Textarea 
+            id="applicationAnswer" 
+            v-model="applicationAnswer"
+            v-bind="applicationAnswerAttrs"
+            rows="5" 
+            cols="30"
+            class="w-full"
+            :class="{ 'p-invalid': errors.applicationAnswer }"
+            autoResize />
+          <label for="applicationAnswer">Votre réponse</label>
+        </FloatLabel>
+      </JnsField>
       
       <div class="flex justify-end gap-2">
         <Button :loading="isSubmitting" v-if="props.associationApplication?.status === ApplicationStatus.IN_PROGRESS"

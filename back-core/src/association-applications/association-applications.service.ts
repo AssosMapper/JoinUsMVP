@@ -9,8 +9,8 @@ import {  AssociationApplication} from './entities/association-application.entit
 import { ApplicationStatus } from '@shared/types/association-applications';
 import { User } from '../users/entities/user.entity';
 import { Association } from '../associations/entities/association.entity';
-import { JoinAssociationDto } from './dto/join-association.dto';
-import { UpdateApplicationStatusDto } from './dto/update-application-status.dto';
+import { JoinAssociationDto } from '@shared/dto/association-applications.dto';
+import { UpdateApplicationStatusDto } from '@shared/dto/association-applications.dto';
 
 @Injectable()
 export class AssociationApplicationsService {

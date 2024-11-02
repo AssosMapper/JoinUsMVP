@@ -8,7 +8,7 @@ const notificationStore = useNotificationStore();
 
 <template>
   <Navbar/>
-  <NotificationBanner v-if="notificationStore.visible"/>
+  <NotificationBanner/>
   <router-view/>
   <Footer/>
 

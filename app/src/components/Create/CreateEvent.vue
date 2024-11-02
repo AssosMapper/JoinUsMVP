@@ -47,7 +47,7 @@ const fetchAssociationByType = async () => {
       }
     } catch (error) {
       console.error('Error fetching association by type:', error);
-      notificationStore.showNotification("Erreur lors de la récupération de l'association", "error");
+      notificationStore.showNotification("Erreur lors de la récupération de l'association", "danger");
     }
   }
 };
@@ -67,7 +67,7 @@ const handleSubmit = async () => {
     await router.push('/');
   } catch (error) {
     console.error('Error creating event:', error);
-    notificationStore.showNotification("Erreur lors de la création de l'évènement", "error");
+    notificationStore.showNotification("Erreur lors de la création de l'évènement", "danger");
   }
 };
 

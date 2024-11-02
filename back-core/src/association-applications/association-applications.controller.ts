@@ -11,11 +11,15 @@ import {
 } from '@nestjs/common';
 import { AssociationApplicationsService } from './association-applications.service';
 import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
-import { JoinAssociationDto } from './dto/join-association.dto';
+import { JoinAssociationDto } from '@shared/dto/association-applications.dto';
 import { CurrentUserId } from '../utils/decorators/current-user-id.decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { UpdateApplicationStatusDto } from './dto/update-application-status.dto';
-
+import { UpdateApplicationStatusDto } from '@shared/dto/association-applications.dto';
+import {
+  joinAssociationSchema,
+  updateApplicationStatusSchema,
+} from '@shared/validations/association-applications.validation';
+import { YupValidationPipe } from '@src/utils/pipes/yup-validation.pipe';
 @Controller('association-applications')
 @BearAuthToken()
 @ApiBearerAuth()
@@ -27,20 +31,22 @@ export class AssociationApplicationsController {
   @Post('join')
   async joinAssociation(
     @CurrentUserId() userId: string,
-    @Body() joinAssociationDto: JoinAssociationDto,
+    @Body(new YupValidationPipe(joinAssociationSchema)) joinAssociationDto: JoinAssociationDto,
   ) {
     return this.applicationService.joinAssociation(userId, joinAssociationDto);
   }
+
   @Patch(':id')
   async updateApplicationStatus(
     @Param('id') id: string,
-    @Body() updateApplicationStatusDto: UpdateApplicationStatusDto,
+    @Body(new YupValidationPipe(updateApplicationStatusSchema)) updateApplicationStatusDto: UpdateApplicationStatusDto,
   ) {
     return this.applicationService.updateApplicationStatus(
       id,
       updateApplicationStatusDto,
     );
   }
+
   @Delete(':id')
   async cancelApplication(
     @CurrentUserId() userId: string,
@@ -48,6 +54,7 @@ export class AssociationApplicationsController {
   ) {
     return this.applicationService.cancelApplication(userId, id);
   }
+
   @Get('by-associations')
   async getApplicationsByAssociations(
     @CurrentUserId() userId: string,
@@ -62,6 +69,7 @@ export class AssociationApplicationsController {
       associationIds,
     );
   }
+  
   @Get('current/:associationId')
   async getCurrentApplication(
     @CurrentUserId() userId: string,

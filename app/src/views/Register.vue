@@ -54,7 +54,7 @@ const handleSubmit = async () => {
     await router.push('/login');
     notificationStore.showNotification("Profil créé avec succès !", "success");
   } catch (error) {
-    notificationStore.showNotification("Erreur lors de la création du profil", "error");
+    notificationStore.showNotification("Erreur lors de la création du profil", "danger");
   }
 };
 </script>

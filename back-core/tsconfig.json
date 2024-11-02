@@ -12,7 +12,8 @@
     "baseUrl": "./",
     "incremental": true,
     "paths": {
-      "@shared/*": ["./../shared/*"]
+      "@shared/*": ["./../shared/*"],
+      "@src/*": ["./src/*"]
     }
   }
 }
