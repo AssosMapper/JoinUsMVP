@@ -19,9 +19,9 @@ const associationApplicationService = {
         const { data, error } = await useApi(
             apiStore.resolveUrl(apiStore.associationApplications.current, { associationId })
         ).json();
-        if (error.value) {
-            throw new Error(error.value);
-        }
+        if (error.value) 
+            throw error.value;
+        
         return data.value;
     },
 

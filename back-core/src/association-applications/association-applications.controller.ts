@@ -70,7 +70,7 @@ export class AssociationApplicationsController {
     );
   }
   
-  @Get('current/:associationId')
+  @Get(':associationId/current')
   async getCurrentApplication(
     @CurrentUserId() userId: string,
     @Param('associationId') associationId: string,

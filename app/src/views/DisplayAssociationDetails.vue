@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { onMounted, ref, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
+import {useUserStore} from "@/store";
 import associationService from '@/services/associationService';
 import eventService from '@/services/eventService';
 import { loadGoogleMapsApi } from '@/utils/loadGoogleMapsApi';
 import EventList from '@/components/EventsList.vue';
 import Loader from '@/components/Loader.vue';
+import { AssociationApplication } from '@shared/types/association-applications';
+import associationApplicationService from '@/services/associationApplicationService';
 
 const route = useRoute();
+const userStore = useUserStore();
 const association = ref<any>(null);
 const map = ref<google.maps.Map | null>(null);
 const marker = ref<google.maps.Marker | null>(null);
@@ -15,7 +19,7 @@ const pastEvents = ref<any[]>([]);
 const todayEvents = ref<any[]>([]);
 const upcomingEvents = ref<any[]>([]);
 const loader = ref(false);
-
+const associationApplication = ref<AssociationApplication | null>(null);
 const fetchAssociationDetails = async () => {
   loader.value = true;
   try {
@@ -81,8 +85,18 @@ const initMap = async () => {
   }
 };
 
-onMounted(() => {
-  fetchAssociationDetails();
+const fetchAssociationApplication = async () => {
+   try {
+      associationApplication.value = await associationApplicationService.getCurrentApplication(association.value.id) as AssociationApplication;
+   } catch (error) {
+      console.error('Error fetching association application:', error);
+   }
+}
+
+onMounted(async () => {
+  await fetchAssociationDetails();
+  await fetchAssociationApplication();
+  loader.value = false;
 });
 </script>
 
@@ -104,6 +118,13 @@ onMounted(() => {
             Types: 
             <span v-for="type in association.types" :key="type.id" class="mr-2 inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700">{{ type.name }}</span>
           </p>
+          <AssociationApplicationFormModal 
+            :applicationQuestion="association.applicationQuestion"
+            :associationId="association.id"
+            :associationApplication="associationApplication" 
+            v-if="!userStore.getAssociation(association.id)"
+            />
+
         </div>
       </div>
       <div class="md:w-1/2 mt-4 md:mt-0">
