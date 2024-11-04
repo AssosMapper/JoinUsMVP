@@ -4,8 +4,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { In, Repository } from 'typeorm';
-import {  AssociationApplication} from './entities/association-application.entity';
+import { Repository } from 'typeorm';
+import { AssociationApplication } from './entities/association-application.entity';
 import { ApplicationStatus } from '@shared/types/association-applications';
 import { User } from '../users/entities/user.entity';
 import { Association } from '../associations/entities/association.entity';
@@ -47,21 +47,16 @@ export class AssociationApplicationsService {
       });
     }
 
-    const existingApplication =
+    const application =
       await this.associationApplicationRepository.findOne({
         where: {
           user: { id: userId },
           association: { id: associationId },
           status: ApplicationStatus.IN_PROGRESS,
         },
-      });
+      }) || new AssociationApplication();
 
-    if (existingApplication)
-      throw new ConflictException({
-        message: `Vous avez déjà demandé à joindre cette association`,
-      });
-
-    const application = new AssociationApplication();
+    
     application.user = user;
     application.association = association;
     application.applicationQuestion = association.applicationQuestion;
@@ -76,6 +71,9 @@ export class AssociationApplicationsService {
         id: id,
         user: { id: userId },
         status: ApplicationStatus.IN_PROGRESS,
+      },
+      order: {
+        createdAt: 'DESC',
       },
     });
 
@@ -133,25 +131,16 @@ export class AssociationApplicationsService {
     userId: string,
     associationIds: string[],
   ) {
-    const applications = await this.associationApplicationRepository.find({
-      where: {
-        user: { id: userId },
-        association: { id: In(associationIds) },
-      },
-    });
-    const mostRecentApplications = Object.values(
-      applications.reduce((acc, app) => {
-        if (
-          !acc[app.association.id] ||
-          app.createdAt > acc[app.association.id].createdAt
-        ) {
-          acc[app.association.id] = app;
-        }
-        return acc;
-      }, {}),
-    );
 
-    return mostRecentApplications;
+    const applications = await this.associationApplicationRepository.createQueryBuilder('application')
+      .distinctOn(['application.associationId'])
+      .where('application.userId = :userId', { userId })
+      .andWhere('application.associationId IN (:...associationIds)', { associationIds })
+      .orderBy('application.associationId')
+      .addOrderBy('application.createdAt', 'DESC')
+      .getMany();
+    
+    return applications;
   }
   /*
   async getApplicationsByAssociation(associationId: string) {

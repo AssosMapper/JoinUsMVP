@@ -28,7 +28,7 @@ const handleLogin = async () => {
     notificationStore.showNotification("Connexion réussie !", "success");
   } catch (error) {
     console.error(error);
-    notificationStore.showNotification("Email ou mot de passe incorrect. Veuillez réessayer", "danger");
+    notificationStore.showNotification("Email ou mot de passe incorrect. Veuillez réessayer", "error");
   }
 };
 </script>

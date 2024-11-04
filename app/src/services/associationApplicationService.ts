@@ -1,4 +1,4 @@
-import { JoinAssociationDto } from 'joinus-shared/validations/association-applications.validation';
+import { JoinAssociationDto } from '@shared/validations/association-applications.validation';
 // app/src/services/associationApplicationService.ts
 import { useApiStore } from "@/store/apiUrls.store";
 import { useApi } from "@/composables/useApi";
@@ -6,12 +6,12 @@ import { buildUrl } from "@/utils/url.util";
 const associationApplicationService = {
     joinAssociation: async (JoinAssociationData: JoinAssociationDto ) => {
         const apiStore = useApiStore();
-        const { data, error } = await useApi(apiStore.associationApplications.join)
+        const {data,error} = await useApi(apiStore.associationApplications.join)
             .post(JoinAssociationData)
             .json();
         if (error.value)
-            throw new Error(error.value);
-
+            throw error.value;
+        
         return data.value;
     },
     getCurrentApplication: async (associationId: string) => {
@@ -32,8 +32,8 @@ const associationApplicationService = {
         )
             .put({ status })
             .json();
-        if (error.value) {
-            throw new Error(error.value);
+            if (error.value) {
+                throw new Error(error.value);
         }
         return data.value;
     },
@@ -42,7 +42,7 @@ const associationApplicationService = {
         const url = `${apiStore.associationApplications.byAssociations}?associationIds=${associationIds.join(',')}`;
         const { data, error } = await useApi(url).json();
         if (error.value)
-            throw new Error(error.value);
+            throw error.value;
 
         return data.value;
     },
@@ -68,13 +68,13 @@ const associationApplicationService = {
 
     cancelApplication: async (applicationId: string) => {
         const apiStore = useApiStore();
-        const url = buildUrl(apiStore.associationApplications.cancel, { applicationId });
+        const url = apiStore.resolveUrl(apiStore.associationApplications.cancel, { applicationId });
         const { data, error } = await useApi(url)
             .delete()
             .json();
-        if (error.value) {
-            throw new Error(error.value);
-        }
+        if (error.value)
+            throw error.value;
+        
         return data.value;
     },
 };

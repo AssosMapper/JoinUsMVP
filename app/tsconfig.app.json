@@ -26,9 +26,7 @@
         "./src/*"
       ],
       "@stores/*": ["/app/src/store*"],
-      "@joinus/interfaces": ["../packages/interfaces/src"],
-      "@joinus/enum": ["../packages/enum"],
-      "@joinus/validations": ["../packages/validations"],
+      "@shared/*": ["../shared/*", "!../shared/node_modules/*"]
     },
     "types": ["node"]
   },

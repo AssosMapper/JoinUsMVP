@@ -27,13 +27,13 @@ export const useApiStore = defineStore('api', {
                 byName: "/associations/by-name/:name",  
             },
             associationApplications: {
-                join: "/association-applications",
+                join: "/association-applications/join",
                 current: "/association-applications/current/:associationId",
                 updateStatus: "/association-applications/:applicationId/status",
                 byAssociation: "/association-applications/by-association/:associationId",
                 byAssociations: "/association-applications/by-associations",
                 all: "/association-applications",
-                cancel: "/association-applications/:applicationId/cancel",
+                cancel: "/association-applications/:applicationId",
             },
             associationTypes: {
                 list: "/type-associations",

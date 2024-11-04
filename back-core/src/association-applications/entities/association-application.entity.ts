@@ -13,7 +13,9 @@ export class AssociationApplication extends EntityStructure {
   @ManyToOne(() => Association)
   @JoinColumn()
   association: Association;
-
+  
+  @Column()
+  associationId: string;
   @Column({
     type: 'enum',
     enum: ApplicationStatus,

@@ -1,6 +1,5 @@
 import {createFetch, useSessionStorage} from '@vueuse/core';
 import {destr} from 'destr';
-import {useCookies} from "@vueuse/integrations/useCookies";
 
 export const useApi = createFetch({
     baseUrl: import.meta.env.VITE_API_BASE_URL || '/api',
@@ -13,6 +12,7 @@ export const useApi = createFetch({
         refetch: true,
         async beforeFetch({options}) {
             const user = useSessionStorage('user').value
+
             let accessToken = null;
             if(user){
                 const data = JSON.parse(user);
@@ -28,15 +28,29 @@ export const useApi = createFetch({
         },
         afterFetch(ctx) {
             const {data, response} = ctx;
-
             let parsedData = null;
             try {
                 parsedData = destr(data);
             } catch (error) {
                 console.error(error);
             }
-
             return {data: parsedData, response};
         },
+        onFetchError(ctx) {
+            const {data,response} = ctx;
+            let parsedData = null;
+            try{
+                parsedData = destr(data);
+            } catch (error) {
+                parsedData = {
+                    statusCode: ctx.response?.status ?? 500,
+                    timestamp: new Date().toISOString(),
+                    path: ctx.response?.url ?? '',
+                    message: "Erreur lors de la connexion"
+                };
+            }
+            return {error: parsedData, response: ctx.response};
+        }
     },
 });
+

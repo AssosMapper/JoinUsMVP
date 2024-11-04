@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ApplicationStatus, AssociationApplication } from '@/types/association-application.types';
+import { ApplicationStatus, AssociationApplication } from '@shared/types/association-applications';
 import FloatLabel from 'primevue/floatlabel';
 import { computed, onMounted, ref } from 'vue';
 import associationApplicationService from '@/services/associationApplicationService';
@@ -8,6 +8,7 @@ import { joinAssociationSchema } from '@shared/validations/association-applicati
 import { JoinAssociationDto } from '@shared/dto/association-applications.dto';
 import JnsField from '@/components/ui/JnsField.vue';
 import { useNotificationStore } from '@/store/notificationStore';
+import { cp } from 'fs';
 
 const props = defineProps<{
   associationApplication?: AssociationApplication,
@@ -19,10 +20,13 @@ const props = defineProps<{
 const visible = ref(false);
 
 const notificationStore = useNotificationStore();
-const { handleSubmit, resetForm, errors, defineField } = useForm<JoinAssociationDto>({
+const applicationQuestion = ref(props.applicationQuestion)
+const associationApplication = ref<AssociationApplication | null>(props.associationApplication ?? null)
+
+const { handleSubmit, resetForm, errors, defineField,setFieldValue } = useForm<JoinAssociationDto>({
   validationSchema: joinAssociationSchema,
   initialValues: {
-    applicationAnswer: props.associationApplication?.applicationAnswer || undefined,
+    applicationAnswer: associationApplication.value?.applicationAnswer ?? null,
     associationId: props.associationId 
   }
 });
@@ -37,16 +41,20 @@ const [applicationAnswer,applicationAnswerAttrs] = defineField('applicationAnswe
 
 const onSubmit = handleSubmit(async (formValues: JoinAssociationDto) => {
   isSubmitting.value = true
-  notificationStore.showNotification("test", "error")
 
   try {
-      await associationApplicationService.joinAssociation({
+      let result = await associationApplicationService.joinAssociation({
         associationId: props.associationId,
         applicationAnswer: formValues.applicationAnswer
       });
     
-    visible.value = false;
+    notificationStore.showNotification("Candidature envoyée avec succès", "success")
+    setFieldValue('applicationAnswer',result.applicationAnswer)
+    applicationQuestion.value = result.applicationQuestion
+    associationApplication.value = {...result} as AssociationApplication
+    console.log(associationApplication.value)
   } catch (error) {
+    notificationStore.showNotification(error.message, "error")
   }finally {
      isSubmitting.value = false
   }
@@ -54,29 +62,36 @@ const onSubmit = handleSubmit(async (formValues: JoinAssociationDto) => {
 });
 
 const handleCancel = async () => {
-  if (props.associationApplication?.id) {
+  if (associationApplication.value?.id) {
+    isSubmitting.value = true
     try {
-      await associationApplicationService.cancelApplication(props.associationApplication.id);
+      await associationApplicationService.cancelApplication(associationApplication.value.id);
       visible.value = false;
-      resetForm();
+      associationApplication.value = null;
+      setFieldValue('applicationAnswer','');
+      applicationQuestion.value = props.applicationQuestion;
+      notificationStore.showNotification("Annulée avec succès", "success")
     } catch (error) {
-      console.error('Error cancelling application:', error);
+      notificationStore.showNotification(error.message, "error")
+    }finally {
+      isSubmitting.value = false
     }
   }
 }
 
 
 const sendButtonText = computed(() => {
-  if (props.associationApplication?.status === ApplicationStatus.IN_PROGRESS)
+  if (associationApplication.value?.status === ApplicationStatus.IN_PROGRESS)
    return "Editer ma candidature";
   return "Envoyer ma candidature";
 })
 
 const showButtonText = computed(() => {
-  if (props.associationApplication?.status === ApplicationStatus.IN_PROGRESS)
+  if (associationApplication.value?.status === ApplicationStatus.IN_PROGRESS)
    return "Voir ma candidature";
   return "Postuler";
 })
+
 </script>
 
 
@@ -88,7 +103,7 @@ const showButtonText = computed(() => {
       <span class="text-2xl font-semibold">Votre candidature</span>
     </template>
     <form @submit="onSubmit" class="flex flex-col gap-4">
-      <span>{{ props.applicationQuestion }}</span>
+      <span>{{ applicationQuestion }}</span>
     
       <JnsField :errorMessage="errors.applicationAnswer">
         <FloatLabel variant="in" class="w-full">
@@ -106,11 +121,12 @@ const showButtonText = computed(() => {
       </JnsField>
       
       <div class="flex justify-end gap-2">
-        <Button :loading="isSubmitting" v-if="props.associationApplication?.status === ApplicationStatus.IN_PROGRESS"
+        <Button :loading="isSubmitting" v-if="associationApplication?.status === ApplicationStatus.IN_PROGRESS"
          label="Annuler ma candidature" 
          text outlined severity="danger"
           @click="handleCancel"
-           type="button" />
+           type="button"
+            />
         <Button :label="sendButtonText" severity="primary" :loading="isSubmitting" type="submit" />
       </div>
     </form>

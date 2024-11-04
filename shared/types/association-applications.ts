@@ -9,9 +9,13 @@ export enum ApplicationStatus {
 
 
 export interface AssociationApplication {
+    id?: string;
     user: User;
     association: Association;
+    associationId: string;
     status: ApplicationStatus;  
     applicationAnswer?: string; 
     applicationQuestion?: string; 
+    createdAt?: Date;
+    updatedAt?: Date;
   }

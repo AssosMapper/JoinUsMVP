@@ -8,7 +8,9 @@ import {AssociationsModule} from "../associations/associations.module";
 @Module({
     imports: [UsersModule,AssociationsModule],
     controllers: [AssociationApplicationsController],
-    providers: [AssociationApplicationsService],
+    providers: [
+        AssociationApplicationsService
+    ],
     exports: [AssociationApplicationsService]
 })
 export class AssociationApplicationsModule {}

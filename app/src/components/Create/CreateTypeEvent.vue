@@ -21,7 +21,7 @@ const handleSubmit = async () => {
     await router.push('/');
   } catch (error) {
     console.error('Error creating type event:', error);
-    notificationStore.showNotification("Erreur lors de la création d'un type d'évènement !", "danger");
+    notificationStore.showNotification("Erreur lors de la création d'un type d'évènement !", "error");
   }
 };
 </script>

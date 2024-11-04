@@ -28,12 +28,12 @@ const validatePhone = (phone: string) => {
 
 const handleSubmit = async () => {
   if (!validatePhone(phone.value)) {
-    notificationStore.showNotification("Invalid phone number format. The phone number must be 0+(de 1 a 9) + 8 chiffres.", "danger");
+    notificationStore.showNotification("Invalid phone number format. The phone number must be 0+(de 1 a 9) + 8 chiffres.", "error");
     return;
   }
 
   if (roleId.value === null) {
-    notificationStore.showNotification("Role ID is required.", "danger");
+    notificationStore.showNotification("Role ID is required.", "error");
     return;
   }
   
@@ -57,7 +57,7 @@ const handleSubmit = async () => {
     notificationStore.showNotification("Profil modifié avec succès !", "success");
     router.push('/');
   } catch (error) {
-    notificationStore.showNotification("Erreur lors de la modification du profil", "danger");
+    notificationStore.showNotification("Erreur lors de la modification du profil", "error");
   }
 };
 </script>

@@ -20,7 +20,7 @@ const handleSubmit = async () => {
     notificationStore.showNotification("Type d'association créé avec succès !", "success");
     await router.push('/');
   } catch (error) {
-    notificationStore.showNotification("Erreur lors de la création d'un type d'association", "danger");
+    notificationStore.showNotification("Erreur lors de la création d'un type d'association", "error");
   }
 };
 </script>
