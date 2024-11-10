@@ -26,11 +26,19 @@ export class AssociationsController {
     return this.associationsService.findAll();
   }
 
+  @Get('/my')
+  @BearAuthToken()
+  findUserAssociations(@CurrentUserId() userId: string): Promise<Association[]> {
+    return this.associationsService.findUserAssociations(userId);
+  }
+
+  
   @Get(':id')
   findOne(@Param('id') id: string): Promise<Association> {
     return this.associationsService.findOne(id);
   }
 
+ 
   @Get('by-name/:name')
   findByName(@Param('name') name: string): Promise<Association> {
     return this.associationsService.findByName(name);

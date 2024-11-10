@@ -15,3 +15,9 @@ export enum UserRole {
   ASSOCIATION_MANAGER = 'associationManager',
   USER = 'user'
 }
+
+export enum RoleEnum {
+  SUPER_ADMIN = 'SuperAdmin',
+  ASSOCIATION_MANAGER = 'AssociationManager',
+  EVENTS_MANAGER = 'EventsManager'
+}

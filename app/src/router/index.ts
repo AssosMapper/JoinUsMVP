@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router';
 import { useUserStore } from '@/store';
+import MyAssociations from '@/views/MyAssociations.vue'
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -71,6 +72,12 @@ const routes: Array<RouteRecordRaw> = [
         name: 'EventsManagerInterface',
         meta: { requiresEventsManager: true },
         component: () => import('../views/EventsManagerInterface.vue'),
+    },
+    {
+        path: '/my-associations',
+        name: 'my-associations',
+        component: MyAssociations,
+        meta: { requiresAuth: true }
     },
 ];
 

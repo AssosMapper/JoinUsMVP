@@ -58,10 +58,20 @@ const getAssociationByName = async (name: string) => {
   return data.value;
 };
 
+const getMyAssociations = async () => {
+  const apiStore = useApiStore();
+  const {data, error} = await useApi(apiStore.associations.my).json();
+  if(error.value) 
+    throw error.value;
+  
+  return data.value;
+};
+
 export default {
   createAssociation,
   getAllAssociations,
   updateAssociation,
   getAssociationById,
-  getAssociationByName
+  getAssociationByName,
+  getMyAssociations
 };

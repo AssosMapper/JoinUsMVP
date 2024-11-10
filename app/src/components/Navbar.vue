@@ -27,6 +27,8 @@ const logout = () => {
     |
     <router-link to="/displayAssociations" class="cursor-pointer">Display Association</router-link>
     |
+    <router-link v-if="isAuthenticated" to="/my-associations" class="cursor-pointer">Mes Associations</router-link>
+    |
     <router-link v-if="isAdmin && isAuthenticated" to="/adminInterface" class="cursor-pointer">Admin Interface |
     </router-link>
     <router-link v-if="(isAdmin || isAssociationManager) && isAuthenticated" to="/associationManagerInterface"

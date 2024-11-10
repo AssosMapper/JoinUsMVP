@@ -1,10 +1,13 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { In, Repository } from 'typeorm';
+import { In, MissingPrimaryColumnError, Repository } from 'typeorm';
 import { Association } from './entities/association.entity';
 import { CreateAssociationDto } from './dto/create-association.dto';
 import { UpdateAssociationDto } from './dto/update-association.dto';
 import { User } from '../users/entities/user.entity';
 import { TypeAssociations } from '../type-associations/entities/type-associations.entity';
+import { cp } from 'fs';
+import { checkRole } from '../utils/functions/check-role';
+import { RoleEnum } from '@shared/types/roles';
 
 @Injectable()
 export class AssociationsService {
@@ -67,5 +70,26 @@ export class AssociationsService {
 
   async remove(id: string): Promise<void> {
     await this.associationsRepository.delete(id);
+  }
+
+  async findUserAssociations(userId: string): Promise<Association[]> {
+    const user = await this.usersRepository.findOne({ 
+      where: { id: userId },
+      relations: ['roles']
+    });
+
+    if (checkRole(user, RoleEnum.SUPER_ADMIN)) 
+      return await this.findAll();
+    
+
+    // Sinon, retourner uniquement les associations de l'utilisateur
+    return await this.associationsRepository.find({
+      where: {
+        users: {
+          id: userId
+        }
+      },
+      relations: ['users', 'types']
+    });
   }
 }

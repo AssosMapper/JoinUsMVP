@@ -9,6 +9,7 @@ import EventList from '@/components/EventsList.vue';
 import Loader from '@/components/Loader.vue';
 import { AssociationApplication } from '@shared/types/association-applications';
 import associationApplicationService from '@/services/associationApplicationService';
+import JnsImage from '@/components/ui/JnsImage.vue';
 
 const route = useRoute();
 const userStore = useUserStore();
@@ -106,7 +107,11 @@ onMounted(async () => {
     <div class="flex flex-col md:flex-row w-full">
       <div class="md:w-1/2 pr-4">
         <div class="imageContainer justify-center flex mb-4">
-          <img :src=getImageSrc(association.name) alt="Association Image" class="w-64 h-64 object-cover rounded-lg" />
+          <JnsImage
+            :name="association.name"
+            :src="getImageSrc(association.name)"
+            size="lg"
+          />
         </div>
         <div class="infosContainer">
           <h1 class="text-2xl font-bold mb-4">{{ association.name }}</h1>
