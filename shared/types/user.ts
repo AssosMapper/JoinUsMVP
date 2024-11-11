@@ -1,8 +1,8 @@
-import { Association } from './association';
-import { Role } from './roles';
+import { Association } from "./association";
+import { Role } from "./roles";
 
 export interface User {
-  id?: number;
+  id?: string;
   first_name: string;
   last_name: string;
   email: string;
@@ -14,4 +14,3 @@ export interface User {
   associations: Association[];
   roles: Role[];
 }
-

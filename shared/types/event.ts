@@ -1,9 +1,9 @@
-import { Association } from './association';
-import { User } from './user';
-import { TypeEvents } from './type-events';
+import { Association } from "./association";
+import { TypeEvents } from "./type-events";
+import { User } from "./user";
 
 export interface Event {
-  id?: number;
+  id?: string;
   titre: string;
   description: string;
   image?: string;

@@ -1,7 +1,7 @@
 import { Association } from './association';
 
 export interface TypeAssociations {
-  id?: number;
+  id?: string;
   name: string;
   description?: string;
   associations: Association[];

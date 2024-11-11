@@ -2,14 +2,13 @@ import { TypeAssociations } from "./type-associations";
 import { User } from "./user";
 
 export interface Association {
-  id?: number;
+  id?: string;
   name: string;
   localisation?: string;
   description: string;
-  image?: string; 
-  users: User[]; 
+  image?: string;
+  users: User[];
   members?: number;
   applicationQuestion?: string;
   types: TypeAssociations[];
 }
-  

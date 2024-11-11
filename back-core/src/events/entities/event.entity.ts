@@ -1,12 +1,11 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
 import { Association } from '../../associations/entities/association.entity';
 import { TypeEvents } from '../../type-events/entities/type-events.entity';
+import { User } from '../../users/entities/user.entity';
 import { EntityStructure } from '../../utils/structures/entity.structure';
 
 @Entity()
-export class Event extends EntityStructure{
-
+export class Event extends EntityStructure {
   @Column()
   titre: string;
 
@@ -37,6 +36,6 @@ export class Event extends EntityStructure{
   @Column()
   isPublic: boolean;
 
-  @Column({ default: false }) 
+  @Column({ default: false })
   isValid: boolean;
 }

@@ -1,7 +1,7 @@
-import { Event } from './event';
+import { Event } from "./event";
 
 export interface TypeEvents {
-  id?: number;
+  id?: string;
   name: string;
   description?: string;
   events: Event[];
