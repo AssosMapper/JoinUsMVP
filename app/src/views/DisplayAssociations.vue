@@ -87,8 +87,8 @@ onBeforeMount(async () => {
             size="md"
           />
         </div>
-        <div class="flex-grow flex flex-col items-start min-w-0">
-          <h5 class="text-xl font-semibold text-gray-900 truncate">
+        <div class="flex-grow flex flex-col text-left items-start min-w-0">
+          <h5 class="text-lg font-semibold text-gray-900 w-full">
             {{ association.name }}
           </h5>
           <p class="text-sm text-gray-600 mt-1">
