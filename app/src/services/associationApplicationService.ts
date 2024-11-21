@@ -1,4 +1,4 @@
-import { JoinAssociationDto } from "@shared/validations/association-applications.validation";
+import { JoinAssociationDto } from "@shared/dto/association-applications.dto";
 // app/src/services/associationApplicationService.ts
 import { useApi } from "@/composables/useApi";
 import { useApiStore } from "@/store/apiUrls.store";
@@ -27,15 +27,14 @@ const associationApplicationService = {
   updateApplicationStatus: async (applicationId: string, status: string) => {
     const apiStore = useApiStore();
     const { data, error } = await useApi(
-      apiStore.resolveUrl(apiStore.associationApplications.updateStatus, {
-        applicationId,
+      apiStore.resolveUrl(apiStore.associationApplications.base, {
+        id: applicationId,
       })
     )
-      .put({ status })
+      .patch({ status })
       .json();
-    if (error.value) {
-      throw new Error(error.value);
-    }
+    if (error.value) throw error.value;
+
     return data.value;
   },
   getApplicationsByAssociations: async (associationIds: string[]) => {

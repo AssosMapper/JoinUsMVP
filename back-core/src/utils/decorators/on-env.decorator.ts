@@ -9,7 +9,7 @@ export function OnEnv(env: string): MethodDecorator {
     const originalMethod = descriptor.value;
 
     descriptor.value = function (...args: any[]) {
-      if (process.env.NODE_ENV !== 'dev') {
+      if (process.env.NODE_ENV !== 'development') {
         console.log(
           `Skipping execution of ${key} because it's not in development mode.`,
         );

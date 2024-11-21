@@ -5,10 +5,12 @@ import associationService from "@/services/associationService";
 import { useNotificationStore } from "@/store/notificationStore";
 import type { Association } from "@shared/types/association.ts";
 import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 
 const notificationStore = useNotificationStore();
 const associations = ref<Association[]>([]);
 const isLoading = ref(true);
+const router = useRouter();
 
 const getImageSrc = (associationName: string | undefined) => {
   if (!associationName) return "/assets/associations-images/default.png";
@@ -26,6 +28,10 @@ const fetchAssociations = async () => {
   } finally {
     isLoading.value = false;
   }
+};
+
+const navigateToDashboard = (associationId: string) => {
+  router.push(`/associations/${associationId}/dashboard`);
 };
 
 onMounted(() => {
@@ -55,7 +61,8 @@ onMounted(() => {
       <div
         v-for="association in associations"
         :key="association.id"
-        class="flex bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow"
+        class="flex bg-white shadow-md rounded-lg p-4 hover:shadow-lg transition-shadow cursor-pointer"
+        @click="navigateToDashboard(association.id!)"
       >
         <div class="flex-shrink-0">
           <JnsImage

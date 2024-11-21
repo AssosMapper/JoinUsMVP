@@ -1,11 +1,25 @@
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as fs from 'fs';
 import * as morgan from 'morgan';
+import * as path from 'path';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  let app;
+  if (process.env.NODE_ENV === 'development') {
+    const httpsOptions = {
+      key: fs.readFileSync(
+        path.join(process.cwd(), '/../configs/ssl/localhost-key.pem'),
+      ),
+      cert: fs.readFileSync(
+        path.join(process.cwd(), '/../configs/ssl/localhost-cert.pem'),
+      ),
+    };
+    app = await NestFactory.create(AppModule, { httpsOptions });
+  } else app = await NestFactory.create(AppModule);
+
   /**
    * Enable CORS
    */

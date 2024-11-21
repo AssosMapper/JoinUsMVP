@@ -1,47 +1,54 @@
-import axios from 'axios';
-import { Association } from '@joinus/interfaces';
-import {useApiStore} from "@/store/apiUrls.store.ts";
-import {useApi} from "@/composables/useApi.ts";
-import {Association} from "@/types/association.types.ts";
+import { useApi } from "@/composables/useApi.ts";
+import { useApiStore } from "@/store/apiUrls.store.ts";
+import { IUpdateAssociation } from "@/types/association.types";
+import { Association } from "@shared/types/association";
 
-const API_URL = import.meta.env.VUE_APP_BACKEND_URL;
-
-const createAssociation = async (association: Association, token: string) => {
+const createAssociation = async (association: Association) => {
   const apiStore = useApiStore();
-  const {data,error,response}=await useApi(apiStore.associations.create).post(association).json();
-    if(error.value){
-        throw new Error(error.value);
-    }
-    return {data: data.value, response: response.value};
+  const { data, error, response } = await useApi(apiStore.associations.create)
+    .post(association)
+    .json();
+  if (error.value) {
+    throw new Error(error.value);
+  }
+  return { data: data.value, response: response.value };
 };
 
 const getAllAssociations = async () => {
   const apiStore = useApiStore();
-  const {data,error,response} = await useApi(apiStore.associations.list).json();
-  if(error.value){
+  const { data, error } = await useApi(apiStore.associations.list).json();
+  if (error.value) {
     throw new Error(error.value);
   }
   return data.value;
 };
 
-
-const updateAssociation = async (id: string, association: IUpdateAssociation) => {
+const updateAssociation = async (
+  id: string,
+  association: IUpdateAssociation
+) => {
   const apiStore = useApiStore();
-    const {data,error,response}=await useApi(apiStore.resolveUrl(apiStore.associations.detail,{
-      id: id
-    })).put(association).json();
-  if(error.value){
+  const { data, error } = await useApi(
+    apiStore.resolveUrl(apiStore.associations.detail, {
+      id: id,
+    })
+  )
+    .put(association)
+    .json();
+  if (error.value) {
     throw new Error(error.value);
   }
-    return data.value;
+  return data.value;
 };
 
-const getAssociationById = async (id: string)=> {
+const getAssociationById = async (id: string) => {
   const apiStore = useApiStore();
-  const {data,error,response} = await useApi(apiStore.resolveUrl(apiStore.associations.detail,{
-    id: id
-  })).json();
-  if(error.value){
+  const { data, error } = await useApi(
+    apiStore.resolveUrl(apiStore.associations.detail, {
+      id: id,
+    })
+  ).json();
+  if (error.value) {
     throw new Error(error.value);
   }
   return data.value;
@@ -49,9 +56,11 @@ const getAssociationById = async (id: string)=> {
 
 const getAssociationByName = async (name: string) => {
   const apiStore = useApiStore();
-  const {data, error, response} = await useApi(apiStore.resolveUrl(apiStore.associations.byName, {
-    name: name
-  })).json();
+  const { data, error } = await useApi(
+    apiStore.resolveUrl(apiStore.associations.byName, {
+      name: name,
+    })
+  ).json();
   if (error.value) {
     throw new Error(error.value);
   }
@@ -60,10 +69,9 @@ const getAssociationByName = async (name: string) => {
 
 const getMyAssociations = async () => {
   const apiStore = useApiStore();
-  const {data, error} = await useApi(apiStore.associations.my).json();
-  if(error.value) 
-    throw error.value;
-  
+  const { data, error } = await useApi(apiStore.associations.my).json();
+  if (error.value) throw error.value;
+
   return data.value;
 };
 
@@ -73,5 +81,5 @@ export default {
   updateAssociation,
   getAssociationById,
   getAssociationByName,
-  getMyAssociations
+  getMyAssociations,
 };

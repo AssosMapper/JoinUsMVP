@@ -5,6 +5,7 @@ import Button from "primevue/button";
 import Sidebar from "primevue/sidebar";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
+import NotificationButton from "./NotificationButton.vue";
 import JnsImage from "./ui/JnsImage.vue";
 
 const userStore = useUserStore();
@@ -81,12 +82,15 @@ const isActiveRoute = (route: string) =>
 
   <!-- Desktop Sidebar -->
   <div class="hidden lg:flex flex-col h-screen w-64 bg-white shadow-lg">
+    <!-- En-tête du sidebar -->
     <div class="p-4 border-b">
-      <div class="flex items-center gap-3">
+      <div class="flex items-center justify-between">
         <span class="font-bold text-xl text-primary">Join Us</span>
+        <NotificationButton />
       </div>
     </div>
 
+    <!-- Menu items -->
     <div class="flex-1 overflow-y-auto py-4">
       <div class="flex flex-col gap-1">
         <template v-for="item in menuItems" :key="item.label">
@@ -114,6 +118,7 @@ const isActiveRoute = (route: string) =>
       </div>
     </div>
 
+    <!-- Footer du sidebar -->
     <div class="border-t p-4">
       <div v-if="isAuthenticated" class="flex flex-col gap-3">
         <button
