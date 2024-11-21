@@ -1,13 +1,13 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { LoginDto } from './dto/login.dto';
-import { User } from '../users/entities/user.entity';
-import { UsersService } from '../users/users.service';
-import { CreateUserDto } from '../users/dto/create-user.dto';
-import { comparePassword } from '../utils/functions';
-import { RegisterDto } from './dto/register.dto';
+import * as bcrypt from 'bcrypt';
 import { Repository } from 'typeorm';
 import { Permission } from '../permissions/entities/permission.entity';
+import { User } from '../users/entities/user.entity';
+import { UsersService } from '../users/users.service';
+import { comparePassword } from '../utils/functions';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
@@ -40,7 +40,6 @@ export class AuthService {
     throw new UnauthorizedException('Invalid credentials');
   }
 
-
   /**
    *
    * Login user and return access token
@@ -52,8 +51,8 @@ export class AuthService {
       relations: ['roles', 'roles.permissions', 'associations'],
     });
     const allPermissions = await this.permissionRepository.find();
-    let permissions = fullUser.roles.map((role) => role.permissions);
-    let flattedPermissions = permissions
+    const permissions = fullUser.roles.map((role) => role.permissions);
+    const flattedPermissions = permissions
       .flat()
       .map((permission) => permission.permission);
     return {
@@ -80,5 +79,14 @@ export class AuthService {
    */
   async register(registerDto: RegisterDto) {
     return await this.userService.register(registerDto);
+  }
+
+  async validateUser(email: string, password: string) {
+    const user = await this.userService.findByEmail(email);
+    if (user && (await bcrypt.compare(password, user.password))) {
+      const { ...result } = user;
+      return result;
+    }
+    return null;
   }
 }

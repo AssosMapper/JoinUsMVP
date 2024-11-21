@@ -4,13 +4,16 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { AssociationApplication } from './entities/association-application.entity';
+import {
+  JoinAssociationDto,
+  UpdateApplicationStatusDto,
+} from '@shared/dto/association-applications.dto';
 import { ApplicationStatus } from '@shared/types/association-applications';
-import { User } from '../users/entities/user.entity';
+import { Repository } from 'typeorm';
 import { Association } from '../associations/entities/association.entity';
-import { JoinAssociationDto } from '@shared/dto/association-applications.dto';
-import { UpdateApplicationStatusDto } from '@shared/dto/association-applications.dto';
+import { NotificationsService } from '../notifications/notifications.service';
+import { User } from '../users/entities/user.entity';
+import { AssociationApplication } from './entities/association-application.entity';
 
 @Injectable()
 export class AssociationApplicationsService {
@@ -21,6 +24,7 @@ export class AssociationApplicationsService {
     private readonly userRepository: Repository<User>,
     @Inject('ASSOCIATION_REPOSITORY')
     private readonly associationRepository: Repository<Association>,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   async joinAssociation(
@@ -48,15 +52,14 @@ export class AssociationApplicationsService {
     }
 
     const application =
-      await this.associationApplicationRepository.findOne({
+      (await this.associationApplicationRepository.findOne({
         where: {
           user: { id: userId },
           association: { id: associationId },
           status: ApplicationStatus.IN_PROGRESS,
         },
-      }) || new AssociationApplication();
+      })) || new AssociationApplication();
 
-    
     application.user = user;
     application.association = association;
     application.applicationQuestion = association.applicationQuestion;
@@ -112,12 +115,28 @@ export class AssociationApplicationsService {
     if (status === ApplicationStatus.APPROVED) {
       application.user.associations.push(application.association);
       await this.userRepository.save(application.user);
+
+      await this.notificationsService.create({
+        title: 'Candidature acceptée',
+        message: `Votre candidature pour rejoindre l'association ${application.association.name} a été acceptée !`,
+        userId: application.user.id,
+      });
+    }
+
+    if (status === ApplicationStatus.DENIED) {
+      await this.notificationsService.create({
+        title: 'Candidature refusée',
+        message: `Votre candidature pour rejoindre l'association ${application.association.name} a été refusée.`,
+        userId: application.user.id,
+      });
+
+      await this.associationApplicationRepository.remove(application);
     }
 
     return this.associationApplicationRepository.save(application);
   }
   async getCurrentApplication(userId: string, associationId: string) {
-    let application = await this.associationApplicationRepository.findOne({
+    const application = await this.associationApplicationRepository.findOne({
       where: {
         user: { id: userId },
         association: { id: associationId },
@@ -131,15 +150,31 @@ export class AssociationApplicationsService {
     userId: string,
     associationIds: string[],
   ) {
-
-    const applications = await this.associationApplicationRepository.createQueryBuilder('application')
+    const applications = await this.associationApplicationRepository
+      .createQueryBuilder('application')
       .distinctOn(['application.associationId'])
       .where('application.userId = :userId', { userId })
-      .andWhere('application.associationId IN (:...associationIds)', { associationIds })
+      .andWhere('application.associationId IN (:...associationIds)', {
+        associationIds,
+      })
       .orderBy('application.associationId')
       .addOrderBy('application.createdAt', 'DESC')
       .getMany();
-    
+
+    return applications;
+  }
+  async getApplicationsByAssociation(associationId: string) {
+    const applications = await this.associationApplicationRepository.find({
+      where: {
+        association: { id: associationId },
+        status: ApplicationStatus.IN_PROGRESS,
+      },
+      relations: ['user', 'association'],
+      order: {
+        createdAt: 'DESC',
+      },
+    });
+
     return applications;
   }
   /*

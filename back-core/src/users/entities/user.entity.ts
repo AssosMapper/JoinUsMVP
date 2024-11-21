@@ -4,8 +4,10 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  OneToMany,
 } from 'typeorm';
 import { Association } from '../../associations/entities/association.entity';
+import { Notification } from '../../notifications/entities/notification.entity';
 import { Role } from '../../roles/entities/role.entity';
 import { EntityStructure } from '../../utils/structures/entity.structure';
 
@@ -44,4 +46,7 @@ export class User extends EntityStructure {
   })
   @JoinTable()
   roles: Array<Role>;
+
+  @OneToMany(() => Notification, (notification) => notification.user)
+  notifications: Notification[];
 }

@@ -1,6 +1,6 @@
 import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
 import { TypeAssociations } from '../../type-associations/entities/type-associations.entity';
+import { User } from '../../users/entities/user.entity';
 import { EntityStructure } from '../../utils/structures/entity.structure';
 
 @Entity()

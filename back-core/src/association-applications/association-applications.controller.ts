@@ -2,24 +2,29 @@ import {
   Body,
   Controller,
   Delete,
+  Get,
   Param,
+  ParseArrayPipe,
   Patch,
   Post,
-  Get,
-  ParseArrayPipe,
   Query,
+  UseGuards,
 } from '@nestjs/common';
-import { AssociationApplicationsService } from './association-applications.service';
-import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
-import { JoinAssociationDto } from '@shared/dto/association-applications.dto';
-import { CurrentUserId } from '../utils/decorators/current-user-id.decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { UpdateApplicationStatusDto } from '@shared/dto/association-applications.dto';
+import {
+  JoinAssociationDto,
+  UpdateApplicationStatusDto,
+} from '@shared/dto/association-applications.dto';
 import {
   joinAssociationSchema,
   updateApplicationStatusSchema,
 } from '@shared/validations/association-applications.validation';
 import { YupValidationPipe } from '@src/utils/pipes/yup-validation.pipe';
+import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
+import { CurrentUserId } from '../utils/decorators/current-user-id.decorator';
+import { AssociationApplicationsService } from './association-applications.service';
+import { AssociationManagerGuard } from './guards/association-manager.guard';
+
 @Controller('association-applications')
 @BearAuthToken()
 @ApiBearerAuth()
@@ -31,28 +36,23 @@ export class AssociationApplicationsController {
   @Post('join')
   async joinAssociation(
     @CurrentUserId() userId: string,
-    @Body(new YupValidationPipe(joinAssociationSchema)) joinAssociationDto: JoinAssociationDto,
+    @Body(new YupValidationPipe(joinAssociationSchema))
+    joinAssociationDto: JoinAssociationDto,
   ) {
     return this.applicationService.joinAssociation(userId, joinAssociationDto);
   }
 
   @Patch(':id')
+  @UseGuards(AssociationManagerGuard)
   async updateApplicationStatus(
     @Param('id') id: string,
-    @Body(new YupValidationPipe(updateApplicationStatusSchema)) updateApplicationStatusDto: UpdateApplicationStatusDto,
+    @Body(new YupValidationPipe(updateApplicationStatusSchema))
+    updateApplicationStatusDto: UpdateApplicationStatusDto,
   ) {
     return this.applicationService.updateApplicationStatus(
       id,
       updateApplicationStatusDto,
     );
-  }
-
-  @Delete(':id')
-  async cancelApplication(
-    @CurrentUserId() userId: string,
-    @Param('id') id: string,
-  ) {
-    return this.applicationService.cancelApplication(userId, id);
   }
 
   @Get('by-associations')
@@ -69,12 +69,20 @@ export class AssociationApplicationsController {
       associationIds,
     );
   }
-  
-  @Get(':associationId/current')
-  async getCurrentApplication(
-    @CurrentUserId() userId: string,
+
+  @Get('by-association/:associationId')
+  @UseGuards(AssociationManagerGuard)
+  async getApplicationsByAssociation(
     @Param('associationId') associationId: string,
   ) {
-    return this.applicationService.getCurrentApplication(userId, associationId);
+    return this.applicationService.getApplicationsByAssociation(associationId);
+  }
+
+  @Delete(':id')
+  async cancelApplication(
+    @CurrentUserId() userId: string,
+    @Param('id') id: string,
+  ) {
+    return this.applicationService.cancelApplication(userId, id);
   }
 }
