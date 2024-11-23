@@ -1,5 +1,4 @@
 import { PrimeVueResolver } from "@primevue/auto-import-resolver";
-import basicSsl from "@vitejs/plugin-basic-ssl";
 import vue from "@vitejs/plugin-vue";
 import path from "path";
 import Components from "unplugin-vue-components/vite";
@@ -11,12 +10,6 @@ export default defineConfig({
     Components({
       resolvers: [PrimeVueResolver()],
     }),
-    process.env.NODE_ENV === "development" &&
-      basicSsl({
-        name: "dev",
-        domains: ["localhost"],
-        certDir: path.resolve(__dirname, "./../configs/ssl/localhost-cert.pem"),
-      }),
   ],
   resolve: {
     alias: {

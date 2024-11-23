@@ -38,6 +38,7 @@ declare module 'vue' {
     NewsLetters: typeof import('./src/components/NewsLetters.vue')['default']
     NotificationBanner: typeof import('./src/components/NotificationBanner.vue')['default']
     NotificationButton: typeof import('./src/components/NotificationButton.vue')['default']
+    NotificationToast: typeof import('./src/components/NotificationToast.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     TabPanel: typeof import('primevue/tabpanel')['default']

@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
@@ -6,8 +7,10 @@ import {
   Patch,
   Query,
   Req,
+  Sse,
 } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { Observable } from 'rxjs';
 import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
 import { PaginationQueryDto } from './dto/pagination-query.dto';
 import { NotificationsService } from './notifications.service';
@@ -31,8 +34,18 @@ export class NotificationsController {
     return this.notificationsService.remove(id, req.user.userId);
   }
 
-  @Patch(':id/read')
-  markAsRead(@Param('id') id: string, @Req() req: any) {
-    return this.notificationsService.markAsRead(id, req.user.userId);
+  @Patch('read')
+  markAsRead(@Body('ids') ids: string[], @Req() req: any) {
+    return this.notificationsService.markAsRead(ids, req.user.userId);
+  }
+
+  @Sse('sse')
+  notificationStream(@Req() req: any): Observable<MessageEvent> {
+    return this.notificationsService.newNotification(req.user.userId);
+  }
+
+  @Get('unread/count')
+  countUnread(@Req() req: any) {
+    return this.notificationsService.countUnreadNotifications(req.user.userId);
   }
 }

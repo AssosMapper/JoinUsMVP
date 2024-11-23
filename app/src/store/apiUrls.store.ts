@@ -51,12 +51,13 @@ export const useApiStore = defineStore("api", {
       notifications: {
         list: "/notifications",
         delete: "/notifications/:id",
-        markAsRead: "/notifications/:id/read",
+        markAsRead: "/notifications/read",
+        notificationStream: "/notifications/sse",
       },
     };
   },
   actions: {
-    resolveUrl(url: string, params: Record<string, string>) {
+    resolveUrl(url: string, params: Record<string, string> = {}) {
       let resolvedUrl = url;
       if (!resolvedUrl) {
         throw new Error("Url not found in the apiStore");
@@ -68,6 +69,9 @@ export const useApiStore = defineStore("api", {
         resolvedUrl = resolvedUrl.replace(`:${key}`, params[key]);
       });
       return resolvedUrl;
+    },
+    resolveWithBaseUrl(url: string, params: Record<string, string> = {}) {
+      return import.meta.env.VITE_API_BASE_URL + this.resolveUrl(url, params);
     },
   },
 });

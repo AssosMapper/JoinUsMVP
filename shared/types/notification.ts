@@ -9,3 +9,7 @@ export interface Notification {
   createdAt: Date;
   updatedAt: Date;
 }
+
+export enum NotificationSseEnum {
+  NEW_NOTIFICATION = "new-notification",
+}

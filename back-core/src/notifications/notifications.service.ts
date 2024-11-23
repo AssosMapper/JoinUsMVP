@@ -1,12 +1,15 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { NotificationSseEnum } from '@shared/types/notification';
+import { map, Observable, Subject } from 'rxjs';
+import { In, Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
 import { CreateNotificationDto } from './dto/create-notification.dto';
 import { PaginationQueryDto } from './dto/pagination-query.dto';
 import { Notification } from './entities/notification.entity';
-
 @Injectable()
 export class NotificationsService {
+  private notificationSubjects: Map<string, Subject<MessageEvent>> = new Map();
+
   constructor(
     @Inject('NOTIFICATION_REPOSITORY')
     private notificationRepository: Repository<Notification>,
@@ -27,8 +30,14 @@ export class NotificationsService {
       ...createNotificationDto,
       user,
     });
+    const result = await this.notificationRepository.save(notification);
+    const unreadCount = await this.countUnreadNotifications(user.id);
+    this.notificationSubjects.get(user.id).next({
+      data: { notification: result, unreadCount },
+      type: NotificationSseEnum.NEW_NOTIFICATION,
+    } as MessageEvent);
 
-    return this.notificationRepository.save(notification);
+    return result;
   }
 
   async findAllForUser(
@@ -57,16 +66,43 @@ export class NotificationsService {
     await this.notificationRepository.remove(notification);
   }
 
-  async markAsRead(id: string, userId: string): Promise<Notification> {
-    const notification = await this.notificationRepository.findOne({
-      where: { id, user: { id: userId } },
+  async markAsRead(ids: string[], userId: string): Promise<Notification[]> {
+    const notifications = await this.notificationRepository.find({
+      where: {
+        id: In(ids),
+        user: { id: userId },
+      },
     });
 
-    if (!notification) {
-      throw new NotFoundException(`La notification n'a pas été trouvée`);
+    if (notifications.length === 0) {
+      throw new NotFoundException(`Aucune notification n'a été trouvée`);
     }
 
-    notification.isRead = true;
-    return this.notificationRepository.save(notification);
+    notifications.forEach((notification) => {
+      notification.isRead = true;
+    });
+
+    return this.notificationRepository.save(notifications);
+  }
+
+  async countUnreadNotifications(userId: string): Promise<number> {
+    return this.notificationRepository.count({
+      where: {
+        user: { id: userId },
+        isRead: false,
+      },
+    });
+  }
+
+  newNotification(userId: string): Observable<MessageEvent> {
+    if (!this.notificationSubjects.has(userId))
+      this.notificationSubjects.set(userId, new Subject<MessageEvent>());
+
+    return this.notificationSubjects.get(userId).pipe(
+      map((messageEvent: MessageEvent) => ({
+        ...messageEvent,
+        data: JSON.stringify(messageEvent.data),
+      })),
+    );
   }
 }

@@ -1,7 +1,9 @@
 import { useApi } from "@/composables/useApi";
+import { useUserStore } from "@/store";
 import { useApiStore } from "@/store/apiUrls.store";
 import { Notification } from "@shared/types";
 import { PaginationQuery } from "@shared/types/pagination-query";
+import { EventSourcePolyfill } from "event-source-polyfill";
 
 const notificationService = {
   getNotifications: async (params: PaginationQuery) => {
@@ -26,14 +28,26 @@ const notificationService = {
     if (error.value) throw error.value;
   },
 
-  markAsRead: async (id: string) => {
+  markAsRead: async (ids: string[]) => {
     const apiStore = useApiStore();
     const { data, error } = await useApi(
-      apiStore.resolveUrl(apiStore.notifications.markAsRead, { id })
-    ).patch();
+      apiStore.notifications.markAsRead
+    ).patch({ ids });
 
     if (error.value) throw error.value;
     return data.value;
+  },
+  notificationStream: async (): Promise<EventSourcePolyfill> => {
+    const apiStore = useApiStore();
+    const userStore = useUserStore();
+    return new EventSourcePolyfill(
+      apiStore.resolveWithBaseUrl(apiStore.notifications.notificationStream),
+      {
+        headers: {
+          Authorization: `Bearer ${userStore.token}`,
+        },
+      }
+    );
   },
 };
 

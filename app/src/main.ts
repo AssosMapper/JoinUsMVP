@@ -7,6 +7,7 @@ import ToastService from "primevue/toastservice";
 import { createApp } from "vue";
 import App from "./App.vue";
 import "./index.css";
+
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 

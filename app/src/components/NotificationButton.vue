@@ -2,11 +2,13 @@
 import notificationService from "@/services/notificationService";
 import { useUserStore } from "@/store";
 import { useNotificationStore } from "@/store/notificationStore";
-import { Notification } from "@shared/types/notification";
+import { Notification, NotificationSseEnum } from "@shared/types/notification";
 import { useInfiniteScroll } from "@vueuse/core";
+import { EventSourcePolyfill } from "event-source-polyfill";
 import Button from "primevue/button";
 import OverlayPanel from "primevue/overlaypanel";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref } from "vue";
+
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
 const notificationsPanel = ref();
@@ -17,7 +19,7 @@ const unreadCount = ref(0);
 const containerRef = ref<HTMLElement | null>(null);
 const loading = ref(false);
 const isInitialLoad = ref(true);
-
+const eventSource = ref<EventSourcePolyfill | null>(null);
 const isAuthenticated = computed(() => userStore.isAuthenticated);
 
 useInfiniteScroll(
@@ -72,9 +74,50 @@ const loadNotifications = async (reset = false) => {
   }
 };
 
-const toggleNotifications = (event: Event) => {
+const markUnreadNotificationsAsRead = async () => {
+  const unreadNotifications = notifications.value.filter((n) => !n.isRead);
+  if (unreadNotifications.length === 0) return;
+
+  try {
+    const unreadIds = unreadNotifications.map((n) => n.id);
+    const updatedNotifications = await notificationService.markAsRead(
+      unreadIds
+    );
+
+    // Mise à jour des notifications locales
+    notifications.value = notifications.value.map((notification) => {
+      if (unreadIds.includes(notification.id)) {
+        return { ...notification, isRead: true };
+      }
+      return notification;
+    });
+
+    unreadCount.value = 0;
+  } catch (error) {
+    notificationStore.showNotification(
+      "Impossible de marquer les notifications comme lues",
+      "error"
+    );
+  }
+};
+
+const handleNewNotification = (event: MessageEvent) => {
+  try {
+    const { notification, unreadCount: newUnreadCount } = JSON.parse(
+      event.data
+    );
+    notifications.value.unshift(notification);
+    unreadCount.value = newUnreadCount;
+    notificationStore.showNotification("Nouvelle notification reçue", "info");
+  } catch (error) {
+    console.error("Erreur lors du parsing de la notification:", error);
+  }
+};
+
+const toggleNotifications = async (event: Event) => {
   notificationsPanel.value.toggle(event);
-  loadNotifications(true);
+  await loadNotifications(true);
+  await markUnreadNotificationsAsRead();
 };
 
 const deleteNotification = async (id: string) => {
@@ -91,9 +134,21 @@ const deleteNotification = async (id: string) => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   if (isAuthenticated.value) {
-    loadNotifications(true);
+    await loadNotifications(true);
+    eventSource.value = await notificationService.notificationStream();
+    eventSource.value.addEventListener(
+      NotificationSseEnum.NEW_NOTIFICATION,
+      handleNewNotification
+    );
+  }
+});
+
+onUnmounted(() => {
+  if (eventSource.value) {
+    eventSource.value.close();
+    eventSource.value = null;
   }
 });
 </script>
