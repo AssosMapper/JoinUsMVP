@@ -7,7 +7,7 @@ import { useInfiniteScroll } from "@vueuse/core";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import Button from "primevue/button";
 import OverlayPanel from "primevue/overlaypanel";
-import { computed, onMounted, onUnmounted, ref } from "vue";
+import { computed, onMounted, onUnmounted, ref, watch } from "vue";
 
 // Stores
 const userStore = useUserStore();
@@ -135,8 +135,9 @@ const handleNewNotification = (event: MessageEvent) => {
  */
 const toggleNotifications = async (event: Event) => {
   notificationsPanel.value.toggle(event);
-  await loadNotifications(true);
-  await markUnreadNotificationsAsRead();
+  if (!notificationsPanel.value.visible) {
+    await loadNotifications(true);
+  }
 };
 
 /**
@@ -155,6 +156,14 @@ const deleteNotification = async (id: string) => {
     );
   }
 };
+
+// Surveille la fermeture du panel pour marquer les notifications comme lues
+watch(
+  () => notificationsPanel.value?.visible,
+  async (newValue) => {
+    if (!newValue) await markUnreadNotificationsAsRead();
+  }
+);
 
 // Cycle de vie du composant
 onMounted(async () => {
@@ -178,7 +187,7 @@ onUnmounted(() => {
   <div v-if="isAuthenticated" class="relative">
     <!-- Bouton de notification avec compteur -->
     <Button
-      class="p-button-rounded overflow-visible p-button-text relative"
+      class="p-button-rounded overflow-visible text-gray-500 p-button-text relative"
       @click="toggleNotifications"
     >
       <i class="pi pi-bell text-xl"></i>
@@ -209,7 +218,7 @@ onUnmounted(() => {
           v-for="notification in notifications"
           :key="notification.id"
           class="p-4 border-b hover:bg-gray-50 cursor-pointer"
-          :class="{ 'bg-blue-50': !notification.isRead }"
+          :class="{ 'bg-blue-100/50': !notification.isRead }"
         >
           <div class="flex justify-between items-start">
             <div>

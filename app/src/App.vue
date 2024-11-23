@@ -11,11 +11,11 @@ const notificationStore = useNotificationStore();
   <div class="h-screen w-full flex">
     <Navbar />
     <main
-      class="w-full grid overflow-x-hidden overflow-y-auto max-w-full max-h-full"
+      class="w-full grid overflow-x-hidden overflow-y-auto max-w-full max-h-full lg:pb-0 pb-14"
     >
       <NotificationBanner />
       <router-view />
-      <Footer />
+      <Footer class="lg:block hidden" />
     </main>
   </div>
 </template>
