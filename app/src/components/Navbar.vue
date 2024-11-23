@@ -86,7 +86,7 @@ const isActiveRoute = (route: string) =>
     <div class="p-4 border-b">
       <div class="flex items-center justify-between">
         <span class="font-bold text-xl text-primary">Join Us</span>
-        <NotificationButton />
+        <NotificationButton v-if="isAuthenticated" />
       </div>
     </div>
 

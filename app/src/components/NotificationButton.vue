@@ -9,34 +9,47 @@ import Button from "primevue/button";
 import OverlayPanel from "primevue/overlaypanel";
 import { computed, onMounted, onUnmounted, ref } from "vue";
 
+// Stores
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
+
+// Refs
 const notificationsPanel = ref();
 const notifications = ref<Notification[]>([]);
+const containerRef = ref<HTMLElement | null>(null);
+const eventSource = ref<EventSourcePolyfill | null>(null);
+
+// État de la pagination et du chargement
 const page = ref(0);
 const hasMore = ref(true);
-const unreadCount = ref(0);
-const containerRef = ref<HTMLElement | null>(null);
 const loading = ref(false);
 const isInitialLoad = ref(true);
-const eventSource = ref<EventSourcePolyfill | null>(null);
+
+// État des notifications
+const unreadCount = ref(0);
 const isAuthenticated = computed(() => userStore.isAuthenticated);
 
+// Configuration du défilement infini
 useInfiniteScroll(
   containerRef,
   async () => {
-    if (
+    const shouldLoadMore =
       hasMore.value &&
       !loading.value &&
       notifications.value.length > 0 &&
-      !isInitialLoad.value
-    ) {
+      !isInitialLoad.value;
+
+    if (shouldLoadMore) {
       await loadNotifications();
     }
   },
   { distance: 10 }
 );
 
+/**
+ * Charge les notifications avec pagination
+ * @param reset - Si true, réinitialise la pagination
+ */
 const loadNotifications = async (reset = false) => {
   if (!isAuthenticated.value || loading.value) return;
 
@@ -55,13 +68,14 @@ const loadNotifications = async (reset = false) => {
         take: 10,
       });
 
+    // Mise à jour des notifications
     notifications.value = reset
       ? (newNotifications as Notification[])
       : [...notifications.value, ...(newNotifications as Notification[])];
 
+    // Mise à jour de l'état
     hasMore.value = notifications.value.length < total;
     unreadCount.value = notifications.value.filter((n) => !n.isRead).length;
-
     page.value++;
   } catch (error) {
     notificationStore.showNotification(
@@ -74,23 +88,22 @@ const loadNotifications = async (reset = false) => {
   }
 };
 
+/**
+ * Marque toutes les notifications non lues comme lues
+ */
 const markUnreadNotificationsAsRead = async () => {
   const unreadNotifications = notifications.value.filter((n) => !n.isRead);
   if (unreadNotifications.length === 0) return;
 
   try {
     const unreadIds = unreadNotifications.map((n) => n.id);
-    const updatedNotifications = await notificationService.markAsRead(
-      unreadIds
-    );
+    await notificationService.markAsRead(unreadIds);
 
-    // Mise à jour des notifications locales
-    notifications.value = notifications.value.map((notification) => {
-      if (unreadIds.includes(notification.id)) {
-        return { ...notification, isRead: true };
-      }
-      return notification;
-    });
+    // Mise à jour locale des notifications
+    notifications.value = notifications.value.map((notification) => ({
+      ...notification,
+      isRead: unreadIds.includes(notification.id) ? true : notification.isRead,
+    }));
 
     unreadCount.value = 0;
   } catch (error) {
@@ -101,6 +114,9 @@ const markUnreadNotificationsAsRead = async () => {
   }
 };
 
+/**
+ * Gère la réception d'une nouvelle notification via SSE
+ */
 const handleNewNotification = (event: MessageEvent) => {
   try {
     const { notification, unreadCount: newUnreadCount } = JSON.parse(
@@ -114,12 +130,18 @@ const handleNewNotification = (event: MessageEvent) => {
   }
 };
 
+/**
+ * Bascule l'affichage du panneau de notifications
+ */
 const toggleNotifications = async (event: Event) => {
   notificationsPanel.value.toggle(event);
   await loadNotifications(true);
   await markUnreadNotificationsAsRead();
 };
 
+/**
+ * Supprime une notification
+ */
 const deleteNotification = async (id: string) => {
   try {
     await notificationService.deleteNotification(id);
@@ -134,15 +156,14 @@ const deleteNotification = async (id: string) => {
   }
 };
 
+// Cycle de vie du composant
 onMounted(async () => {
-  if (isAuthenticated.value) {
-    await loadNotifications(true);
-    eventSource.value = await notificationService.notificationStream();
-    eventSource.value.addEventListener(
-      NotificationSseEnum.NEW_NOTIFICATION,
-      handleNewNotification
-    );
-  }
+  await loadNotifications(true);
+  eventSource.value = await notificationService.notificationStream();
+  eventSource.value.addEventListener(
+    NotificationSseEnum.NEW_NOTIFICATION,
+    handleNewNotification
+  );
 });
 
 onUnmounted(() => {
@@ -155,6 +176,7 @@ onUnmounted(() => {
 
 <template>
   <div v-if="isAuthenticated" class="relative">
+    <!-- Bouton de notification avec compteur -->
     <Button
       class="p-button-rounded overflow-visible p-button-text relative"
       @click="toggleNotifications"
@@ -168,17 +190,21 @@ onUnmounted(() => {
       </span>
     </Button>
 
+    <!-- Panneau des notifications -->
     <OverlayPanel ref="notificationsPanel" :showCloseIcon="true" class="w-96">
       <div
         ref="containerRef"
         class="flex flex-col max-h-[70vh] overflow-y-auto"
       >
+        <!-- Message si aucune notification -->
         <div
           v-if="notifications.length === 0"
           class="p-4 text-center text-gray-500"
         >
           Notifications non trouvées
         </div>
+
+        <!-- Liste des notifications -->
         <div
           v-for="notification in notifications"
           :key="notification.id"
@@ -197,6 +223,8 @@ onUnmounted(() => {
             />
           </div>
         </div>
+
+        <!-- Indicateur de chargement -->
         <div v-if="loading" class="p-3 text-center text-gray-500">
           <i class="pi pi-spin pi-spinner"></i>
         </div>
