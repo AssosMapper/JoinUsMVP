@@ -34,7 +34,6 @@ project/
 ### Composants Vue
 
 - PascalCase pour les noms de fichiers et composants
-- Préfixe `Jns` pour les composants réutilisables
 - Suffixe descriptif du type de composant (Modal, Form, List)
 
 Exemple:
@@ -321,4 +320,11 @@ router.beforeEach((to, from, next) => {
 
 Cette structure suit les meilleures pratiques observées dans ta codebase, notamment dans les fichiers d'application d'association qui servent de référence.
 
-IMPORTANT : Lors des réponses vérifie bien dans les docs que j'ai indexé réponses correspondent, sinon vérifie que le code que tu génère correspond bien aux versions de mes package.json respectifs.
+IMPORTANT : Lors des réponses vérifie bien dans les docs que j'ai mis dans le repertoires documentations pour me fournir les réponses sur la bonne versions
+
+le repertoire documentations contient les doc suivantes :
+
+- nestv10 : Documentation sur nestjs version 10
+- vue3 : Documentation vue3 (privilegier la composition pas l'option api)
+- typeorm : orm que j'utilise avec nest
+- yup.md: doc du validateur yup
