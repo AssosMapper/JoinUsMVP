@@ -1,6 +1,7 @@
 import { useApi } from "@/composables/useApi.ts";
 import { useApiStore } from "@/store/apiUrls.store.ts";
 import { IUpdateAssociation } from "@/types/association.types";
+import { ResponseError } from "@/types/http.types";
 import { Association } from "@shared/types/association";
 
 const createAssociation = async (association: Association) => {
@@ -75,6 +76,26 @@ const getMyAssociations = async () => {
   return data.value;
 };
 
+const getAssociationMembers = async (id: string) => {
+  const apiStore = useApiStore();
+  const { data, error } = await useApi(
+    apiStore.resolveUrl(apiStore.associations.members, { id })
+  ).json();
+  if (error.value) throw error.value as ResponseError;
+  return data.value;
+};
+
+const removeMember = async (associationId: string, userId: string) => {
+  const apiStore = useApiStore();
+  const { error } = await useApi(
+    apiStore.resolveUrl(apiStore.associations.removeMember, {
+      id: associationId,
+      userId,
+    })
+  ).delete();
+  if (error.value) throw error.value as ResponseError;
+};
+
 export default {
   createAssociation,
   getAllAssociations,
@@ -82,4 +103,6 @@ export default {
   getAssociationById,
   getAssociationByName,
   getMyAssociations,
+  getAssociationMembers,
+  removeMember,
 };

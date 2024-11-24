@@ -1,25 +1,24 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
-import { useUserStore } from '@/store/usersStore';
-import associationService from '@/services/associationService';
-import typeAssociationService from '@/services/typeAssociationService';
-import { useRouter } from 'vue-router';
-import GoogleAutoCompleteComponent from '../GoogleAutoCompleteComponent.vue';
-import {useNotificationStore} from "@/store/notificationStore.ts";
+import associationService from "@/services/associationService";
+import typeAssociationService from "@/services/typeAssociationService";
+import { useNotificationStore } from "@/store/notificationStore.ts";
+import { useUserStore } from "@/store/userStore";
+import { onMounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
+import GoogleAutoCompleteComponent from "../GoogleAutoCompleteComponent.vue";
 
 const userStore = useUserStore();
 const router = useRouter();
-
 
 const isAdmin = userStore.isAdmin;
 const isAssociationManager = userStore.isAssociationManager;
 
 const association = ref({
   id: 0,
-  name: '',
-  localisation: '',
-  description: '',
-  image: '',
+  name: "",
+  localisation: "",
+  description: "",
+  image: "",
   user_id: userStore.id,
   typeIds: [] as number[],
   members: 0,
@@ -27,22 +26,23 @@ const association = ref({
 
 const selectedAssociationId = ref<number | null>(null);
 const selectedTypeIds = ref<number[]>([]);
-const availableAssociations = ref<{ id: number, name: string }[]>([]);
-const availableTypes = ref<{ id: number, name: string }[]>([]);
+const availableAssociations = ref<{ id: number; name: string }[]>([]);
+const availableTypes = ref<{ id: number; name: string }[]>([]);
 
 const fetchTypes = async () => {
   try {
-    availableTypes.value = await typeAssociationService.getAllTypeAssociations();
+    availableTypes.value =
+      await typeAssociationService.getAllTypeAssociations();
   } catch (error) {
-    console.error('Error fetching types:', error);
+    console.error("Error fetching types:", error);
   }
 };
 
 const fetchAssociations = async () => {
   try {
-    availableAssociations.value =  await associationService.getAllAssociations();
+    availableAssociations.value = await associationService.getAllAssociations();
   } catch (error) {
-    console.error('Error fetching associations:', error);
+    console.error("Error fetching associations:", error);
   }
 };
 
@@ -52,33 +52,39 @@ const fetchAssociationDetails = async (id: number) => {
     association.value = {
       ...assoData,
       typeIds: assoData.types.map((type: any) => type.id),
-      user_id: userStore.id
+      user_id: userStore.id,
     };
     selectedTypeIds.value = assoData.types.map((type: any) => type.id);
   } catch (error) {
-    console.error('Error fetching association details:', error);
+    console.error("Error fetching association details:", error);
   }
 };
 
 const handleSubmit = async () => {
   try {
-    const { id,createdAt,updatedAt,types, ...rest } = association.value;
+    const { id, createdAt, updatedAt, types, ...rest } = association.value;
 
     const dataToSend = {
       ...rest,
       typeIds: selectedTypeIds.value,
-      user_id: association.value.user_id
+      user_id: association.value.user_id,
     };
-    
+
     delete dataToSend.users;
-    
-    console.log('Data to send:', JSON.stringify(dataToSend, null, 2));
-    
-    await associationService.updateAssociation(association.value.id, dataToSend);
-    useNotificationStore().showNotification('Association updated successfully', 'success');
-    await router.push('/');
+
+    console.log("Data to send:", JSON.stringify(dataToSend, null, 2));
+
+    await associationService.updateAssociation(
+      association.value.id,
+      dataToSend
+    );
+    useNotificationStore().showNotification(
+      "Association updated successfully",
+      "success"
+    );
+    await router.push("/");
   } catch (error) {
-    console.error('Error updating association:', error);
+    console.error("Error updating association:", error);
   }
 };
 
@@ -99,30 +105,45 @@ watch(selectedAssociationId, (newId) => {
     fetchAssociationDetails(newId);
   }
 });
-
 </script>
 
 <template>
-  <div class="form-container w-4/5 flex justify-center text-center mx-auto my-10 py-8 border border-gray-300 rounded-lg">
+  <div
+    class="form-container w-4/5 flex justify-center text-center mx-auto my-10 py-8 border border-gray-300 rounded-lg"
+  >
     <form class="w-full max-w-md" @submit.prevent="handleSubmit">
-      <h2 class="text-2xl font-semibold leading-7 text-gray-900 mb-6">Update Association</h2>
+      <h2 class="text-2xl font-semibold leading-7 text-gray-900 mb-6">
+        Update Association
+      </h2>
 
       <div v-if="isAdmin" class="mb-4">
-        <label for="associationSelect" class="block text-sm font-medium leading-6 text-gray-900">Select Association</label>
+        <label
+          for="associationSelect"
+          class="block text-sm font-medium leading-6 text-gray-900"
+          >Select Association</label
+        >
         <select
           id="associationSelect"
           v-model="selectedAssociationId"
           class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         >
           <option value="" disabled>Select an association</option>
-          <option v-for="assoc in availableAssociations" :key="assoc.id" :value="assoc.id">
+          <option
+            v-for="assoc in availableAssociations"
+            :key="assoc.id"
+            :value="assoc.id"
+          >
             {{ assoc.name }}
           </option>
         </select>
       </div>
 
       <div class="mb-4">
-        <label for="name" class="block text-sm font-medium leading-6 text-gray-900">Name</label>
+        <label
+          for="name"
+          class="block text-sm font-medium leading-6 text-gray-900"
+          >Name</label
+        >
         <input
           type="text"
           id="name"
@@ -133,7 +154,11 @@ watch(selectedAssociationId, (newId) => {
       </div>
 
       <div class="mb-4">
-        <label for="localisation" class="block text-sm font-medium leading-6 text-gray-900">Localisation</label>
+        <label
+          for="localisation"
+          class="block text-sm font-medium leading-6 text-gray-900"
+          >Localisation</label
+        >
         <GoogleAutoCompleteComponent
           type="text"
           id="localisation"
@@ -144,7 +169,11 @@ watch(selectedAssociationId, (newId) => {
       </div>
 
       <div class="mb-4">
-        <label for="description" class="block text-sm font-medium leading-6 text-gray-900">Description</label>
+        <label
+          for="description"
+          class="block text-sm font-medium leading-6 text-gray-900"
+          >Description</label
+        >
         <textarea
           id="description"
           v-model="association.description"
@@ -154,7 +183,11 @@ watch(selectedAssociationId, (newId) => {
       </div>
 
       <div class="mb-4">
-        <label for="image" class="block text-sm font-medium leading-6 text-gray-900">Image</label>
+        <label
+          for="image"
+          class="block text-sm font-medium leading-6 text-gray-900"
+          >Image</label
+        >
         <input
           type="text"
           id="image"
@@ -164,7 +197,11 @@ watch(selectedAssociationId, (newId) => {
       </div>
 
       <div class="mb-4">
-        <label for="members" class="block text-sm font-medium leading-6 text-gray-900">Members</label>
+        <label
+          for="members"
+          class="block text-sm font-medium leading-6 text-gray-900"
+          >Members</label
+        >
         <input
           type="number"
           id="members"
@@ -174,8 +211,14 @@ watch(selectedAssociationId, (newId) => {
       </div>
 
       <div class="mb-4">
-        <label class="block text-sm font-medium leading-6 text-gray-900">Type Associations</label>
-        <div v-for="type in availableTypes" :key="type.id" class="flex items-center">
+        <label class="block text-sm font-medium leading-6 text-gray-900"
+          >Type Associations</label
+        >
+        <div
+          v-for="type in availableTypes"
+          :key="type.id"
+          class="flex items-center"
+        >
           <input
             type="checkbox"
             :id="`type-${type.id}`"
@@ -183,7 +226,11 @@ watch(selectedAssociationId, (newId) => {
             v-model="selectedTypeIds"
             class="mr-2"
           />
-          <label :for="`type-${type.id}`" class="text-sm font-medium leading-6 text-gray-900">{{ type.name }}</label>
+          <label
+            :for="`type-${type.id}`"
+            class="text-sm font-medium leading-6 text-gray-900"
+            >{{ type.name }}</label
+          >
         </div>
       </div>
 
@@ -197,5 +244,4 @@ watch(selectedAssociationId, (newId) => {
   </div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

@@ -1,5 +1,5 @@
 // import { createPinia } from 'pinia';
-import { useUserStore } from '../store/usersStore';
+import { useUserStore } from "../store/userStore";
 
 // const pinia = createPinia();
 

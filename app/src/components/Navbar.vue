@@ -183,7 +183,7 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
       <div v-if="isAuthenticated" class="flex flex-col gap-3">
         <button
           class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200 w-full"
-          @click="router.push('/profile')"
+          @click="router.push('/updateProfile')"
         >
           <Avatar
             :label="first_name?.charAt(0).toUpperCase()"

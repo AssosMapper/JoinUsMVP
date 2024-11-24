@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AssociationApplicationFormModal: typeof import('./src/components/AssociationApplication/AssociationApplicationFormModal.vue')['default']
+    AssociationMembers: typeof import('./src/components/AssociationDashboard/AssociationMembers.vue')['default']
     Avatar: typeof import('primevue/avatar')['default']
     Button: typeof import('primevue/button')['default']
     Calendar: typeof import('./src/components/Calendar.vue')['default']
@@ -34,6 +35,7 @@ declare module 'vue' {
     Loader: typeof import('./src/components/Loader.vue')['default']
     ManageAssociationApplications: typeof import('./src/components/AssociationDashboard/ManageAssociationApplications.vue')['default']
     Map: typeof import('./src/components/Map.vue')['default']
+    Message: typeof import('primevue/message')['default']
     Navbar: typeof import('./src/components/Navbar.vue')['default']
     NewsLetters: typeof import('./src/components/NewsLetters.vue')['default']
     NotificationBanner: typeof import('./src/components/NotificationBanner.vue')['default']
@@ -49,5 +51,8 @@ declare module 'vue' {
     UpdateEvent: typeof import('./src/components/Update/UpdateEvent.vue')['default']
     UpdateTypeAssociation: typeof import('./src/components/Update/UpdateTypeAssociation.vue')['default']
     UpdateTypeEvent: typeof import('./src/components/Update/UpdateTypeEvent.vue')['default']
+  }
+  export interface ComponentCustomProperties {
+    Tooltip: typeof import('primevue/tooltip')['default']
   }
 }

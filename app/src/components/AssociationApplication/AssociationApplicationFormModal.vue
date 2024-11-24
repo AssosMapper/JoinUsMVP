@@ -57,7 +57,7 @@ const onSubmit = handleSubmit(async (formValues: JoinAssociationDto) => {
     applicationQuestion.value = result.applicationQuestion;
     associationApplication.value = { ...result } as AssociationApplication;
     console.log(associationApplication.value);
-  } catch (error) {
+  } catch (error: any) {
     notificationStore.showNotification(error.message, "error");
   } finally {
     isSubmitting.value = false;
@@ -76,7 +76,7 @@ const handleCancel = async () => {
       setFieldValue("applicationAnswer", "");
       applicationQuestion.value = props.applicationQuestion;
       notificationStore.showNotification("Annulée avec succès", "success");
-    } catch (error) {
+    } catch (error: any) {
       notificationStore.showNotification(error.message, "error");
     } finally {
       isSubmitting.value = false;

@@ -14,3 +14,8 @@ export interface User {
   associations: Association[];
   roles: Role[];
 }
+
+export type PublicUser = Pick<
+  User,
+  "id" | "first_name" | "last_name" | "image"
+>;

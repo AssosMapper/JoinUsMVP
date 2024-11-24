@@ -1,7 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { User } from '../../users/entities/user.entity';
 import { Repository } from 'typeorm';
+import { Association } from '../../associations/entities/association.entity';
 import { Role } from '../../roles/entities/role.entity';
+import { User } from '../../users/entities/user.entity';
 import { OnDev } from '../../utils/decorators/on-dev.decorator';
 import { hashPassword } from '../../utils/functions';
 
@@ -12,12 +13,17 @@ export class UserSeedService {
     private readonly userRepository: Repository<User>,
     @Inject('ROLE_REPOSITORY')
     private readonly roleRepository: Repository<Role>,
+    @Inject('ASSOCIATION_REPOSITORY')
+    private readonly associationRepository: Repository<Association>,
   ) {}
 
   @OnDev()
   async seed() {
     await this.drop();
     const users = [];
+
+    // Récupérer toutes les associations
+    const associations = await this.associationRepository.find();
 
     // Create SuperAdmin user
     const superAdminRole = await this.roleRepository.findOne({
@@ -33,6 +39,7 @@ export class UserSeedService {
     user.email = 'admin@test.com';
     user.password = await hashPassword('Password123!');
     user.roles = [superAdminRole];
+    user.associations = associations; // L'admin est membre de toutes les associations
     users.push(user);
 
     // Create AssociationManager user

@@ -1,12 +1,14 @@
 <script setup lang="ts">
+import AssociationMembers from "@/components/AssociationDashboard/AssociationMembers.vue";
 import JnsImage from "@/components/ui/JnsImage.vue";
 import Loader from "@/components/ui/Loader.vue";
 import associationService from "@/services/associationService";
 import { useNotificationStore } from "@/store/notificationStore";
-import { useUserStore } from "@/store/usersStore";
+import { useUserStore } from "@/store/userStore";
 import { canManageAssociation } from "@/utils/check-role";
 import { User } from "@shared/types";
 import type { Association } from "@shared/types/association";
+import ConfirmDialog from "primevue/confirmdialog";
 import Tab from "primevue/tab";
 import TabList from "primevue/tablist";
 import TabPanel from "primevue/tabpanel";
@@ -84,7 +86,8 @@ onMounted(async () => {
         <Tabs :value="activeTab">
           <TabList>
             <Tab value="0">Informations</Tab>
-            <Tab v-if="canManageApplications" value="1"
+            <Tab value="1">Membres</Tab>
+            <Tab v-if="canManageApplications" value="2"
               >Gérer les candidatures</Tab
             >
           </TabList>
@@ -97,7 +100,14 @@ onMounted(async () => {
               </div>
             </TabPanel>
 
-            <TabPanel v-if="canManageApplications" value="1">
+            <TabPanel value="1">
+              <AssociationMembers
+                :associationId="route.params.id as string"
+                :canManageApplications="canManageApplications"
+              />
+            </TabPanel>
+
+            <TabPanel v-if="canManageApplications" value="2">
               <ManageAssociationApplications :associationId="association.id!" />
             </TabPanel>
           </TabPanels>
@@ -105,4 +115,6 @@ onMounted(async () => {
       </div>
     </div>
   </div>
+
+  <ConfirmDialog />
 </template>

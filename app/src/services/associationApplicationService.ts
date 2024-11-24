@@ -1,14 +1,15 @@
-import { JoinAssociationDto } from "@shared/dto/association-applications.dto";
-// app/src/services/associationApplicationService.ts
 import { useApi } from "@/composables/useApi";
 import { useApiStore } from "@/store/apiUrls.store";
+import { ResponseError } from "@/types/http.types";
+import { JoinAssociationDto } from "@shared/dto/association-applications.dto";
+
 const associationApplicationService = {
   joinAssociation: async (JoinAssociationData: JoinAssociationDto) => {
     const apiStore = useApiStore();
     const { data, error } = await useApi(apiStore.associationApplications.join)
       .post(JoinAssociationData)
       .json();
-    if (error.value) throw error.value;
+    if (error.value) throw error.value as ResponseError;
 
     return data.value;
   },
@@ -19,7 +20,7 @@ const associationApplicationService = {
         associationId,
       })
     ).json();
-    if (error.value) throw error.value;
+    if (error.value) throw error.value as ResponseError;
 
     return data.value;
   },
@@ -33,7 +34,7 @@ const associationApplicationService = {
     )
       .patch({ status })
       .json();
-    if (error.value) throw error.value;
+    if (error.value) throw error.value as ResponseError;
 
     return data.value;
   },
@@ -43,7 +44,7 @@ const associationApplicationService = {
       apiStore.associationApplications.byAssociations
     }?associationIds=${associationIds.join(",")}`;
     const { data, error } = await useApi(url).json();
-    if (error.value) throw error.value;
+    if (error.value) throw error.value as ResponseError;
 
     return data.value;
   },
@@ -54,7 +55,7 @@ const associationApplicationService = {
         associationId,
       })
     ).json();
-    if (error.value) throw new Error(error.value);
+    if (error.value) throw error.value as ResponseError;
 
     return data.value;
   },
@@ -64,9 +65,8 @@ const associationApplicationService = {
     const { data, error } = await useApi(
       apiStore.associationApplications.all
     ).json();
-    if (error.value) {
-      throw new Error(error.value);
-    }
+    if (error.value) throw error.value as ResponseError;
+
     return data.value;
   },
 
@@ -76,7 +76,7 @@ const associationApplicationService = {
       applicationId,
     });
     const { data, error } = await useApi(url).delete().json();
-    if (error.value) throw error.value;
+    if (error.value) throw error.value as ResponseError;
 
     return data.value;
   },

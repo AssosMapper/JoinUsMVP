@@ -26,6 +26,8 @@ export const useApiStore = defineStore("api", {
         create: "/associations",
         byName: "/associations/by-name/:name",
         my: "/associations/my/",
+        members: "/associations/:id/members",
+        removeMember: "/associations/:id/members/:userId",
       },
       associationApplications: {
         base: "/association-applications/:id",

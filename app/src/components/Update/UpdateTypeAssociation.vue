@@ -1,34 +1,37 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
-import { useUserStore } from '@/store/usersStore';
-import typeAssociationService from '@/services/typeAssociationService';
-import { useRouter } from 'vue-router';
+import typeAssociationService from "@/services/typeAssociationService";
+import { useUserStore } from "@/store/userStore";
+import { onMounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
 
 const userStore = useUserStore();
 const router = useRouter();
 
 const typeAssociation = ref({
   id: 0,
-  name: '',
-  description: '',
+  name: "",
+  description: "",
 });
 
 const selectedTypeAssociationId = ref<number | null>(null);
-const availableTypeAssociations = ref<{ id: number, name: string }[]>([]);
+const availableTypeAssociations = ref<{ id: number; name: string }[]>([]);
 
 const fetchTypeAssociations = async () => {
   try {
-    availableTypeAssociations.value  = await typeAssociationService.getAllTypeAssociations();
+    availableTypeAssociations.value =
+      await typeAssociationService.getAllTypeAssociations();
   } catch (error) {
-    console.error('Error fetching type associations:', error);
+    console.error("Error fetching type associations:", error);
   }
 };
 
 const fetchTypeAssociationDetails = async (id: number) => {
   try {
-    typeAssociation.value= await typeAssociationService.getTypeAssociationById(id);
+    typeAssociation.value = await typeAssociationService.getTypeAssociationById(
+      id
+    );
   } catch (error) {
-    console.error('Error fetching type association details:', error);
+    console.error("Error fetching type association details:", error);
   }
 };
 
@@ -36,10 +39,13 @@ const handleSubmit = async () => {
   try {
     const token = userStore.access_token;
     const { name, description } = typeAssociation.value;
-    await typeAssociationService.updateTypeAssociation(typeAssociation.value.id, { name, description });
-    await router.push('/');
+    await typeAssociationService.updateTypeAssociation(
+      typeAssociation.value.id,
+      { name, description }
+    );
+    await router.push("/");
   } catch (error) {
-    console.error('Error updating type association:', error);
+    console.error("Error updating type association:", error);
   }
 };
 
@@ -55,26 +61,42 @@ watch(selectedTypeAssociationId, (newId) => {
 </script>
 
 <template>
-  <div class="form-container w-4/5 flex justify-center text-center mx-auto my-10 py-8 border border-gray-300 rounded-lg">
+  <div
+    class="form-container w-4/5 flex justify-center text-center mx-auto my-10 py-8 border border-gray-300 rounded-lg"
+  >
     <form class="w-full max-w-md" @submit.prevent="handleSubmit">
-      <h2 class="text-2xl font-semibold leading-7 text-gray-900 mb-6">Update Type Association</h2>
+      <h2 class="text-2xl font-semibold leading-7 text-gray-900 mb-6">
+        Update Type Association
+      </h2>
 
       <div class="mb-4">
-        <label for="typeAssociationSelect" class="block text-sm font-medium leading-6 text-gray-900">Select Type Association</label>
+        <label
+          for="typeAssociationSelect"
+          class="block text-sm font-medium leading-6 text-gray-900"
+          >Select Type Association</label
+        >
         <select
           id="typeAssociationSelect"
           v-model="selectedTypeAssociationId"
           class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         >
           <option value="" disabled>Select a type association</option>
-          <option v-for="typeAssoc in availableTypeAssociations" :key="typeAssoc.id" :value="typeAssoc.id">
+          <option
+            v-for="typeAssoc in availableTypeAssociations"
+            :key="typeAssoc.id"
+            :value="typeAssoc.id"
+          >
             {{ typeAssoc.name }}
           </option>
         </select>
       </div>
 
       <div class="mb-4">
-        <label for="name" class="block text-sm font-medium leading-6 text-gray-900">Name</label>
+        <label
+          for="name"
+          class="block text-sm font-medium leading-6 text-gray-900"
+          >Name</label
+        >
         <input
           type="text"
           id="name"
@@ -85,7 +107,11 @@ watch(selectedTypeAssociationId, (newId) => {
       </div>
 
       <div class="mb-4">
-        <label for="description" class="block text-sm font-medium leading-6 text-gray-900">Description</label>
+        <label
+          for="description"
+          class="block text-sm font-medium leading-6 text-gray-900"
+          >Description</label
+        >
         <input
           type="text"
           id="description"
@@ -104,5 +130,4 @@ watch(selectedTypeAssociationId, (newId) => {
   </div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>

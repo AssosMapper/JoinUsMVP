@@ -1,44 +1,44 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import { useUserStore } from '@/store/usersStore';
-import typeEventService from '@/services/typeEventService';
+import typeEventService from "@/services/typeEventService";
+import { useUserStore } from "@/store/userStore";
+import { onMounted, ref, watch } from "vue";
+import { useRouter } from "vue-router";
 
 const userStore = useUserStore();
 const router = useRouter();
 
 const typeEvent = ref({
   id: 0,
-  name: '',
-  description: '',
+  name: "",
+  description: "",
 });
 
 const selectedTypeEventId = ref<number | null>(null);
-const availableTypeEvents = ref<{ id: number, name: string }[]>([]);
+const availableTypeEvents = ref<{ id: number; name: string }[]>([]);
 
 const fetchTypeEvents = async () => {
   try {
     availableTypeEvents.value = await typeEventService.getAllTypeEvents();
   } catch (error) {
-    console.error('Error fetching type events:', error);
+    console.error("Error fetching type events:", error);
   }
 };
 
 const fetchTypeEventDetails = async (id: number) => {
   try {
     typeEvent.value = await typeEventService.getTypeEventById(id);
-    console.log('Type Event details:', typeEvent.value);
+    console.log("Type Event details:", typeEvent.value);
   } catch (error) {
-    console.error('Error fetching type event details:', error);
+    console.error("Error fetching type event details:", error);
   }
 };
 
 const handleSubmit = async () => {
   try {
     await typeEventService.updateTypeEvent(typeEvent.value.id, typeEvent.value);
-    await router.push('/');
+    await router.push("/");
   } catch (error) {
-    console.error('Error updating type event:', error);
+    console.error("Error updating type event:", error);
   }
 };
 
@@ -54,26 +54,42 @@ watch(selectedTypeEventId, (newId) => {
 </script>
 
 <template>
-  <div class="form-container w-4/5 flex justify-center text-center mx-auto my-10 py-8 border border-gray-300 rounded-lg">
+  <div
+    class="form-container w-4/5 flex justify-center text-center mx-auto my-10 py-8 border border-gray-300 rounded-lg"
+  >
     <form class="w-full max-w-md" @submit.prevent="handleSubmit">
-      <h2 class="text-2xl font-semibold leading-7 text-gray-900 mb-6">Update Type Event</h2>
+      <h2 class="text-2xl font-semibold leading-7 text-gray-900 mb-6">
+        Update Type Event
+      </h2>
 
       <div class="mb-4">
-        <label for="typeEventSelect" class="block text-sm font-medium leading-6 text-gray-900">Select Type Event</label>
+        <label
+          for="typeEventSelect"
+          class="block text-sm font-medium leading-6 text-gray-900"
+          >Select Type Event</label
+        >
         <select
           id="typeEventSelect"
           v-model="selectedTypeEventId"
           class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         >
           <option value="" disabled>Select a type event</option>
-          <option v-for="typeEvent in availableTypeEvents" :key="typeEvent.id" :value="typeEvent.id">
+          <option
+            v-for="typeEvent in availableTypeEvents"
+            :key="typeEvent.id"
+            :value="typeEvent.id"
+          >
             {{ typeEvent.name }}
           </option>
         </select>
       </div>
 
       <div class="mb-4">
-        <label for="name" class="block text-sm font-medium leading-6 text-gray-900">Name</label>
+        <label
+          for="name"
+          class="block text-sm font-medium leading-6 text-gray-900"
+          >Name</label
+        >
         <input
           type="text"
           id="name"
@@ -84,7 +100,11 @@ watch(selectedTypeEventId, (newId) => {
       </div>
 
       <div class="mb-4">
-        <label for="description" class="block text-sm font-medium leading-6 text-gray-900">Description</label>
+        <label
+          for="description"
+          class="block text-sm font-medium leading-6 text-gray-900"
+          >Description</label
+        >
         <input
           type="text"
           id="description"
@@ -103,5 +123,4 @@ watch(selectedTypeEventId, (newId) => {
   </div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>
