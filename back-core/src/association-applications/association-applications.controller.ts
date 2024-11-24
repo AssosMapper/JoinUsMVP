@@ -20,10 +20,10 @@ import {
   updateApplicationStatusSchema,
 } from '@shared/validations/association-applications.validation';
 import { YupValidationPipe } from '@src/utils/pipes/yup-validation.pipe';
+import { AssociationManagerGuard } from '../associations/guards/association-manager.guard';
 import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
 import { CurrentUserId } from '../utils/decorators/current-user-id.decorator';
 import { AssociationApplicationsService } from './association-applications.service';
-import { AssociationManagerGuard } from './guards/association-manager.guard';
 
 @Controller('association-applications')
 @BearAuthToken()
@@ -43,6 +43,7 @@ export class AssociationApplicationsController {
   }
 
   @Patch(':id')
+  @BearAuthToken()
   @UseGuards(AssociationManagerGuard)
   async updateApplicationStatus(
     @Param('id') id: string,
@@ -71,6 +72,7 @@ export class AssociationApplicationsController {
   }
 
   @Get('by-association/:associationId')
+  @BearAuthToken()
   @UseGuards(AssociationManagerGuard)
   async getApplicationsByAssociation(
     @Param('associationId') associationId: string,

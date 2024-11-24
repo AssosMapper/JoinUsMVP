@@ -11,15 +11,17 @@ export class ProfileService {
 
   async findOne(userId: string): Promise<User> {
     if (userId === 'me') {
-      console.error('Invalid id "me" passed to findOne');
-      throw new NotFoundException('Invalid user ID');
+      console.error('ID invalide "me" passé à findOne');
+      throw new NotFoundException('ID utilisateur invalide');
     }
     const user = await this.usersRepository.findOne({
       where: { id: userId },
       relations: ['roles', 'associations'],
     });
     if (!user) {
-      throw new NotFoundException(`User with ID ${userId} not found`);
+      throw new NotFoundException(
+        `L'utilisateur avec l'ID ${userId} n'a pas été trouvé`,
+      );
     }
     return user;
   }

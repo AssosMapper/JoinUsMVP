@@ -115,7 +115,6 @@ export class AssociationApplicationsService {
     if (status === ApplicationStatus.APPROVED) {
       application.user.associations.push(application.association);
       await this.userRepository.save(application.user);
-
       await this.notificationsService.create({
         title: 'Candidature acceptée',
         message: `Votre candidature pour rejoindre l'association ${application.association.name} a été acceptée !`,
@@ -129,11 +128,9 @@ export class AssociationApplicationsService {
         message: `Votre candidature pour rejoindre l'association ${application.association.name} a été refusée.`,
         userId: application.user.id,
       });
-
-      await this.associationApplicationRepository.remove(application);
     }
 
-    return this.associationApplicationRepository.save(application);
+    return this.associationApplicationRepository.remove(application);
   }
   async getCurrentApplication(userId: string, associationId: string) {
     const application = await this.associationApplicationRepository.findOne({
