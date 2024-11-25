@@ -10,7 +10,6 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiBearerAuth } from '@nestjs/swagger';
 import {
   JoinAssociationDto,
   UpdateApplicationStatusDto,
@@ -27,7 +26,6 @@ import { AssociationApplicationsService } from './association-applications.servi
 
 @Controller('association-applications')
 @BearAuthToken()
-@ApiBearerAuth()
 export class AssociationApplicationsController {
   constructor(
     private readonly applicationService: AssociationApplicationsService,
@@ -43,7 +41,6 @@ export class AssociationApplicationsController {
   }
 
   @Patch(':id')
-  @BearAuthToken()
   @UseGuards(AssociationManagerGuard)
   async updateApplicationStatus(
     @Param('id') id: string,
@@ -72,7 +69,6 @@ export class AssociationApplicationsController {
   }
 
   @Get('by-association/:associationId')
-  @BearAuthToken()
   @UseGuards(AssociationManagerGuard)
   async getApplicationsByAssociation(
     @Param('associationId') associationId: string,

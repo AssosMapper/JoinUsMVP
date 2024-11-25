@@ -54,8 +54,8 @@ export class AssociationsController {
   }
 
   @Put(':id')
-  @BearAuthToken()
   @UseGuards(AssociationManagerGuard)
+  @BearAuthToken()
   update(
     @Param('id') id: string,
     @Body() updateAssociationDto: UpdateAssociationDto,
@@ -64,8 +64,8 @@ export class AssociationsController {
   }
 
   @Delete(':id')
-  @BearAuthToken()
   @UseGuards(AssociationManagerGuard)
+  @BearAuthToken()
   remove(@Param('id') id: string) {
     return this.associationsService.remove(id);
   }
@@ -77,8 +77,8 @@ export class AssociationsController {
   }
 
   @Delete(':id/members/:userId')
-  @BearAuthToken()
   @UseGuards(AssociationManagerGuard)
+  @BearAuthToken()
   removeMember(@Param('id') id: string, @Param('userId') userId: string) {
     return this.associationsService.removeMember(id, userId);
   }

@@ -9,7 +9,6 @@ import {
   Req,
   Sse,
 } from '@nestjs/common';
-import { ApiBearerAuth } from '@nestjs/swagger';
 import { Observable } from 'rxjs';
 import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
 import { PaginationQueryDto } from './dto/pagination-query.dto';
@@ -17,7 +16,6 @@ import { NotificationsService } from './notifications.service';
 
 @Controller('notifications')
 @BearAuthToken()
-@ApiBearerAuth()
 export class NotificationsController {
   constructor(private readonly notificationsService: NotificationsService) {}
 

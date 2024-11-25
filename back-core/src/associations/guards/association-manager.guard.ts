@@ -19,7 +19,7 @@ export class AssociationManagerGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const userId = request.user?.id;
+    const userId = request.user?.userId;
     const associationId = request.params.associationId || request.params.id;
 
     // Charger l'utilisateur avec ses relations
