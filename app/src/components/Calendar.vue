@@ -1,70 +1,25 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { Event } from "@shared/types/event";
+import Button from "primevue/button";
+import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
-import eventService from "../services/eventService.ts";
 import JnsImage from "./ui/JnsImage.vue";
 
+interface Props {
+  events: Event[];
+  currentPage: number;
+  totalPages: number;
+  isLoading?: boolean;
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  isLoading: false,
+});
+
 const router = useRouter();
-const events = ref([]);
 const currentDate = ref(new Date());
 const selectedDate = ref(new Date());
 const isMobile = ref(window.innerWidth < 768);
-const loader = ref(false);
-const currentPage = ref(1);
-const totalPages = ref(1);
-const pageSize = ref(10);
-
-const fetchEvents = async (isValid: boolean = true) => {
-  loader.value = true;
-  try {
-    const year = currentDate.value.getFullYear();
-    const month = currentDate.value.getMonth() + 1;
-
-    const response = await eventService.getEventsByMonth(
-      year,
-      month,
-      currentPage.value,
-      pageSize.value,
-      isValid
-    );
-
-    if (Array.isArray(response)) {
-      events.value = response;
-      totalPages.value = 1;
-    } else if (response && response.data) {
-      events.value = response.data;
-      totalPages.value = Math.ceil(response.total / pageSize.value);
-    } else {
-      events.value = [];
-      totalPages.value = 1;
-    }
-  } catch (error) {
-    console.error("Erreur lors de la récupération des événements :", error);
-  } finally {
-    loader.value = false;
-  }
-};
-
-const nextPage = () => {
-  if (currentPage.value < totalPages.value) {
-    currentPage.value++;
-    fetchEvents();
-  }
-};
-
-const previousPage = () => {
-  if (currentPage.value > 1) {
-    currentPage.value--;
-    fetchEvents();
-  }
-};
-
-onMounted(() => {
-  fetchEvents(true);
-  window.addEventListener("resize", () => {
-    isMobile.value = window.innerWidth < 768;
-  });
-});
 
 const currentMonthYear = computed(() => {
   return currentDate.value.toLocaleString("default", {
@@ -105,36 +60,62 @@ const calendarDays = computed(() => {
   return days;
 });
 
+// Fonction utilitaire pour normaliser les dates
+const normalizeDate = (date: Date | string) => {
+  const d = new Date(date);
+  const normalized = new Date(
+    d.getFullYear(),
+    d.getMonth(),
+    d.getDate()
+  ).getTime();
+
+  return normalized;
+};
+
+// Ajoutons un watcher pour voir les événements reçus
+watch(
+  () => props.events,
+  (newEvents) => {
+    console.log("Calendar received events:", newEvents);
+  },
+  { immediate: true }
+);
+
 const selectedDateEvents = computed(() => {
-  return events.value.filter((event) => {
-    const eventDate = new Date(event.date);
-    return eventDate.toDateString() === selectedDate.value.toDateString();
+  const eventsArray = Array.isArray(props.events) ? props.events : [];
+  return eventsArray.filter((event) => {
+    const normalizedEventDate = normalizeDate(event.date);
+    const normalizedSelectedDate = normalizeDate(selectedDate.value);
+
+    return normalizedEventDate === normalizedSelectedDate;
   });
 });
 
 const getEventCountForDate = (date: Date) => {
-  return events.value.filter((event) => {
-    const eventDate = new Date(event.date);
-    return eventDate.toDateString() === date.toDateString();
+  const eventsArray = Array.isArray(props.events) ? props.events : [];
+  return eventsArray.filter((event) => {
+    return normalizeDate(event.date) === normalizeDate(date);
   }).length;
 };
 
 const eventsByDate = computed(() => {
   const eventsMap: { [key: string]: Event[] } = {};
-  if (events.value.length > 0) {
-    events.value.forEach((event) => {
-      const eventDate = new Date(event.date).toDateString();
-      if (!eventsMap[eventDate]) {
-        eventsMap[eventDate] = [];
+  const eventsArray = Array.isArray(props.events) ? props.events : [];
+
+  if (eventsArray.length > 0) {
+    eventsArray.forEach((event) => {
+      const dateKey = normalizeDate(event.date).toString();
+      if (!eventsMap[dateKey]) {
+        eventsMap[dateKey] = [];
       }
-      eventsMap[eventDate].push(event);
+      eventsMap[dateKey].push(event);
     });
   }
   return eventsMap;
 });
 
 const getEventsForDate = (date: Date) => {
-  return eventsByDate.value[date.toDateString()] || [];
+  return eventsByDate.value[normalizeDate(date).toString()] || [];
 };
 
 const getImageSrc = (associationName: string) => {
@@ -151,8 +132,10 @@ const nextMonth = () => {
     currentDate.value.getMonth() + 1,
     1
   );
-  currentPage.value = 1;
-  fetchEvents(true);
+  emit("month-change", {
+    year: currentDate.value.getFullYear(),
+    month: currentDate.value.getMonth() + 1,
+  });
 };
 
 const previousMonth = () => {
@@ -161,8 +144,10 @@ const previousMonth = () => {
     currentDate.value.getMonth() - 1,
     1
   );
-  currentPage.value = 1;
-  fetchEvents(true);
+  emit("month-change", {
+    year: currentDate.value.getFullYear(),
+    month: currentDate.value.getMonth() + 1,
+  });
 };
 
 const selectDate = (date: Date) => {
@@ -184,6 +169,15 @@ const goToAssociationDetails = (id: number) => {
 
 const goToEventDetails = (id: number) => {
   router.push({ name: "EventDetails", params: { id } });
+};
+
+const emit = defineEmits<{
+  "month-change": [{ year: number; month: number }];
+  "page-change": [number];
+}>();
+
+const handlePageChange = (newPage: number) => {
+  emit("page-change", newPage);
 };
 </script>
 
@@ -361,6 +355,21 @@ const goToEventDetails = (id: number) => {
             Pas d'événements pour cette date.
           </div>
         </div>
+      </div>
+      <div
+        v-if="totalPages > 1"
+        class="pagination flex justify-center gap-2 mt-4 pb-4"
+      >
+        <Button
+          :disabled="currentPage === 1"
+          @click="handlePageChange(currentPage - 1)"
+          icon="pi pi-chevron-left"
+        />
+        <Button
+          :disabled="currentPage === totalPages"
+          @click="handlePageChange(currentPage + 1)"
+          icon="pi pi-chevron-right"
+        />
       </div>
     </div>
   </div>

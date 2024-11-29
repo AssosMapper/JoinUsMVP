@@ -32,6 +32,9 @@ export class NotificationsService {
     });
     const result = await this.notificationRepository.save(notification);
     const unreadCount = await this.countUnreadNotifications(user.id);
+    if (!this.notificationSubjects.has(user.id))
+      this.notificationSubjects.set(user.id, new Subject<MessageEvent>());
+
     this.notificationSubjects.get(user.id).next({
       data: { notification: result, unreadCount },
       type: NotificationSseEnum.NEW_NOTIFICATION,

@@ -12,6 +12,7 @@ declare module 'vue' {
     Avatar: typeof import('primevue/avatar')['default']
     Button: typeof import('primevue/button')['default']
     Calendar: typeof import('./src/components/Calendar.vue')['default']
+    CalendarWrapper: typeof import('./src/components/Calendar/CalendarWrapper.vue')['default']
     Column: typeof import('primevue/column')['default']
     CreateAssociation: typeof import('./src/components/Create/CreateAssociation.vue')['default']
     CreateEvent: typeof import('./src/components/Create/CreateEvent.vue')['default']

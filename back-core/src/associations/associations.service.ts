@@ -2,6 +2,7 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { RoleEnum } from '@shared/types/roles';
 import { PublicUser } from '@shared/types/user';
 import { In, Repository } from 'typeorm';
+import { NotificationsService } from '../notifications/notifications.service';
 import { TypeAssociations } from '../type-associations/entities/type-associations.entity';
 import { User } from '../users/entities/user.entity';
 import { checkRole } from '../utils/functions/check-role';
@@ -18,6 +19,7 @@ export class AssociationsService {
     private usersRepository: Repository<User>,
     @Inject('TYPE_ASSOCIATIONS_REPOSITORY')
     private typeAssociationsRepository: Repository<TypeAssociations>,
+    private notificationsService: NotificationsService,
   ) {}
 
   findAll(): Promise<Association[]> {
@@ -140,5 +142,12 @@ export class AssociationsService {
     // Retirer le membre
     association.users = association.users.filter((user) => user.id !== userId);
     await this.associationsRepository.save(association);
+
+    // Envoyer une notification à l'utilisateur banni
+    await this.notificationsService.create({
+      userId: userId,
+      title: "Exclusion d'association",
+      message: `Vous avez été exclu de l'association ${association.name}`,
+    });
   }
 }
