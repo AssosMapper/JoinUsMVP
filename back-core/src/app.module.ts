@@ -5,7 +5,7 @@ import {
   RequestMethod,
 } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { AssociationApplicationsModule } from './association-applications/association-applications.module';
 import { AssociationApplication } from './association-applications/entities/association-application.entity';
 import { AssociationsModule } from './associations/associations.module';
@@ -16,6 +16,7 @@ import { EventsModule } from './events/events.module';
 import { Media } from './media/entities/media.entity';
 import { MediaModule } from './media/media.module';
 import { Notification } from './notifications/entities/notification.entity';
+import { NotificationsModule } from './notifications/notifications.module';
 import { Permission } from './permissions/entities/permission.entity';
 import { PermissionsModule } from './permissions/permissions.module';
 import { ProfileModule } from './profile/profile.module';
@@ -30,9 +31,10 @@ import { UsersModule } from './users/users.module';
 import { AllExceptionsFilter } from './utils/all-exceptions.filter';
 import { validationSchema } from './utils/config/config';
 import { DatabaseModule } from './utils/database/database.module';
+import { RoleGuard } from './utils/guards/role.guards';
 import { LoggingInterceptor } from './utils/logging.interceptor';
 import { LoggingMiddleware } from './utils/middlewares/logging.middleware';
-import { NotificationsModule } from './notifications/notifications.module';
+
 @Module({
   imports: [
     DatabaseModule.forRoot([
@@ -72,6 +74,10 @@ import { NotificationsModule } from './notifications/notifications.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RoleGuard,
     },
   ],
 })

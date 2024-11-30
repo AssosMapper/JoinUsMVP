@@ -1,4 +1,9 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { RoleEnum } from '@shared/types/roles';
 import { PublicUser } from '@shared/types/user';
 import { In, Repository } from 'typeorm';
@@ -133,11 +138,17 @@ export class AssociationsService {
       relations: ['users'],
     });
 
-    if (!association) {
-      throw new NotFoundException(
-        `Association with ID ${associationId} not found`,
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['roles'],
+    });
+
+    if (!association || !user)
+      throw new NotFoundException(`Association ou utilisateur non trouvé`);
+    if (checkRole(user, RoleEnum.ASSOCIATION_MANAGER))
+      throw new UnauthorizedException(
+        "Un gérant d'association ne peut pas être viré d'une association",
       );
-    }
 
     // Retirer le membre
     association.users = association.users.filter((user) => user.id !== userId);
