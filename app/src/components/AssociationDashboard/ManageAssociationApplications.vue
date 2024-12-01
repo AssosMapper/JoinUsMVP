@@ -6,7 +6,7 @@ import { ApplicationStatus } from "@shared/types/association-applications";
 import Button from "primevue/button";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 
 const props = defineProps<{
   associationId: string;
@@ -50,8 +50,9 @@ const loadApplications = async () => {
   }
 };
 
-// Charger les applications au montage du composant
-loadApplications();
+onMounted(() => {
+  loadApplications();
+});
 </script>
 
 <template>

@@ -94,14 +94,8 @@ const getEventsByDate = async (date: string, limit: number) => {
   const url = `${apiStore.events.byDate}?date=${date}&limit=${limit}`;
 
   const { data, error } = await useApi(url).json();
-  console.log(data);
-  console.log(data);
-  console.log(data);
-  console.log(data);
-  console.log(data);
-  if (error.value) {
-    throw new Error(error.value);
-  }
+  if (error.value) throw new Error(error.value);
+
   return data.value;
 };
 
@@ -110,14 +104,16 @@ const getEventsByMonth = async (
   month: number,
   page: number = 1,
   limit: number = 10,
-  isValid?: boolean
+  isValid?: boolean,
+  search?: string
 ) => {
   const apiStore = useApiStore();
   let url = `${apiStore.events.byMonth}?year=${year}&month=${month}&page=${page}&limit=${limit}`;
 
   if (isValid !== undefined) url += `&isValid=${isValid}`;
+  if (search) url += `&search=${encodeURIComponent(search)}`;
 
-  const { data, error, response } = await useApi(url).json();
+  const { data, error } = await useApi(url).json();
   if (error.value) throw error.value as ResponseError;
 
   return data.value;

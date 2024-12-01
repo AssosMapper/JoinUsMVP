@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AssociationMembers from "@/components/AssociationDashboard/AssociationMembers.vue";
+import ManageAssociationApplications from "@/components/AssociationDashboard/ManageAssociationApplications.vue";
 import JnsImage from "@/components/ui/JnsImage.vue";
 import Loader from "@/components/ui/Loader.vue";
 import associationService from "@/services/associationService";
@@ -83,7 +84,7 @@ onMounted(async () => {
 
       <!-- Tabs -->
       <div class="card">
-        <Tabs :value="activeTab">
+        <Tabs v-model:value="activeTab" :lazy="true">
           <TabList>
             <Tab value="0">Informations</Tab>
             <Tab value="1">Membres</Tab>

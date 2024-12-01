@@ -4,7 +4,7 @@ import { User } from "./user";
 
 export interface Event {
   id?: string;
-  titre: string;
+  titre?: string;
   description: string;
   image?: string;
   date: Date;

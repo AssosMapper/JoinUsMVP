@@ -328,3 +328,6 @@ le repertoire documentations contient les doc suivantes :
 - vue3 : Documentation vue3 (privilegier la composition pas l'option api)
 - typeorm : orm que j'utilise avec nest
 - yup.md: doc du validateur yup
+- primevue : code source des composants primevue
+
+  Il faudra voir en priorité le répertoire documentations pour avoir les bonnes versions des doc et la bonne manière d'utiliser les librairies

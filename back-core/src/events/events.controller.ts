@@ -1,13 +1,28 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Put, UseGuards, Query, DefaultValuePipe, ParseIntPipe, BadRequestException } from '@nestjs/common';
-import { EventsService } from './events.service';
-import { Event } from './entities/event.entity';
+import {
+  Body,
+  Controller,
+  DefaultValuePipe,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+  Query,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import {
+  GetEventsByMonthDto,
+  getEventsByMonthSchema,
+} from '@shared/dto/events.dto';
+import { User } from '../users/entities/user.entity';
+import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
+import { CurrentUserId } from '../utils/decorators/current-user-id.decorator';
+import { YupValidationPipe } from '../utils/pipes/yup-validation.pipe';
 import { CreateEventDto } from './dto/create-events.dto';
 import { UpdateEventDto } from './dto/update-events.dto';
-import { CurrentUserId } from '../utils/decorators/current-user-id.decorator';
-import { User } from '../users/entities/user.entity';
-import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
-import { FilterEventsDto } from './dto/filter-events.dto';
+import { Event } from './entities/event.entity';
+import { EventsService } from './events.service';
 
 @Controller('events')
 @ApiBearerAuth()
@@ -22,7 +37,7 @@ export class EventsController {
     @Query('isValid') isValid?: boolean,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
-  ): Promise<{ data: Event[], total: number, page: number, limit: number }> {
+  ): Promise<{ data: Event[]; total: number; page: number; limit: number }> {
     return this.eventsService.findAll(isValid, page, limit);
   }
 
@@ -31,8 +46,12 @@ export class EventsController {
   @ApiQuery({ name: 'limit', required: true, type: Number })
   async findEventsByAssociationId(
     @Query('associationId') associationId: string,
-    @Query('limit') limit: number
-  ): Promise<{ pastEvents: Event[], todayEvents: Event[], upcomingEvents: Event[] }> {
+    @Query('limit') limit: number,
+  ): Promise<{
+    pastEvents: Event[];
+    todayEvents: Event[];
+    upcomingEvents: Event[];
+  }> {
     return this.eventsService.findEventsByAssociationId(associationId, limit);
   }
 
@@ -41,32 +60,30 @@ export class EventsController {
   @ApiQuery({ name: 'limit', required: true, type: Number })
   async findEventsByDate(
     @Query('date') date: string,
-    @Query('limit') limit: number
-  ): Promise<{ pastEvents: Event[], todayEvents: Event[], upcomingEvents: Event[] }> {
+    @Query('limit') limit: number,
+  ): Promise<{
+    pastEvents: Event[];
+    todayEvents: Event[];
+    upcomingEvents: Event[];
+  }> {
     return this.eventsService.findEventsByDate(date, limit);
   }
 
   @Get('by-month')
   async getEventsByMonth(
-    @Query('year') year: string,
-    @Query('month') month: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
-    @Query('isValid') isValid?: string,  
-  ): Promise<{ data: Event[], total: number, page: number, limit: number }> {
-    const yearNum = parseInt(year, 10);
-    const monthNum = parseInt(month, 10);
-  
-    let isValidBoolean: boolean | undefined = undefined;
-    if (isValid === 'true') {
-      isValidBoolean = true;
-    } else if (isValid === 'false') {
-      isValidBoolean = false;
-    }
-  
-    return this.eventsService.findEventsByMonth(yearNum, monthNum, page, limit, isValidBoolean);
+    @Query(new YupValidationPipe(getEventsByMonthSchema))
+    query: GetEventsByMonthDto,
+  ): Promise<{ data: Event[]; total: number; page: number; limit: number }> {
+    const { year, month, page = 1, limit = 10, isValid, search } = query;
+    return this.eventsService.findEventsByMonth(
+      year,
+      month,
+      page,
+      limit,
+      isValid,
+      search,
+    );
   }
-  
 
   @Get(':id')
   findOne(@Param('id') id: string): Promise<Event> {
@@ -80,8 +97,11 @@ export class EventsController {
 
   @Post()
   @BearAuthToken()
-  create(@CurrentUserId() user:User,@Body() createEventDto: CreateEventDto): Promise<Event> {
-    return this.eventsService.create(user,createEventDto);
+  create(
+    @CurrentUserId() user: User,
+    @Body() createEventDto: CreateEventDto,
+  ): Promise<Event> {
+    return this.eventsService.create(user, createEventDto);
   }
 
   @Put(':id')

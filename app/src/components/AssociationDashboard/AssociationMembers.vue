@@ -3,7 +3,7 @@ import JnsImage from "@/components/ui/JnsImage.vue";
 import associationService from "@/services/associationService";
 import { useNotificationStore } from "@/store/notificationStore";
 import { PublicUser } from "@shared/types/user";
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 
 const props = defineProps<{
   associationId: string;
@@ -12,6 +12,10 @@ const props = defineProps<{
 
 const notificationStore = useNotificationStore();
 const members = ref<PublicUser[]>([]);
+
+const emit = defineEmits<{
+  loaded: [];
+}>();
 
 const loadMembers = async () => {
   try {
@@ -33,7 +37,9 @@ const handleRemoveMember = async (userId: string) => {
   }
 };
 
-loadMembers();
+onMounted(() => {
+  loadMembers();
+});
 </script>
 
 <template>
