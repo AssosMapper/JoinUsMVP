@@ -212,11 +212,9 @@ export class EventsService {
   async findEventsByMonth(
     year: number,
     month: number,
-    page: number = 1,
-    limit: number = 10,
     isValid?: boolean,
     search?: string,
-  ): Promise<{ data: Event[]; total: number; page: number; limit: number }> {
+  ): Promise<Event[]> {
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0, 23, 59, 59, 999);
 
@@ -240,19 +238,8 @@ export class EventsService {
       });
     }
 
-    query
-      .orderBy('event.date', 'ASC')
-      .addOrderBy('event.titre', 'ASC')
-      .skip((page - 1) * limit)
-      .take(limit);
+    query.orderBy('event.date', 'ASC').addOrderBy('event.titre', 'ASC');
 
-    const [data, total] = await query.getManyAndCount();
-
-    return {
-      data,
-      total,
-      page,
-      limit,
-    };
+    return query.getMany();
   }
 }

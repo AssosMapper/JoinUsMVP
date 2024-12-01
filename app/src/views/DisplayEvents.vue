@@ -16,39 +16,21 @@ import { onMounted, ref, watch } from "vue";
 const events = ref<Event[]>([]);
 const search = ref("");
 const loading = ref(false);
-const currentPage = ref(1);
-const itemsPerPage = ref(10);
-const hasMore = ref(true);
 const activeTab = ref("0");
 
 const debouncedSearch = useDebounce(search, 300);
 
-const fetchEvents = async (reset = false) => {
-  if (reset) {
-    currentPage.value = 1;
-    events.value = [];
-    hasMore.value = true;
-  }
-
-  if (!hasMore.value || loading.value) return;
-
+const fetchEvents = async () => {
   loading.value = true;
   try {
     const today = new Date();
     const response = await eventService.getEventsByMonth(
       today.getFullYear(),
       today.getMonth() + 1,
-      currentPage.value,
-      itemsPerPage.value,
       true,
       debouncedSearch.value
     );
-
-    if (reset) events.value = response.data;
-    else events.value = [...events.value, ...response.data];
-
-    hasMore.value = events.value.length < response.total;
-    currentPage.value++;
+    events.value = response;
   } catch (error) {
     console.error("Erreur lors de la récupération des événements :", error);
   } finally {
@@ -56,13 +38,7 @@ const fetchEvents = async (reset = false) => {
   }
 };
 
-const loadMore = async () => {
-  if (hasMore.value && !loading.value) {
-    await fetchEvents();
-  }
-};
-
-watch(debouncedSearch, () => fetchEvents(true));
+watch(debouncedSearch, fetchEvents);
 
 onMounted(fetchEvents);
 </script>
@@ -110,25 +86,15 @@ onMounted(fetchEvents);
         </div>
       </div>
 
-      <!-- Contenu avec padding pour éviter le chevauchement -->
+      <!-- Contenu -->
       <div>
         <TabPanels>
           <TabPanel value="0">
-            <EventsList
-              :events="events"
-              :loading="loading"
-              :fetchMore="loadMore"
-              :hasMore="hasMore"
-            />
+            <EventsList :events="events" :loading="loading" />
           </TabPanel>
 
           <TabPanel value="1">
-            <Calendar
-              :events="events"
-              :currentPage="currentPage"
-              :totalPages="Math.ceil(events.length / itemsPerPage)"
-              @page-change="handlePageChange"
-            />
+            <Calendar :events="events" />
           </TabPanel>
 
           <TabPanel value="2">

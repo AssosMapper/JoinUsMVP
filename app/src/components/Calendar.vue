@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import { Event } from "@shared/types/event";
-import Button from "primevue/button";
 import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import JnsImage from "./ui/JnsImage.vue";
 
 interface Props {
   events: Event[];
-  currentPage: number;
-  totalPages: number;
   isLoading?: boolean;
 }
 
@@ -173,12 +170,7 @@ const goToEventDetails = (id: number) => {
 
 const emit = defineEmits<{
   "month-change": [{ year: number; month: number }];
-  "page-change": [number];
 }>();
-
-const handlePageChange = (newPage: number) => {
-  emit("page-change", newPage);
-};
 </script>
 
 <template>
@@ -355,21 +347,6 @@ const handlePageChange = (newPage: number) => {
             Pas d'événements pour cette date.
           </div>
         </div>
-      </div>
-      <div
-        v-if="totalPages > 1"
-        class="pagination flex justify-center gap-2 mt-4 pb-4"
-      >
-        <Button
-          :disabled="currentPage === 1"
-          @click="handlePageChange(currentPage - 1)"
-          icon="pi pi-chevron-left"
-        />
-        <Button
-          :disabled="currentPage === totalPages"
-          @click="handlePageChange(currentPage + 1)"
-          icon="pi pi-chevron-right"
-        />
       </div>
     </div>
   </div>

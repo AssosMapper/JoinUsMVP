@@ -102,13 +102,11 @@ const getEventsByDate = async (date: string, limit: number) => {
 const getEventsByMonth = async (
   year: number,
   month: number,
-  page: number = 1,
-  limit: number = 10,
   isValid?: boolean,
   search?: string
 ) => {
   const apiStore = useApiStore();
-  let url = `${apiStore.events.byMonth}?year=${year}&month=${month}&page=${page}&limit=${limit}`;
+  let url = `${apiStore.events.byMonth}?year=${year}&month=${month}`;
 
   if (isValid !== undefined) url += `&isValid=${isValid}`;
   if (search) url += `&search=${encodeURIComponent(search)}`;
