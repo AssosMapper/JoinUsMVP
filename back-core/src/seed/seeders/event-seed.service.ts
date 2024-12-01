@@ -49,7 +49,7 @@ export class EventSeedService {
 
     // Créer des événements pour chaque association
     for (const association of associations) {
-      const numEvents = Math.floor(Math.random() * 3) + 2; // 2-4 événements par association
+      const numEvents = 10; // 10 événements par association
 
       for (let i = 0; i < numEvents; i++) {
         const event = new Event();

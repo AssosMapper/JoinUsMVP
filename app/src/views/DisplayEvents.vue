@@ -44,11 +44,8 @@ const fetchEvents = async (reset = false) => {
       debouncedSearch.value
     );
 
-    if (reset) {
-      events.value = response.data;
-    } else {
-      events.value = [...events.value, ...response.data];
-    }
+    if (reset) events.value = response.data;
+    else events.value = [...events.value, ...response.data];
 
     hasMore.value = events.value.length < response.total;
     currentPage.value++;

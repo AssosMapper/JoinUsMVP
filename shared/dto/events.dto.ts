@@ -1,13 +1,6 @@
 import * as yup from "yup";
 import { PaginationDto } from "./pagination.dto";
 
-export interface GetEventsByMonthDto extends PaginationDto {
-  year: number;
-  month: number;
-  isValid?: boolean;
-  search?: string;
-}
-
 export const getEventsByMonthSchema = yup
   .object()
   .shape({
@@ -19,3 +12,5 @@ export const getEventsByMonthSchema = yup
     search: yup.string().max(255).optional(),
   })
   .required();
+export type GetEventsByMonthDto = yup.InferType<typeof getEventsByMonthSchema> &
+  PaginationDto;

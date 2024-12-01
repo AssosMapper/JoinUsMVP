@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import JnsImage from "@/components/ui/JnsImage.vue";
+import { useLayoutRefStore } from "@/store/layoutRefStore";
 import { friendlyDate } from "@shared/utils/date";
 import { useInfiniteScroll } from "@vueuse/core";
 import Badge from "primevue/badge";
 import Card from "primevue/card";
 import ProgressSpinner from "primevue/progressspinner";
-import { ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -16,16 +16,16 @@ const props = defineProps<{
   hasMore: boolean;
 }>();
 
-const el = ref<HTMLElement | null>(null);
+const layoutRefStore = useLayoutRefStore();
 
 useInfiniteScroll(
-  el,
+  layoutRefStore.mainRef,
   async () => {
-    if (!props.loading && props.hasMore) {
-      await props.fetchMore();
-    }
+    if (!props.loading && props.hasMore) await props.fetchMore();
   },
-  { distance: 10 }
+  {
+    distance: 50,
+  }
 );
 
 const truncateDescription = (description: string, maxLength: number = 255) => {
