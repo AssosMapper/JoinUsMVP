@@ -214,6 +214,7 @@ export class EventsService {
     month: number,
     isValid?: boolean,
     search?: string,
+    typeEventId?: string,
   ): Promise<Event[]> {
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0, 23, 59, 59, 999);
@@ -236,6 +237,10 @@ export class EventsService {
       query.andWhere('LOWER(event.titre) LIKE LOWER(:search)', {
         search: `%${search}%`,
       });
+    }
+
+    if (typeEventId) {
+      query.andWhere('event.typeEvent.id = :typeEventId', { typeEventId });
     }
 
     query.orderBy('event.date', 'ASC').addOrderBy('event.titre', 'ASC');

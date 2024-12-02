@@ -103,13 +103,15 @@ const getEventsByMonth = async (
   year: number,
   month: number,
   isValid?: boolean,
-  search?: string
+  search?: string,
+  typeEventId?: string
 ) => {
   const apiStore = useApiStore();
   let url = `${apiStore.events.byMonth}?year=${year}&month=${month}`;
 
   if (isValid !== undefined) url += `&isValid=${isValid}`;
   if (search) url += `&search=${encodeURIComponent(search)}`;
+  if (typeEventId) url += `&typeEventId=${typeEventId}`;
 
   const { data, error } = await useApi(url).json();
   if (error.value) throw error.value as ResponseError;

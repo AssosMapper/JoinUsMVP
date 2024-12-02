@@ -74,8 +74,14 @@ export class EventsController {
     @Query(new YupValidationPipe(getEventsByMonthSchema))
     query: GetEventsByMonthDto,
   ): Promise<Event[]> {
-    const { year, month, isValid, search } = query;
-    return this.eventsService.findEventsByMonth(year, month, isValid, search);
+    const { year, month, isValid, search, typeEventId } = query;
+    return this.eventsService.findEventsByMonth(
+      year,
+      month,
+      isValid,
+      search,
+      typeEventId,
+    );
   }
 
   @Get(':id')

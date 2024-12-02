@@ -1,9 +1,8 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { TypeEvents } from './entities/type-events.entity';
 import { CreateTypeEventDto } from './dto/create-type-event.dto';
 import { UpdateTypeEventDto } from './dto/update-type-event.dto';
+import { TypeEvents } from './entities/type-events.entity';
 
 @Injectable()
 export class TypeEventsService {
@@ -17,7 +16,9 @@ export class TypeEventsService {
   }
 
   async findOne(id: string): Promise<TypeEvents> {
-    const typeEvent = await this.typeEventsRepository.findOne({ where: { id } });
+    const typeEvent = await this.typeEventsRepository.findOne({
+      where: { id },
+    });
     if (!typeEvent) {
       throw new NotFoundException(`TypeEvent with ID ${id} not found`);
     }
@@ -31,7 +32,10 @@ export class TypeEventsService {
     return this.typeEventsRepository.save(typeEvent);
   }
 
-  async update(id: string, updateTypeEventDto: UpdateTypeEventDto): Promise<TypeEvents> {
+  async update(
+    id: string,
+    updateTypeEventDto: UpdateTypeEventDto,
+  ): Promise<TypeEvents> {
     const existingTypeEvent = await this.findOne(id);
     if (!existingTypeEvent) {
       throw new NotFoundException(`TypeEvent with ID ${id} not found`);

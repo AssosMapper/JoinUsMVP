@@ -1,34 +1,48 @@
 <script setup lang="ts">
-import Calendar from "@/components/Calendar.vue";
-import EventsList from "@/components/EventsList.vue";
 import eventService from "@/services/eventService";
+import typeEventService from "@/services/typeEventService";
 import { Event } from "@shared/types/event";
+import { TypeEvents } from "@shared/types/type-events";
 import { useDebounce } from "@vueuse/core";
+import Dropdown from "primevue/dropdown";
 import IconField from "primevue/iconfield";
 import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
 import Tab from "primevue/tab";
 import TabList from "primevue/tablist";
-import TabPanel from "primevue/tabpanel";
-import TabPanels from "primevue/tabpanels";
 import { onMounted, ref, watch } from "vue";
 
 const events = ref<Event[]>([]);
+const typeEvents = ref<TypeEvents[]>([]);
 const search = ref("");
 const loading = ref(false);
 const activeTab = ref("0");
+const currentDate = ref(new Date());
+const selectedType = ref<TypeEvents | null>(null);
 
 const debouncedSearch = useDebounce(search, 300);
+
+const fetchTypeEvents = async () => {
+  try {
+    const data = await typeEventService.getAllTypeEvents();
+    typeEvents.value = data;
+  } catch (error) {
+    console.error(
+      "Erreur lors de la récupération des types d'événements :",
+      error
+    );
+  }
+};
 
 const fetchEvents = async () => {
   loading.value = true;
   try {
-    const today = new Date();
     const response = await eventService.getEventsByMonth(
-      today.getFullYear(),
-      today.getMonth() + 1,
+      currentDate.value.getFullYear(),
+      currentDate.value.getMonth() + 1,
       true,
-      debouncedSearch.value
+      debouncedSearch.value,
+      selectedType.value?.id
     );
     events.value = response;
   } catch (error) {
@@ -38,9 +52,30 @@ const fetchEvents = async () => {
   }
 };
 
-watch(debouncedSearch, fetchEvents);
+onMounted(async () => {
+  await fetchTypeEvents();
+  fetchEvents();
+});
 
-onMounted(fetchEvents);
+const handlePreviousMonth = () => {
+  currentDate.value = new Date(
+    currentDate.value.getFullYear(),
+    currentDate.value.getMonth() - 1,
+    1
+  );
+  fetchEvents();
+};
+
+const handleNextMonth = () => {
+  currentDate.value = new Date(
+    currentDate.value.getFullYear(),
+    currentDate.value.getMonth() + 1,
+    1
+  );
+  fetchEvents();
+};
+
+watch([debouncedSearch, selectedType], fetchEvents);
 </script>
 
 <template>
@@ -49,7 +84,7 @@ onMounted(fetchEvents);
       <!-- Header fixe avec search et tabs -->
       <div class="fixed md:static top-0 left-0 right-0 z-50 bg-white shadow-md">
         <div class="p-4">
-          <div class="flex justify-center mb-4">
+          <div class="flex flex-col md:flex-row justify-center gap-4">
             <IconField class="w-full max-w-3xl">
               <InputIcon class="pi pi-search" />
               <InputText
@@ -58,6 +93,14 @@ onMounted(fetchEvents);
                 class="w-full"
               />
             </IconField>
+            <Dropdown
+              v-model="selectedType"
+              :options="typeEvents"
+              optionLabel="name"
+              placeholder="Type d'événement"
+              class="hidden md:flex w-64 md:scale-100"
+              :showClear="true"
+            />
           </div>
         </div>
 
@@ -86,22 +129,42 @@ onMounted(fetchEvents);
         </div>
       </div>
 
-      <!-- Contenu -->
-      <div>
-        <TabPanels>
-          <TabPanel value="0">
-            <EventsList :events="events" :loading="loading" />
-          </TabPanel>
+      <section class="pt-32 md:pt-0 px-10">
+        <!-- Date Switch -->
+        <div class="mt-10 flex justify-center md:justify-end w-full">
+          <DateSwitchComponent
+            :current-date="currentDate"
+            @previous="handlePreviousMonth"
+            @next="handleNextMonth"
+          />
+        </div>
 
-          <TabPanel value="1">
-            <Calendar :events="events" />
-          </TabPanel>
+        <!-- Contenu -->
+        <div>
+          <TabPanels>
+            <TabPanel value="0">
+              <EventsList
+                :events="events"
+                :loading="loading"
+                :current-month-year="
+                  currentDate.toLocaleDateString('fr-FR', {
+                    month: 'long',
+                    year: 'numeric',
+                  })
+                "
+              />
+            </TabPanel>
 
-          <TabPanel value="2">
-            <div class="text-center p-4">Fonctionnalité à venir</div>
-          </TabPanel>
-        </TabPanels>
-      </div>
+            <TabPanel value="1">
+              <Calendar :events="events" :current-date="currentDate" />
+            </TabPanel>
+
+            <TabPanel value="2">
+              <div class="text-center p-4">Fonctionnalité à venir</div>
+            </TabPanel>
+          </TabPanels>
+        </div>
+      </section>
     </div>
   </Tabs>
 </template>

@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import { Event } from "@shared/types/event";
-import { computed, ref, watch } from "vue";
+import { computed, emit, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import JnsImage from "./ui/JnsImage.vue";
 
 interface Props {
   events: Event[];
+  currentDate: Date;
   isLoading?: boolean;
 }
 
@@ -14,20 +15,19 @@ const props = withDefaults(defineProps<Props>(), {
 });
 
 const router = useRouter();
-const currentDate = ref(new Date());
 const selectedDate = ref(new Date());
 const isMobile = ref(window.innerWidth < 768);
 
 const currentMonthYear = computed(() => {
-  return currentDate.value.toLocaleString("default", {
+  return props.currentDate.toLocaleString("default", {
     month: "long",
     year: "numeric",
   });
 });
 
 const calendarDays = computed(() => {
-  const year = currentDate.value.getFullYear();
-  const month = currentDate.value.getMonth();
+  const year = props.currentDate.getFullYear();
+  const month = props.currentDate.getMonth();
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
 
@@ -123,30 +123,6 @@ const getImageSrc = (associationName: string) => {
   return `/assets/associations-images/${sanitizedAssociationName}.png`;
 };
 
-const nextMonth = () => {
-  currentDate.value = new Date(
-    currentDate.value.getFullYear(),
-    currentDate.value.getMonth() + 1,
-    1
-  );
-  emit("month-change", {
-    year: currentDate.value.getFullYear(),
-    month: currentDate.value.getMonth() + 1,
-  });
-};
-
-const previousMonth = () => {
-  currentDate.value = new Date(
-    currentDate.value.getFullYear(),
-    currentDate.value.getMonth() - 1,
-    1
-  );
-  emit("month-change", {
-    year: currentDate.value.getFullYear(),
-    month: currentDate.value.getMonth() + 1,
-  });
-};
-
 const selectDate = (date: Date) => {
   selectedDate.value = date;
 };
@@ -174,64 +150,12 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <div class="flex items-center justify-center py-6">
+  <div class="flex items-center justify-center">
     <div class="w-full shadow-lg">
-      <div class="md:p-8 pt-2 dark:bg-gray-800 bg-white rounded-t">
-        <div class="px-4 flex items-center justify-between">
-          <span
-            tabindex="0"
-            class="focus:outline-none text-base font-bold dark:text-gray-100 text-gray-800"
-          >
-            {{ currentMonthYear }}
-          </span>
-          <div class="flex items-center">
-            <button
-              @click="previousMonth"
-              aria-label="calendar backward"
-              class="focus:text-gray-400 hover:text-gray-400 text-gray-800 dark:text-gray-100"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="icon icon-tabler icon-tabler-chevron-left"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                fill="none"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <polyline points="15 6 9 12 15 18" />
-              </svg>
-            </button>
-            <button
-              @click="nextMonth"
-              aria-label="calendar forward"
-              class="focus:text-gray-400 hover:text-gray-400 ml-3 text-gray-800 dark:text-gray-100"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                class="icon icon-tabler icon-tabler-chevron-right"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                stroke-width="1.5"
-                stroke="currentColor"
-                fill="none"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <polyline points="9 6 15 12 9 18" />
-              </svg>
-            </button>
-          </div>
-        </div>
-        <div
-          class="flex items-center justify-between pt-4 md:pt-6 overflow-x-auto"
-        >
+      <div
+        class="px-8 md:py-0 md:px-4 dark:bg-gray-800 bg-white rounded-t"
+      >
+        <div class="flex items-center justify-between overflow-x-auto">
           <table class="w-full">
             <thead>
               <tr class="h-10">

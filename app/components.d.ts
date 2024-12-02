@@ -19,6 +19,7 @@ declare module 'vue' {
     CreateTypeAssociation: typeof import('./src/components/Create/CreateTypeAssociation.vue')['default']
     CreateTypeEvent: typeof import('./src/components/Create/CreateTypeEvent.vue')['default']
     DataTable: typeof import('primevue/datatable')['default']
+    DateSwitchComponent: typeof import('./src/components/ui/DateSwitchComponent.vue')['default']
     Dialog: typeof import('primevue/dialog')['default']
     DisplayEventsMap: typeof import('./src/components/DisplayEventsMap.vue')['default']
     Dropdown: typeof import('primevue/dropdown')['default']

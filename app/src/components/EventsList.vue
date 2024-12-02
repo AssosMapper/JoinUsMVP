@@ -12,6 +12,7 @@ const router = useRouter();
 const props = defineProps<{
   events: any[];
   loading: boolean;
+  currentMonthYear: string;
   fetchMore: () => Promise<void>;
   hasMore: boolean;
 }>();
@@ -43,7 +44,15 @@ const goToEventDetails = (id: number) => {
     ref="el"
     class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4"
   >
+    <div
+      v-if="!loading && events.length === 0"
+      class="col-span-full text-center py-8 text-gray-500"
+    >
+      Il n'y a pas d'événements en {{ props.currentMonthYear }}
+    </div>
+
     <Card
+      v-else
       v-for="event in events"
       :key="event.id"
       class="event-card cursor-pointer"
