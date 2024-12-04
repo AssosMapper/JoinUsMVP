@@ -68,7 +68,6 @@ export class AssociationsService {
     association.localisation = createAssociationDto.localisation;
     association.users = [user];
     association.types = types;
-    association.members = createAssociationDto.members;
     return this.associationsRepository.save(association);
   }
 

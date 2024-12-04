@@ -20,11 +20,11 @@ export class Association extends EntityStructure {
   @ManyToMany(() => User, (user) => user.associations)
   users: Array<User>;
 
-  @Column({ nullable: true, type: 'int' })
-  members: number;
-
   @Column({ length: 255, nullable: true })
   applicationQuestion: string;
+
+  @Column({ default: false })
+  isPublic: boolean;
 
   @ManyToMany(
     () => TypeAssociations,

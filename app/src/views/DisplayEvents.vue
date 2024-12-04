@@ -82,7 +82,7 @@ watch([debouncedSearch, selectedType], fetchEvents);
   <Tabs v-model:value="activeTab">
     <div class="relative">
       <!-- Header fixe avec search et tabs -->
-      <div class="fixed md:static top-0 left-0 right-0 z-50 bg-white shadow-md">
+      <div class="fixed md:static top-0 left-0 right-0 z-20 bg-white shadow-md">
         <div class="p-4">
           <div class="flex flex-col md:flex-row justify-center gap-4">
             <IconField class="w-full max-w-3xl">

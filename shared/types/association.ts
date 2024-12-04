@@ -10,5 +10,6 @@ export interface Association {
   users: User[];
   members?: number;
   applicationQuestion?: string;
+  isPublic?: boolean;
   types: TypeAssociations[];
 }

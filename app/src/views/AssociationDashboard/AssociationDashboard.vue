@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AssociationForm from "@/components/AssociationDashboard/AssociationForm.vue";
 import AssociationMembers from "@/components/AssociationDashboard/AssociationMembers.vue";
 import ManageAssociationApplications from "@/components/AssociationDashboard/ManageAssociationApplications.vue";
 import JnsImage from "@/components/ui/JnsImage.vue";
@@ -48,6 +49,11 @@ const loadAssociation = async () => {
   }
 };
 
+const onAssociationUpdated = async (updatedAssociation: Association) => {
+  association.value = updatedAssociation;
+  await loadAssociation();
+};
+
 onMounted(async () => {
   try {
     await loadAssociation();
@@ -84,13 +90,14 @@ onMounted(async () => {
 
       <!-- Tabs -->
       <div class="card">
-        <Tabs v-model:value="activeTab" :lazy="true">
+        <Tabs scrollable v-model:value="activeTab" :lazy="true">
           <TabList>
             <Tab value="0">Informations</Tab>
             <Tab value="1">Membres</Tab>
             <Tab v-if="canManageApplications" value="2"
               >Gérer les candidatures</Tab
             >
+            <Tab v-if="canManageApplications" value="3">Paramètres</Tab>
           </TabList>
 
           <TabPanels>
@@ -110,6 +117,14 @@ onMounted(async () => {
 
             <TabPanel v-if="canManageApplications" value="2">
               <ManageAssociationApplications :associationId="association.id!" />
+            </TabPanel>
+
+            <TabPanel v-if="canManageApplications" value="3">
+              <AssociationForm
+                :association="association"
+                mode="edit"
+                @saved="onAssociationUpdated"
+              />
             </TabPanel>
           </TabPanels>
         </Tabs>

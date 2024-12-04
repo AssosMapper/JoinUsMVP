@@ -8,7 +8,7 @@ import { useUserStore } from "@/store";
 import { useNotificationStore } from "@/store/notificationStore";
 import { Association } from "@shared/types/association";
 import { AssociationApplication } from "@shared/types/association-applications";
-import { computed, onBeforeMount, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 const router = useRouter();
 const notificationStore = useNotificationStore();
@@ -16,6 +16,8 @@ const associations = ref<Association[]>([]);
 const associationApplications = ref<AssociationApplication[]>([]);
 const loader = ref(false);
 const userStore = useUserStore();
+const joiningAssociation = ref<string | null>(null);
+
 const fetchAssociations = async () => {
   loader.value = true;
   try {
@@ -62,7 +64,26 @@ const getImageSrc = (associationName: string) => {
   return `/assets/associations-images/${sanitizedAssociationName}.png`;
 };
 
-onBeforeMount(async () => {
+const joinAssociation = async (associationId: string) => {
+  try {
+    joiningAssociation.value = associationId;
+    await associationApplicationService.joinAssociation({
+      associationId,
+      applicationAnswer: "", // Pas besoin de réponse pour une association publique
+    });
+    await userStore.refetchUser();
+    notificationStore.showNotification(
+      "Vous avez rejoint l'association avec succès",
+      "success"
+    );
+  } catch (error: any) {
+    notificationStore.showNotification(error.message, "error");
+  } finally {
+    joiningAssociation.value = null;
+  }
+};
+
+onMounted(async () => {
   await fetchAssociations();
   await fetchAssociationApplications();
   isLoading.value = false;
@@ -102,10 +123,7 @@ onBeforeMount(async () => {
         <p class="text-gray-600 mb-3 line-clamp-2 max-w-prose">
           {{ association.description }}
         </p>
-        <p class="text-gray-600 mb-4">
-          <i class="pi pi-users mr-1"></i>
-          {{ association.members }} membres
-        </p>
+
         <div class="flex flex-wrap justify-center gap-2 mb-3">
           <span
             v-for="type in association.types"
@@ -122,12 +140,24 @@ onBeforeMount(async () => {
           En savoir plus
         </Button>
 
-        <AssociationApplicationFormModal
-          :applicationQuestion="association.applicationQuestion"
-          :associationId="association.id"
-          :associationApplication="getApplicationForAssociation(association.id)"
-          v-if="!userStore.getAssociation(association.id)"
-        />
+        <template v-if="!userStore.getAssociation(association.id)">
+          <Button
+            v-if="association.isPublic"
+            @click="joinAssociation(association.id)"
+            :loading="joiningAssociation === association.id"
+          >
+            Rejoindre
+          </Button>
+
+          <AssociationApplicationFormModal
+            v-else
+            :applicationQuestion="association.applicationQuestion"
+            :associationId="association.id"
+            :associationApplication="
+              getApplicationForAssociation(association.id)
+            "
+          />
+        </template>
       </div>
     </div>
   </div>

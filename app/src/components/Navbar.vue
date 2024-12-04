@@ -73,7 +73,7 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
 <template>
   <!-- Bottom Navigation Bar (Mobile Only) -->
   <div
-    class="lg:hidden fixed bottom-0 left-0 right-0 h-14 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-40"
+    class="lg:hidden fixed bottom-0 left-0 right-0 h-14 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-[90]"
   >
     <div class="flex justify-around items-center h-full px-2">
       <Button
@@ -122,7 +122,7 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
   <!-- Unified Sidebar -->
   <div
     :class="[
-      'bg-white shadow-lg z-50 transition-transform duration-300 h-screen',
+      'bg-white shadow-lg z-[91] transition-transform duration-300 h-screen',
       'lg:w-64 w-[80vw]',
       'lg:relative fixed',
       'lg:translate-x-0',
@@ -134,7 +134,10 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
       <span class="font-bold text-xl text-primary">Join Us</span>
       <div class="flex items-center gap-2">
         <!-- Bouton notification toujours visible si authentifié -->
-        <NotificationButton class="hidden md:flex" v-if="isAuthenticated" />
+        <NotificationButton
+          class="hidden md:flex z-[92]"
+          v-if="isAuthenticated"
+        />
         <!-- Bouton fermeture uniquement sur mobile -->
         <Button
           v-if="!isDesktop"

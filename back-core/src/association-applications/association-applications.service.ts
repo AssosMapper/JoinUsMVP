@@ -51,6 +51,17 @@ export class AssociationApplicationsService {
       });
     }
 
+    if (association.isPublic) {
+      user.associations.push(association);
+      await this.userRepository.save(user);
+      await this.notificationsService.create({
+        title: 'Bienvenue !',
+        message: `Vous avez rejoint l'association ${association.name}`,
+        userId: user.id,
+      });
+      return;
+    }
+
     const application =
       (await this.associationApplicationRepository.findOne({
         where: {

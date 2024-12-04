@@ -8,3 +8,12 @@ export class MemberDto {
   last_name: string;
   image?: string;
 }
+
+export interface CreateAssociationDto {
+  name: string;
+  isPublic: boolean;
+  applicationQuestion?: string;
+  typeIds: string[];
+}
+
+export interface UpdateAssociationDto extends Partial<CreateAssociationDto> {}

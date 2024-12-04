@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AssociationApplicationFormModal: typeof import('./src/components/AssociationApplication/AssociationApplicationFormModal.vue')['default']
+    AssociationForm: typeof import('./src/components/AssociationDashboard/AssociationForm.vue')['default']
     AssociationMembers: typeof import('./src/components/AssociationDashboard/AssociationMembers.vue')['default']
     Avatar: typeof import('primevue/avatar')['default']
     Button: typeof import('primevue/button')['default']
@@ -40,6 +41,7 @@ declare module 'vue' {
     ManageAssociationApplications: typeof import('./src/components/AssociationDashboard/ManageAssociationApplications.vue')['default']
     Map: typeof import('./src/components/Map.vue')['default']
     Message: typeof import('primevue/message')['default']
+    MultiSelect: typeof import('primevue/multiselect')['default']
     Navbar: typeof import('./src/components/Navbar.vue')['default']
     NewsLetters: typeof import('./src/components/NewsLetters.vue')['default']
     NotificationBanner: typeof import('./src/components/NotificationBanner.vue')['default']
@@ -57,6 +59,8 @@ declare module 'vue' {
     TabView: typeof import('primevue/tabview')['default']
     Textarea: typeof import('primevue/textarea')['default']
     Toast: typeof import('primevue/toast')['default']
+    ToggleButton: typeof import('primevue/togglebutton')['default']
+    ToggleSwitch: typeof import('primevue/toggleswitch')['default']
     UpdateAssociation: typeof import('./src/components/Update/UpdateAssociation.vue')['default']
     UpdateEvent: typeof import('./src/components/Update/UpdateEvent.vue')['default']
     UpdateTypeAssociation: typeof import('./src/components/Update/UpdateTypeAssociation.vue')['default']

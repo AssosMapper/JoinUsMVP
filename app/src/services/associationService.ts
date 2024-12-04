@@ -1,10 +1,9 @@
 import { useApi } from "@/composables/useApi.ts";
 import { useApiStore } from "@/store/apiUrls.store.ts";
-import { IUpdateAssociation } from "@/types/association.types";
 import { ResponseError } from "@/types/http.types";
-import { Association } from "@shared/types/association";
+import { UpdateAssociationDto } from "@shared/dto/associations.dto";
 
-const createAssociation = async (association: Association) => {
+const createAssociation = async (association: CreateAssociationDto) => {
   const apiStore = useApiStore();
   const { data, error, response } = await useApi(apiStore.associations.create)
     .post(association)
@@ -24,22 +23,16 @@ const getAllAssociations = async () => {
   return data.value;
 };
 
-const updateAssociation = async (
-  id: string,
-  association: IUpdateAssociation
-) => {
+const updateAssociation = async (id: string, data: UpdateAssociationDto) => {
   const apiStore = useApiStore();
-  const { data, error } = await useApi(
-    apiStore.resolveUrl(apiStore.associations.detail, {
-      id: id,
-    })
+  const { data: response, error } = await useApi(
+    apiStore.resolveUrl(apiStore.associations.detail, { id })
   )
-    .put(association)
+    .put(data)
     .json();
-  if (error.value) {
-    throw new Error(error.value);
-  }
-  return data.value;
+
+  if (error.value) throw error.value;
+  return response.value;
 };
 
 const getAssociationById = async (id: string) => {
