@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Repository, DataSource } from 'typeorm';
-import { TypeAssociations } from '../../type-associations/entities/type-associations.entity';
+import { DataSource, Repository } from 'typeorm';
 import { Association } from '../../associations/entities/association.entity';
+import { TypeAssociations } from '../../type-associations/entities/type-associations.entity';
 
 @Injectable()
 export class TypeAssociationsSeedService {
@@ -20,13 +20,26 @@ export class TypeAssociationsSeedService {
     await this.drop();
 
     const types = [
-      { name: "Écologie", description: "Associations engagées pour la protection de l'environnement." },
-      { name: "Droits sociaux", description: "Associations défendant les droits sociaux et l'égalité." },
-      { name: "Santé", description: "Associations œuvrant pour l'accès à la santé pour tous." },
-      { name: "Droits humains", description: "Associations promouvant et défendant les droits humains." }
+      {
+        name: 'Écologie',
+        description:
+          "Associations engagées pour la protection de l'environnement.",
+      },
+      {
+        name: 'Droits sociaux',
+        description: "Associations défendant les droits sociaux et l'égalité.",
+      },
+      {
+        name: 'Santé',
+        description: "Associations œuvrant pour l'accès à la santé pour tous.",
+      },
+      {
+        name: 'Droits humains',
+        description: 'Associations promouvant et défendant les droits humains.',
+      },
     ];
 
-    const typeEntities = types.map(type => {
+    const typeEntities = types.map((type) => {
       const typeEntity = new TypeAssociations();
       typeEntity.name = type.name;
       typeEntity.description = type.description;
@@ -39,12 +52,12 @@ export class TypeAssociationsSeedService {
 
     const createdTypes = await this.typeAssociationsRepository.find();
 
-    const associationsToCreate = createdTypes.map(type => {
+    const associationsToCreate = createdTypes.map((type) => {
       const association = new Association();
       association.name = `Join-us-${type.name.toLowerCase()}`;
-      association.localisation = "Default Location";
+      association.localisation = 'Default Location';
       association.description = `Association pour ${type.name.toLowerCase()}`;
-      association.image = `${type.name.toLowerCase()}.png`;
+      association.image = null;
       association.types = [type];
       return association;
     });
@@ -60,7 +73,9 @@ export class TypeAssociationsSeedService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      await queryRunner.query(`DELETE FROM association_types_type_associations`);
+      await queryRunner.query(
+        `DELETE FROM association_types_type_associations`,
+      );
       await queryRunner.query(`DELETE FROM association`);
       await queryRunner.query(`DELETE FROM type_associations`);
       await queryRunner.commitTransaction();

@@ -8,6 +8,8 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
+import { PublicAssociationDto } from '@shared/dto/associations.dto';
+import { plainToInstance } from 'class-transformer';
 import { User } from '../users/entities/user.entity';
 import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
 import { CurrentUserId } from '../utils/decorators/current-user-id.decorator';
@@ -35,8 +37,12 @@ export class AssociationsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Association> {
-    return this.associationsService.findOne(id);
+  async findOne(@Param('id') id: string): Promise<PublicAssociationDto> {
+    const association = await this.associationsService.findOne(id);
+    return plainToInstance(PublicAssociationDto, association, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Get('by-name/:name')

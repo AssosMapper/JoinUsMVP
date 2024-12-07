@@ -65,6 +65,8 @@ declare module 'vue' {
     UpdateEvent: typeof import('./src/components/Update/UpdateEvent.vue')['default']
     UpdateTypeAssociation: typeof import('./src/components/Update/UpdateTypeAssociation.vue')['default']
     UpdateTypeEvent: typeof import('./src/components/Update/UpdateTypeEvent.vue')['default']
+    Uploader: typeof import('./src/components/ui/Uploader.vue')['default']
+    UploadImage: typeof import('./src/components/ui/UploadImage.vue')['default']
   }
   export interface ComponentCustomProperties {
     Tooltip: typeof import('primevue/tooltip')['default']

@@ -1,7 +1,5 @@
-import {Column, Entity, ManyToOne} from 'typeorm';
-import {EntityStructure} from "../../utils/structures/entity.structure";
-import {User} from "../../users/entities/user.entity";
-import {Association} from "../../associations/entities/association.entity";
+import { Column, Entity } from 'typeorm';
+import { EntityStructure } from '../../utils/structures/entity.structure';
 
 @Entity()
 export class Media extends EntityStructure {

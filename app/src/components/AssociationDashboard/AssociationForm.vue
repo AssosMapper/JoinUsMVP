@@ -3,11 +3,12 @@ import JnsField from "@/components/ui/JnsField.vue";
 import associationService from "@/services/associationService";
 import typeAssociationService from "@/services/typeAssociationService";
 import { useNotificationStore } from "@/store/notificationStore";
+import { PublicMediaDto } from "@shared/dto/media.dto";
 import { Association } from "@shared/types/association";
 import { TypeAssociations } from "@shared/types/type-associations";
 import { associationSchema } from "@shared/validations/associations.validation.ts";
 import { useForm } from "vee-validate";
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 
 const props = defineProps<{
   association?: Association;
@@ -15,7 +16,6 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   saved: [Association];
-  cancelled: [];
 }>();
 
 const notificationStore = useNotificationStore();
@@ -31,6 +31,7 @@ const { handleSubmit, errors, defineField } = useForm({
     isPublic: props.association?.isPublic ?? false,
     applicationQuestion: props.association?.applicationQuestion ?? "",
     typeIds: props.association?.types?.map((type) => type.id) ?? [],
+    image: props.association?.image.id ?? null,
   },
 });
 
@@ -40,6 +41,13 @@ const [applicationQuestion, applicationQuestionAttrs] = defineField(
   "applicationQuestion"
 );
 const [typeIds, typeIdsAttrs] = defineField("typeIds");
+
+const [image] = defineField("image");
+const imageData = ref<PublicMediaDto | null>(null);
+
+watch(imageData, (newImage) => {
+  image.value = newImage?.id ?? null;
+});
 
 const loadTypeAssociations = async () => {
   try {
@@ -51,6 +59,7 @@ const loadTypeAssociations = async () => {
 };
 
 const onSubmit = handleSubmit(async (values) => {
+  console.log(values);
   try {
     isLoading.value = true;
     const savedAssociation = isEditMode.value
@@ -151,6 +160,13 @@ onMounted(() => {
                 v-bind="applicationQuestionAttrs"
               />
             </FloatLabel>
+          </JnsField>
+        </div>
+
+        <!-- Image de l'association -->
+        <div class="col-span-2 flex justify-center">
+          <JnsField :error-message="errors.image">
+            <UploadImage v-model="imageData" preview />
           </JnsField>
         </div>
       </div>

@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Permission } from '../../permissions/entities/permission.entity';
 import { DataSource, Repository } from 'typeorm';
+import { Permission } from '../../permissions/entities/permission.entity';
 import { Role } from '../../roles/entities/role.entity';
 
 @Injectable()
@@ -29,15 +29,16 @@ export class RoleSeedService {
     const allPermissions = await this.permissionRepository.find();
     const excludedPermissions = ['typeevents', 'typeassociation', 'user'];
     const associationManagerPermissions = allPermissions.filter(
-      (perm) => !excludedPermissions.some((excl) => perm.permission.startsWith(excl)),
+      (perm) =>
+        !excludedPermissions.some((excl) => perm.permission.startsWith(excl)),
     );
 
-    const eventPermissions = allPermissions.filter(
-      (perm) => perm.permission.startsWith('events'),
+    const eventPermissions = allPermissions.filter((perm) =>
+      perm.permission.startsWith('events'),
     );
 
     const userPermissions = [...eventPermissions];
-    
+
     // Add permission for updating roles to user role
     const roleUpdatePermission = await this.permissionRepository.findOne({
       where: { permission: 'role:update' },

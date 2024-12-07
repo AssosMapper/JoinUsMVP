@@ -56,6 +56,10 @@ export const useApiStore = defineStore("api", {
         markAsRead: "/notifications/read",
         notificationStream: "/notifications/sse",
       },
+      media: {
+        upload: "/v1/media/upload",
+        get: "/v1/media/:id",
+      },
     };
   },
   actions: {

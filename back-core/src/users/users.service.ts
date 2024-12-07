@@ -4,16 +4,15 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
-import { Role } from '../roles/entities/role.entity';
+import { Repository } from 'typeorm';
 import { Association } from '../associations/entities/association.entity';
 import { RegisterDto } from '../auth/dto/register.dto';
+import { Role } from '../roles/entities/role.entity';
 import { hashPassword } from '../utils/functions';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
@@ -37,7 +36,7 @@ export class UsersService {
     }
     const user = await this.usersRepository.findOne({
       where: { id },
-      relations: ['roles', 'associations'],
+      relations: ['roles.permissions', 'associations'],
     });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -77,7 +76,7 @@ export class UsersService {
     newUser.last_name = createUserDto.lastName;
     newUser.phone = createUserDto.phone;
     newUser.localisation = createUserDto.localisation;
-    newUser.image = createUserDto.image;
+    //newUser.image = createUserDto.image;
     return this.usersRepository.save(newUser);
   }
 
@@ -146,7 +145,7 @@ export class UsersService {
     newUser.last_name = registerDto.lastName;
     newUser.phone = registerDto.phone;
     newUser.localisation = registerDto.localisation;
-    newUser.image = registerDto.image;
+    //  newUser.image = registerDto.image;
     newUser.roles = [userRole];
 
     return this.usersRepository.save(newUser);

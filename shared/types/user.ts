@@ -1,3 +1,4 @@
+import { Media } from "@src/shared/types/media";
 import { Association } from "./association";
 import { Role } from "./roles";
 
@@ -9,7 +10,7 @@ export interface User {
   password: string;
   phone?: string;
   localisation?: string;
-  image?: string;
+  image?: Media;
   deletedAt?: Date;
   associations: Association[];
   roles: Role[];

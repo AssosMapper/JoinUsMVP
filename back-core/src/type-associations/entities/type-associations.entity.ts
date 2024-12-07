@@ -4,13 +4,12 @@ import { EntityStructure } from '../../utils/structures/entity.structure';
 
 @Entity()
 export class TypeAssociations extends EntityStructure {
-
   @Column()
   name: string;
 
   @Column({ nullable: true })
   description: string;
 
-  @ManyToMany(() => Association, association => association.types)
+  @ManyToMany(() => Association, (association) => association.types)
   associations: Association[];
 }

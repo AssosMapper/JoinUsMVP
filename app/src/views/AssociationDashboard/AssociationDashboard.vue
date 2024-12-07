@@ -5,6 +5,7 @@ import ManageAssociationApplications from "@/components/AssociationDashboard/Man
 import JnsImage from "@/components/ui/JnsImage.vue";
 import Loader from "@/components/ui/Loader.vue";
 import associationService from "@/services/associationService";
+import mediaService from "@/services/mediaService";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useUserStore } from "@/store/userStore";
 import { canManageAssociation } from "@/utils/check-role";
@@ -31,19 +32,12 @@ const canManageApplications = computed(() =>
   canManageAssociation(userStore.user as User, route.params.id as string)
 );
 
-const getImageSrc = (associationName: string | undefined) => {
-  if (!associationName) return "/assets/associations-images/default.png";
-  const sanitizedAssociationName = associationName
-    .replace(/\s+/g, "")
-    .toLowerCase();
-  return `/assets/associations-images/${sanitizedAssociationName}.png`;
-};
-
 const loadAssociation = async () => {
   try {
-    association.value = await associationService.getAssociationById(
+    const result = await associationService.getAssociationById(
       route.params.id as string
     );
+    association.value = result;
   } catch (error: any) {
     notificationStore.showNotification(error.message, "error");
   }
@@ -74,7 +68,7 @@ onMounted(async () => {
       <div class="flex items-center space-x-6 bg-primary/10 p-6 rounded-lg">
         <JnsImage
           :name="association.name"
-          :src="getImageSrc(association.name)"
+          :src="mediaService.getMediaUrl(association.image)"
           size="lg"
         />
         <div>

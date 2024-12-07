@@ -4,9 +4,10 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { PublicUserDto } from '@shared/dto/user.dto';
 import { RoleEnum } from '@shared/types/roles';
-import { PublicUser } from '@shared/types/user';
 import { In, Repository } from 'typeorm';
+import { Media } from '../media/entities/media.entity';
 import { NotificationsService } from '../notifications/notifications.service';
 import { TypeAssociations } from '../type-associations/entities/type-associations.entity';
 import { User } from '../users/entities/user.entity';
@@ -14,7 +15,6 @@ import { checkRole } from '../utils/functions/check-role';
 import { CreateAssociationDto } from './dto/create-association.dto';
 import { UpdateAssociationDto } from './dto/update-association.dto';
 import { Association } from './entities/association.entity';
-
 @Injectable()
 export class AssociationsService {
   constructor(
@@ -25,6 +25,8 @@ export class AssociationsService {
     @Inject('TYPE_ASSOCIATIONS_REPOSITORY')
     private typeAssociationsRepository: Repository<TypeAssociations>,
     private notificationsService: NotificationsService,
+    @Inject('MEDIA_REPOSITORY')
+    private mediaRepository: Repository<Media>,
   ) {}
 
   findAll(): Promise<Association[]> {
@@ -34,7 +36,7 @@ export class AssociationsService {
   async findOne(id: string): Promise<Association> {
     const association = await this.associationsRepository.findOne({
       where: { id },
-      relations: ['users', 'types'],
+      relations: ['users', 'types', 'image'],
     });
     if (!association) {
       throw new NotFoundException(`Association with ID ${id} not found`);
@@ -64,7 +66,14 @@ export class AssociationsService {
     const association = new Association();
     association.name = createAssociationDto.name;
     association.description = createAssociationDto.description;
-    association.image = createAssociationDto.image;
+    if (createAssociationDto.image) {
+      const media = await this.mediaRepository.findOne({
+        where: { id: createAssociationDto.image },
+      });
+      if (media) {
+        association.image = media;
+      }
+    }
     association.localisation = createAssociationDto.localisation;
     association.users = [user];
     association.types = types;
@@ -84,6 +93,14 @@ export class AssociationsService {
       existingAssociation.types = await this.typeAssociationsRepository.findBy({
         id: In(updateAssociationDto.typeIds),
       });
+    }
+
+    if (updateAssociationDto.image) {
+      const media = await this.mediaRepository.findOne({
+        where: { id: updateAssociationDto.image },
+      });
+
+      if (media) existingAssociation.image = media;
     }
 
     Object.assign(existingAssociation, updateAssociationDto);
@@ -113,7 +130,7 @@ export class AssociationsService {
     });
   }
 
-  async getMembers(id: string): Promise<PublicUser[]> {
+  async getMembers(id: string): Promise<PublicUserDto[]> {
     const association = await this.associationsRepository.findOne({
       where: { id },
       relations: ['users'],
@@ -125,6 +142,8 @@ export class AssociationsService {
 
     return association.users.map((user) => ({
       id: user.id,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
       first_name: user.first_name,
       last_name: user.last_name,
       image: user.image,

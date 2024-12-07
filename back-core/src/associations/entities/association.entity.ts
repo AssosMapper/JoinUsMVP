@@ -1,4 +1,12 @@
-import { Column, Entity, JoinTable, ManyToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  OneToOne,
+} from 'typeorm';
+import { Media } from '../../media/entities/media.entity';
 import { TypeAssociations } from '../../type-associations/entities/type-associations.entity';
 import { User } from '../../users/entities/user.entity';
 import { EntityStructure } from '../../utils/structures/entity.structure';
@@ -14,8 +22,9 @@ export class Association extends EntityStructure {
   @Column('text')
   description: string;
 
-  @Column({ nullable: true })
-  image: string;
+  @OneToOne(() => Media, { nullable: true })
+  @JoinColumn()
+  image: Media;
 
   @ManyToMany(() => User, (user) => user.associations)
   users: Array<User>;

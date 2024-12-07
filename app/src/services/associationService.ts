@@ -1,7 +1,11 @@
 import { useApi } from "@/composables/useApi.ts";
 import { useApiStore } from "@/store/apiUrls.store.ts";
 import { ResponseError } from "@/types/http.types";
-import { UpdateAssociationDto } from "@shared/dto/associations.dto";
+import {
+  CreateAssociationDto,
+  PublicAssociationDto,
+  UpdateAssociationDto,
+} from "@shared/dto/associations.dto";
 
 const createAssociation = async (association: CreateAssociationDto) => {
   const apiStore = useApiStore();
@@ -45,7 +49,7 @@ const getAssociationById = async (id: string) => {
   if (error.value) {
     throw new Error(error.value);
   }
-  return data.value;
+  return data.value as PublicAssociationDto;
 };
 
 const getAssociationByName = async (name: string) => {
