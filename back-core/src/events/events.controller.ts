@@ -12,9 +12,11 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import {
+  EventDto,
   GetEventsByMonthDto,
   getEventsByMonthSchema,
 } from '@shared/dto/events.dto';
+import { plainToInstance } from 'class-transformer';
 import { User } from '../users/entities/user.entity';
 import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
 import { CurrentUserId } from '../utils/decorators/current-user-id.decorator';
@@ -37,8 +39,14 @@ export class EventsController {
     @Query('isValid') isValid?: boolean,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number = 1,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number = 10,
-  ): Promise<{ data: Event[]; total: number; page: number; limit: number }> {
-    return this.eventsService.findAll(isValid, page, limit);
+  ): Promise<{ data: EventDto[]; total: number; page: number; limit: number }> {
+    const events = await this.eventsService.findAll(isValid, page, limit);
+    return {
+      data: plainToInstance(EventDto, events.data),
+      total: events.total,
+      page: events.page,
+      limit: events.limit,
+    };
   }
 
   @Get('/by-association')
@@ -48,11 +56,28 @@ export class EventsController {
     @Query('associationId') associationId: string,
     @Query('limit') limit: number,
   ): Promise<{
-    pastEvents: Event[];
-    todayEvents: Event[];
-    upcomingEvents: Event[];
+    pastEvents: EventDto[];
+    todayEvents: EventDto[];
+    upcomingEvents: EventDto[];
   }> {
-    return this.eventsService.findEventsByAssociationId(associationId, limit);
+    const events = await this.eventsService.findEventsByAssociationId(
+      associationId,
+      limit,
+    );
+    return {
+      pastEvents: plainToInstance(EventDto, events.pastEvents, {
+        excludeExtraneousValues: true,
+        enableImplicitConversion: true,
+      }),
+      todayEvents: plainToInstance(EventDto, events.todayEvents, {
+        excludeExtraneousValues: true,
+        enableImplicitConversion: true,
+      }),
+      upcomingEvents: plainToInstance(EventDto, events.upcomingEvents, {
+        excludeExtraneousValues: true,
+        enableImplicitConversion: true,
+      }),
+    };
   }
 
   @Get('/by-date')
@@ -73,25 +98,37 @@ export class EventsController {
   async getEventsByMonth(
     @Query(new YupValidationPipe(getEventsByMonthSchema))
     query: GetEventsByMonthDto,
-  ): Promise<Event[]> {
+  ): Promise<EventDto[]> {
     const { year, month, isValid, search, typeEventId } = query;
-    return this.eventsService.findEventsByMonth(
+    const events = await this.eventsService.findEventsByMonth(
       year,
       month,
       isValid,
       search,
       typeEventId,
     );
+    return plainToInstance(EventDto, events, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Event> {
-    return this.eventsService.findOne(id);
+  async findOne(@Param('id') id: string): Promise<EventDto> {
+    const event = await this.eventsService.findOne(id);
+    return plainToInstance(EventDto, event, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Get('/user/:userId')
-  findEventsByUser(@Param('userId') userId: string): Promise<Event[]> {
-    return this.eventsService.findByUserId(userId);
+  async findEventsByUser(@Param('userId') userId: string): Promise<EventDto[]> {
+    const events = await this.eventsService.findByUserId(userId);
+    return plainToInstance(EventDto, events, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Post()

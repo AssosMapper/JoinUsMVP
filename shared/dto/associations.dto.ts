@@ -1,7 +1,7 @@
-import { PublicMediaDto } from "@src/shared/dto/media.dto";
-import { PublicUserDto } from "@src/shared/dto/user.dto";
 import { Expose, Type } from "class-transformer";
+import { PublicMediaDto } from "./media.dto";
 import { TypeAssociationsDto } from "./type-associations.dto";
+import { PublicUserDto } from "./user.dto";
 export class RemoveMemberDto {
   userId: string;
 }
@@ -37,12 +37,14 @@ export class PublicAssociationDto {
   @Type(() => TypeAssociationsDto)
   types: TypeAssociationsDto[];
 
-  @Expose()
-  @Type(() => PublicUserDto)
-  users: PublicUserDto[];
-
   @Expose() localisation: string;
   @Expose() description: string;
   @Expose() createdAt: Date;
   @Expose() updatedAt: Date;
+}
+
+export class MyAssociationsDto extends PublicAssociationDto {
+  @Expose()
+  @Type(() => PublicUserDto)
+  users: PublicUserDto[];
 }

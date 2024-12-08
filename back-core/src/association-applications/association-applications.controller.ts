@@ -11,6 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  AssociationApplicationDto,
   JoinAssociationDto,
   UpdateApplicationStatusDto,
 } from '@shared/dto/association-applications.dto';
@@ -19,6 +20,7 @@ import {
   updateApplicationStatusSchema,
 } from '@shared/validations/association-applications.validation';
 import { YupValidationPipe } from '@src/utils/pipes/yup-validation.pipe';
+import { plainToInstance } from 'class-transformer';
 import { AssociationManagerGuard } from '../associations/guards/association-manager.guard';
 import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
 import { CurrentUserId } from '../utils/decorators/current-user-id.decorator';
@@ -36,8 +38,15 @@ export class AssociationApplicationsController {
     @CurrentUserId() userId: string,
     @Body(new YupValidationPipe(joinAssociationSchema))
     joinAssociationDto: JoinAssociationDto,
-  ) {
-    return this.applicationService.joinAssociation(userId, joinAssociationDto);
+  ): Promise<AssociationApplicationDto> {
+    const application = await this.applicationService.joinAssociation(
+      userId,
+      joinAssociationDto,
+    );
+    return plainToInstance(AssociationApplicationDto, application, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Patch(':id')
@@ -46,11 +55,15 @@ export class AssociationApplicationsController {
     @Param('id') id: string,
     @Body(new YupValidationPipe(updateApplicationStatusSchema))
     updateApplicationStatusDto: UpdateApplicationStatusDto,
-  ) {
-    return this.applicationService.updateApplicationStatus(
+  ): Promise<AssociationApplicationDto> {
+    const application = await this.applicationService.updateApplicationStatus(
       id,
       updateApplicationStatusDto,
     );
+    return plainToInstance(AssociationApplicationDto, application, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Get('by-associations')
@@ -61,26 +74,43 @@ export class AssociationApplicationsController {
       new ParseArrayPipe({ items: String, separator: ',' }),
     )
     associationIds: string[],
-  ) {
-    return this.applicationService.getApplicationsByAssociations(
-      userId,
-      associationIds,
-    );
+  ): Promise<AssociationApplicationDto[]> {
+    const applications =
+      await this.applicationService.getApplicationsByAssociations(
+        userId,
+        associationIds,
+      );
+    return plainToInstance(AssociationApplicationDto, applications, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Get('by-association/:associationId')
   @UseGuards(AssociationManagerGuard)
   async getApplicationsByAssociation(
     @Param('associationId') associationId: string,
-  ) {
-    return this.applicationService.getApplicationsByAssociation(associationId);
+  ): Promise<AssociationApplicationDto[]> {
+    const applications =
+      await this.applicationService.getApplicationsByAssociation(associationId);
+    return plainToInstance(AssociationApplicationDto, applications, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Delete(':id')
   async cancelApplication(
     @CurrentUserId() userId: string,
     @Param('id') id: string,
-  ) {
-    return this.applicationService.cancelApplication(userId, id);
+  ): Promise<AssociationApplicationDto> {
+    const application = await this.applicationService.cancelApplication(
+      userId,
+      id,
+    );
+    return plainToInstance(AssociationApplicationDto, application, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 }

@@ -1,8 +1,9 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 import { Association } from '../../associations/entities/association.entity';
 import { TypeEvents } from '../../type-events/entities/type-events.entity';
 import { User } from '../../users/entities/user.entity';
 import { EntityStructure } from '../../utils/structures/entity.structure';
+import { Media } from '@src/media/entities/media.entity';
 
 @Entity()
 export class Event extends EntityStructure {
@@ -12,8 +13,9 @@ export class Event extends EntityStructure {
   @Column('text')
   description: string;
 
-  @Column({ nullable: true })
-  image: string;
+  @OneToOne(() => Media, { nullable: true })
+  @JoinColumn()
+  image: Media;
 
   @Column()
   date: Date;

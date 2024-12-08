@@ -1,15 +1,11 @@
-import { Inject } from '@nestjs/common';
 import { ApplicationStatus } from '@shared/types/association-applications';
-import { Column, DataSource, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { Association } from '../../associations/entities/association.entity';
 import { User } from '../../users/entities/user.entity';
 import { EntityStructure } from '../../utils/structures/entity.structure';
 
 @Entity()
 export class AssociationApplication extends EntityStructure {
-  @Inject()
-  private dataSource: DataSource;
-
   @ManyToOne(() => User)
   @JoinColumn()
   user: User;

@@ -89,7 +89,7 @@ export class EventsService {
     }
     event.titre = createEventDto.titre;
     event.description = createEventDto.description;
-    event.image = createEventDto.image;
+    //    event.image = createEventDto.image;
     event.date = createEventDto.date;
     event.localisation = createEventDto.localisation;
     event.association = association;

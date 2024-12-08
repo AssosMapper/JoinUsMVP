@@ -8,7 +8,11 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
-import { PublicAssociationDto } from '@shared/dto/associations.dto';
+import {
+  MyAssociationsDto,
+  PublicAssociationDto,
+} from '@shared/dto/associations.dto';
+import { PublicUserDto } from '@shared/dto/user.dto';
 import { plainToInstance } from 'class-transformer';
 import { User } from '../users/entities/user.entity';
 import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
@@ -16,7 +20,6 @@ import { CurrentUserId } from '../utils/decorators/current-user-id.decorator';
 import { AssociationsService } from './associations.service';
 import { CreateAssociationDto } from './dto/create-association.dto';
 import { UpdateAssociationDto } from './dto/update-association.dto';
-import { Association } from './entities/association.entity';
 import { AssociationManagerGuard } from './guards/association-manager.guard';
 
 @Controller('associations')
@@ -24,16 +27,25 @@ export class AssociationsController {
   constructor(private readonly associationsService: AssociationsService) {}
 
   @Get()
-  findAll(): Promise<Association[]> {
-    return this.associationsService.findAll();
+  async findAll(): Promise<PublicAssociationDto[]> {
+    const associations = await this.associationsService.findAll();
+    return plainToInstance(PublicAssociationDto, associations, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Get('/my')
   @BearAuthToken()
-  findUserAssociations(
+  async findUserAssociations(
     @CurrentUserId() userId: string,
-  ): Promise<Association[]> {
-    return this.associationsService.findUserAssociations(userId);
+  ): Promise<MyAssociationsDto[]> {
+    const associations =
+      await this.associationsService.findUserAssociations(userId);
+    return plainToInstance(MyAssociationsDto, associations, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Get(':id')
@@ -46,40 +58,62 @@ export class AssociationsController {
   }
 
   @Get('by-name/:name')
-  findByName(@Param('name') name: string): Promise<Association> {
-    return this.associationsService.findByName(name);
+  async findByName(@Param('name') name: string): Promise<PublicAssociationDto> {
+    const association = await this.associationsService.findByName(name);
+    return plainToInstance(PublicAssociationDto, association, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Post()
   @BearAuthToken()
-  create(
+  async create(
     @CurrentUserId() user: User,
     @Body() createAssociationDto: CreateAssociationDto,
-  ): Promise<Association> {
-    return this.associationsService.create(user, createAssociationDto);
+  ): Promise<PublicAssociationDto> {
+    const association = await this.associationsService.create(
+      user,
+      createAssociationDto,
+    );
+    return plainToInstance(PublicAssociationDto, association, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Put(':id')
   @UseGuards(AssociationManagerGuard)
   @BearAuthToken()
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateAssociationDto: UpdateAssociationDto,
-  ) {
-    return this.associationsService.update(id, updateAssociationDto);
+  ): Promise<PublicAssociationDto> {
+    const association = await this.associationsService.update(
+      id,
+      updateAssociationDto,
+    );
+    return plainToInstance(PublicAssociationDto, association, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Delete(':id')
   @UseGuards(AssociationManagerGuard)
   @BearAuthToken()
-  remove(@Param('id') id: string) {
-    return this.associationsService.remove(id);
+  async remove(@Param('id') id: string): Promise<void> {
+    await this.associationsService.remove(id);
   }
 
   @Get(':id/members')
   @BearAuthToken()
-  getMembers(@Param('id') id: string) {
-    return this.associationsService.getMembers(id);
+  async getMembers(@Param('id') id: string): Promise<PublicUserDto[]> {
+    const members = await this.associationsService.getMembers(id);
+    return plainToInstance(PublicUserDto, members, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Delete(':id/members/:userId')
