@@ -1,43 +1,80 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards } from '@nestjs/common';
-import { TypeAssociationsService } from './type-associations.service';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { TypeAssociationsDto } from '@shared/dto/type-associations.dto';
+import { plainToInstance } from 'class-transformer';
+import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
 import { CreateTypeAssociationDto } from './dto/create-type-association.dto';
 import { UpdateTypeAssociationDto } from './dto/update-type-association.dto';
-import { ApiBearerAuth } from '@nestjs/swagger';
-import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
+import { TypeAssociationsService } from './type-associations.service';
 
 @Controller('type-associations')
 export class TypeAssociationsController {
-  constructor(private readonly typeAssociationsService: TypeAssociationsService) {}
+  constructor(
+    private readonly typeAssociationsService: TypeAssociationsService,
+  ) {}
 
   @Get()
-  findAll() {
-    return this.typeAssociationsService.findAll();
+  async findAll(): Promise<TypeAssociationsDto[]> {
+    const typeAssociations = await this.typeAssociationsService.findAll();
+    return plainToInstance(TypeAssociationsDto, typeAssociations, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.typeAssociationsService.findOne(id);
+  async findOne(@Param('id') id: string): Promise<TypeAssociationsDto> {
+    const typeAssociation = await this.typeAssociationsService.findOne(id);
+    return plainToInstance(TypeAssociationsDto, typeAssociation, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Post()
   @BearAuthToken()
   @ApiBearerAuth()
-  create(@Body() createTypeAssociationDto: CreateTypeAssociationDto) {
-    return this.typeAssociationsService.create(createTypeAssociationDto);
+  async create(
+    @Body() createTypeAssociationDto: CreateTypeAssociationDto,
+  ): Promise<TypeAssociationsDto> {
+    const typeAssociation = await this.typeAssociationsService.create(
+      createTypeAssociationDto,
+    );
+    return plainToInstance(TypeAssociationsDto, typeAssociation, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
-
 
   @Put(':id')
   @BearAuthToken()
   @ApiBearerAuth()
-  update(@Param('id') id: string, @Body() updateTypeAssociationDto: UpdateTypeAssociationDto) {
-    return this.typeAssociationsService.update(id, updateTypeAssociationDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateTypeAssociationDto: UpdateTypeAssociationDto,
+  ): Promise<TypeAssociationsDto> {
+    const typeAssociation = await this.typeAssociationsService.update(
+      id,
+      updateTypeAssociationDto,
+    );
+    return plainToInstance(TypeAssociationsDto, typeAssociation, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Delete(':id')
   @BearAuthToken()
   @ApiBearerAuth()
-  remove(@Param('id') id: string) {
-    return this.typeAssociationsService.remove(id);
+  async remove(@Param('id') id: string): Promise<{ deleted: boolean }> {
+    return await this.typeAssociationsService.remove(id);
   }
 }

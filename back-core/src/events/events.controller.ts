@@ -133,17 +133,28 @@ export class EventsController {
 
   @Post()
   @BearAuthToken()
-  create(
+  async create(
     @CurrentUserId() user: User,
     @Body() createEventDto: CreateEventDto,
-  ): Promise<Event> {
-    return this.eventsService.create(user, createEventDto);
+  ): Promise<EventDto | null> {
+    const event = await this.eventsService.create(user, createEventDto);
+    return plainToInstance(EventDto, event, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Put(':id')
   @BearAuthToken()
-  update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
-    return this.eventsService.update(id, updateEventDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateEventDto: UpdateEventDto,
+  ): Promise<EventDto | null> {
+    const event = await this.eventsService.update(id, updateEventDto);
+    return plainToInstance(EventDto, event, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Delete(':id')

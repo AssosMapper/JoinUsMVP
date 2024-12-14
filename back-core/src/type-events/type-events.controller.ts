@@ -1,43 +1,76 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards } from '@nestjs/common';
-import { TypeEventsService } from './type-events.service';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+} from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { TypeEventsDto } from '@shared/dto/type-events.dto';
+import { plainToInstance } from 'class-transformer';
+import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
 import { CreateTypeEventDto } from './dto/create-type-event.dto';
 import { UpdateTypeEventDto } from './dto/update-type-event.dto';
-import { TypeEvents } from './entities/type-events.entity';
-import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { TypeEventsService } from './type-events.service';
 
 @Controller('type-events')
 export class TypeEventsController {
   constructor(private readonly typeEventsService: TypeEventsService) {}
 
   @Get()
-  findAll(): Promise<TypeEvents[]> {
-    return this.typeEventsService.findAll();
+  async findAll(): Promise<TypeEventsDto[]> {
+    const typeEvents = await this.typeEventsService.findAll();
+    return plainToInstance(TypeEventsDto, typeEvents, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<TypeEvents> {
-    return this.typeEventsService.findOne(id);
+  async findOne(@Param('id') id: string): Promise<TypeEventsDto> {
+    const typeEvent = await this.typeEventsService.findOne(id);
+    return plainToInstance(TypeEventsDto, typeEvent, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Post()
   @BearAuthToken()
   @ApiBearerAuth()
-  create(@Body() createTypeEventDto: CreateTypeEventDto): Promise<TypeEvents> {
-    return this.typeEventsService.create(createTypeEventDto);
+  async create(
+    @Body() createTypeEventDto: CreateTypeEventDto,
+  ): Promise<TypeEventsDto> {
+    const typeEvent = await this.typeEventsService.create(createTypeEventDto);
+    return plainToInstance(TypeEventsDto, typeEvent, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Put(':id')
   @BearAuthToken()
   @ApiBearerAuth()
-  update(@Param('id') id: string, @Body() updateTypeEventDto: UpdateTypeEventDto) {
-    return this.typeEventsService.update(id, updateTypeEventDto);
+  async update(
+    @Param('id') id: string,
+    @Body() updateTypeEventDto: UpdateTypeEventDto,
+  ): Promise<TypeEventsDto> {
+    const typeEvent = await this.typeEventsService.update(
+      id,
+      updateTypeEventDto,
+    );
+    return plainToInstance(TypeEventsDto, typeEvent, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Delete(':id')
   @BearAuthToken()
   @ApiBearerAuth()
-  remove(@Param('id') id: string) {
+  remove(@Param('id') id: string): Promise<void> {
     return this.typeEventsService.remove(id);
   }
 }
