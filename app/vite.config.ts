@@ -11,6 +11,7 @@ export default defineConfig({
       resolvers: [PrimeVueResolver()],
     }),
   ],
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

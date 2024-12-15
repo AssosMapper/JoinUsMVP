@@ -8,6 +8,11 @@
   "author": "",
   "license": "ISC",
   "description": "",
+  "overrides": {
+    "class-transformer": {
+      "storage": "class-transformer/cjs/storage"
+    }
+  },
   "dependencies": {
     "@nestjs/swagger": "^8.0.1",
     "class-transformer": "^0.5.1",
