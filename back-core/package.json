@@ -21,7 +21,6 @@
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
     "seed": "ts-node -r tsconfig-paths/register ./src/seed/seed.ts"
   },
-
   "dependencies": {
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.2.3",
@@ -41,6 +40,7 @@
     "morgan": "^1.10.0",
     "mysql2": "^3.10.2",
     "nestjs-paginate": "^9.0.0",
+    "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "reflect-metadata": "^0.2.0",
     "rxjs": "^7.8.1",

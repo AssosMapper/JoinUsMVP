@@ -11,12 +11,13 @@ export default defineConfig({
       resolvers: [PrimeVueResolver()],
     }),
   ],
-
+  server: {
+    host: true,
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "@shared": path.resolve(__dirname, "./../shared"),
-      "@back": path.resolve(__dirname, "./../back-core/src"),
+      "@shared": path.resolve(__dirname, "./shared"),
       "@stores": path.resolve(__dirname, "./src/store"),
     },
   },

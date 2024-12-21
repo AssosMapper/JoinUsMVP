@@ -1,4 +1,4 @@
-import { Media } from "@src/shared/types/media";
+import { Media } from "@shared/types/media";
 import { Association } from "./association";
 import { Role } from "./roles";
 

@@ -8,8 +8,8 @@
     "allowSyntheticDefaultImports": true,
     "strict": true,
     "noEmit": true,
-    "types": ["node"],
-
+    "types": ["node"]
   },
-  "include": ["vite.config.ts"]
+  "exclude": ["./shared/node_modules/*"],
+  "include": ["vite.config.ts", "./shared/**/*.ts"]
 }
