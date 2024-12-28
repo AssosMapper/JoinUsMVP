@@ -60,4 +60,13 @@ export class EventsController {
       enableImplicitConversion: true,
     });
   }
+
+  @Get(':id')
+  async findOne(@Param('id') id: string): Promise<EventDto> {
+    const event = await this.eventsService.findOne(id);
+    return plainToInstance(EventDto, event, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
+  }
 }

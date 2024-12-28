@@ -19,7 +19,7 @@
 }
 
 .p-tablist-tab-list {
-    @apply relative flex bg-surface-0 dark:bg-surface-900 border-b border-surface-200 dark:border-surface-700
+    @apply relative flex bg-surface-0 border-b border-surface-200 dark:border-surface-700
 }
 
 .p-tablist-content {
@@ -66,7 +66,7 @@
 }
 
 .p-tabpanels {
-    @apply bg-surface-0 dark:bg-surface-900 text-surface-700 dark:text-surface-0
+    @apply bg-surface-0  text-surface-700 dark:text-surface-0
         pt-[0.875rem] pb-[1.125rem] px-[1.125rem] outline-none
 }
 
