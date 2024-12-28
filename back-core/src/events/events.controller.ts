@@ -38,4 +38,26 @@ export class EventsController {
       enableImplicitConversion: true,
     });
   }
+
+  @Get('by-month')
+  @ApiQuery({ name: 'year', required: true, type: Number })
+  @ApiQuery({ name: 'month', required: true, type: Number })
+  @ApiQuery({ name: 'isValid', required: false, type: Boolean })
+  async getEventsByMonth(
+    @Query(new YupValidationPipe(getEventsByMonthSchema))
+    query: GetEventsByMonthDto,
+  ): Promise<EventDto[]> {
+    const { year, month, isValid, search, typeEventId } = query;
+    const events = await this.eventsService.findEventsByMonth(
+      year,
+      month,
+      isValid,
+      search,
+      typeEventId,
+    );
+    return plainToInstance(EventDto, events, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
+  }
 }
