@@ -3,13 +3,29 @@ import { useApiStore } from "@/store/apiUrls.store.ts";
 import { IEvent } from "@/types/event.types.ts";
 import { ResponseError } from "@/types/http.types";
 import axios from "axios";
+import { useUserStore } from '@/store';
 
 const API_URL = import.meta.env.VITE_APP_BACKEND_URL;
 
 const createEvent = async (event: IEvent) => {
-  const { data, error, response } = await useApi(useApiStore().events.create)
-    .post(event)
+  const userStore = useUserStore();
+  const apiStore = useApiStore();
+  
+  const payload = {
+    ...event,
+    associationId: userStore.user?.associationId || event.associationId
+  };
+
+  const { data, error } = await useApi(apiStore.events.create)
+    .post(payload)
     .json();
+
+  if (error.value) {
+    console.error('Error creating event:', error.value);
+    throw error.value;
+  }
+
+  return data.value;
 };
 
 const getAllEvents = async (

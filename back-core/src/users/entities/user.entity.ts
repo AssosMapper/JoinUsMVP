@@ -53,4 +53,7 @@ export class User extends EntityStructure {
 
   @OneToMany(() => Notification, (notification) => notification.user)
   notifications: Notification[];
+
+  @Column({ nullable: true })
+  associationId?: string;
 }

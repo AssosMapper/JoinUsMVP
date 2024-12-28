@@ -4,16 +4,23 @@ import { Association } from "@shared/types/association";
 import { Role } from "@shared/types/roles";
 import { defineStore } from "pinia";
 
+interface UserState {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  roles: Role[];
+  associations: Association[];
+  associationId?: string;
+}
+
 export const useUserStore = defineStore("user", {
   state() {
     return {
       loader: false,
       token: "",
       isAuth: false,
-      user: {
-        roles: [] as Role[],
-        associations: [] as Association[],
-      },
+      user: null as UserState | null,
     };
   },
   getters: {
@@ -22,27 +29,28 @@ export const useUserStore = defineStore("user", {
     },
     isAdmin(): boolean {
       return (
-        this.user.roles?.some((role) => role.name === "SuperAdmin") ?? false
+        this.user?.roles?.some((role) => role.name === "SuperAdmin") ?? false
       );
     },
 
     isAssociationManager(): boolean {
       return (
-        this.user.roles?.some((role) => role.name === "AssociationManager") ??
+        this.user?.roles?.some((role) => role.name === "AssociationManager") ??
         false
       );
     },
     isEventsManager(): boolean {
       return (
-        this.user.roles?.some((role) => role.name === "EventsManager") ?? false
+        this.user?.roles?.some((role) => role.name === "EventsManager") ?? false
       );
     },
     isUser(): boolean {
-      return this.user.roles?.some((role) => role.name === "User") ?? false;
+      return this.user?.roles?.some((role) => role.name === "User") ?? false;
     },
     fullName(): string {
-      return `${this.user.first_name} ${this.user.last_name}`.trim();
+      return `${this.user?.first_name} ${this.user?.last_name}`.trim();
     },
+    associationId: (state) => state.user?.associationId,
   },
   actions: {
     async login(credentials: ICredentials) {
@@ -60,7 +68,7 @@ export const useUserStore = defineStore("user", {
     },
     getAssociation(associationId: string): Association | null {
       return (
-        this.user.associations?.find(
+        this.user?.associations?.find(
           (association) => association.id === associationId
         ) ?? null
       );
@@ -89,6 +97,9 @@ export const useUserStore = defineStore("user", {
       } finally {
         this.loader = false;
       }
+    },
+    setUser(userData: any) {
+      this.user = userData;
     },
   },
   persist: {

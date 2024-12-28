@@ -70,15 +70,17 @@ export class EventsService {
   }
 
   async create(user: User, createEventDto: CreateEventDto): Promise<Event> {
-    const event = new Event();
+    const associationId = user.associationId || createEventDto.associationId;
+    
     const association = await this.associationRepository.findOne({
-      where: { id: createEventDto.associationId },
+      where: { id: associationId },
     });
+    
     if (!association) {
-      throw new NotFoundException(
-        `Association with ID ${createEventDto.associationId} not found`,
-      );
+      throw new NotFoundException(`Association not found`);
     }
+
+    const event = new Event();
     const typeEvent = await this.typeEventsRepository.findOne({
       where: { id: createEventDto.typeEventId },
     });
