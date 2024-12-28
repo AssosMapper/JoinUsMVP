@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import typeEventService from "@/services/typeEventService";
 import { useNotificationStore } from "@/store/notificationStore.ts";
-import { useUserStore } from "@/store/userStore";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 
-const userStore = useUserStore();
 const router = useRouter();
 const notificationStore = useNotificationStore();
 

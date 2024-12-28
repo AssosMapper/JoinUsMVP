@@ -35,7 +35,6 @@ export class EventDto {
   description: string;
 
   @Expose()
-  @Type(() => PublicMediaDto)
   image: PublicMediaDto;
 
   @Expose()
@@ -45,15 +44,12 @@ export class EventDto {
   localisation?: string;
 
   @Expose()
-  @Type(() => PublicAssociationDto)
   association: PublicAssociationDto;
 
   @Expose()
-  @Type(() => PublicUserDto)
   user: PublicUserDto;
 
   @Expose()
-  @Type(() => TypeEventsDto)
   typeEvent: TypeEventsDto;
 
   @Expose()
