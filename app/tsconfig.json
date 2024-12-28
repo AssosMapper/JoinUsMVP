@@ -8,4 +8,9 @@
       "path": "./tsconfig.node.json"
     }
   ],
+  "compilerOptions": {
+    "paths": {
+      "@shared/*": ["../shared/*"]
+    }
+  }
 }

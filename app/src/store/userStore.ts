@@ -29,23 +29,23 @@ export const useUserStore = defineStore("user", {
     },
     isAdmin(): boolean {
       return (
-        this.user?.roles?.some((role) => role.name === "SuperAdmin") ?? false
+        this.user?.roles?.some((role: Role) => role.name === "SuperAdmin") ?? false
       );
     },
 
     isAssociationManager(): boolean {
       return (
-        this.user?.roles?.some((role) => role.name === "AssociationManager") ??
+        this.user?.roles?.some((role: Role) => role.name === "AssociationManager") ??
         false
       );
     },
     isEventsManager(): boolean {
       return (
-        this.user?.roles?.some((role) => role.name === "EventsManager") ?? false
+        this.user?.roles?.some((role: Role) => role.name === "EventsManager") ?? false
       );
     },
     isUser(): boolean {
-      return this.user?.roles?.some((role) => role.name === "User") ?? false;
+      return this.user?.roles?.some((role: Role) => role.name === "User") ?? false;
     },
     fullName(): string {
       return `${this.user?.first_name} ${this.user?.last_name}`.trim();
@@ -60,8 +60,11 @@ export const useUserStore = defineStore("user", {
         this.token = data?.access_token;
         this.user = data?.user;
         this.isAuth = true;
-      } catch (e) {
-        throw new Error(e.message);
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          throw new Error(e.message);
+        }
+        throw new Error('Une erreur est survenue');
       } finally {
         this.loader = false;
       }
@@ -69,7 +72,7 @@ export const useUserStore = defineStore("user", {
     getAssociation(associationId: string): Association | null {
       return (
         this.user?.associations?.find(
-          (association) => association.id === associationId
+          (association: Association) => association.id === associationId
         ) ?? null
       );
     },
@@ -81,8 +84,11 @@ export const useUserStore = defineStore("user", {
       try {
         const data = await authService.getProfile(this.token);
         this.user = data;
-      } catch (e) {
-        throw new Error(e.message);
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          throw new Error(e.message);
+        }
+        throw new Error('Une erreur est survenue');
       } finally {
         this.loader = false;
       }
@@ -92,8 +98,11 @@ export const useUserStore = defineStore("user", {
       this.loader = true;
       try {
         await authService.register(register);
-      } catch (e) {
-        throw new Error("Inscription failed");
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          throw new Error(e.message);
+        }
+        throw new Error('Une erreur est survenue');
       } finally {
         this.loader = false;
       }

@@ -40,7 +40,7 @@ const getAllEvents = async (
     url += `&isValid=${isValid}`;
   }
 
-  const { data, error, response } = await useApi(url).json();
+  const { data, error } = await useApi(url).json();
   if (error.value) {
     throw new Error(error.value);
   }
@@ -49,7 +49,7 @@ const getAllEvents = async (
 
 const getEventById = async (id: string) => {
   const apiStore = useApiStore();
-  const { data, error, response } = await useApi(
+  const { data, error } = await useApi(
     apiStore.resolveUrl(apiStore.events.detail, {
       id: id,
     })
@@ -68,7 +68,7 @@ const getEventsByUserId = async (userId: number) => {
 
 const updateEvent = async (id: string, event: Partial<IEvent>) => {
   const apiStore = useApiStore();
-  const { data, error, response } = await useApi(
+  const { data, error } = await useApi(
     apiStore.resolveUrl(apiStore.events.update, {
       id: id,
     })
@@ -97,7 +97,7 @@ const getEventsByAssociationId = async (
   const apiStore = useApiStore();
   const url = `${apiStore.events.byAssociation}?associationId=${associationId}&limit=${limit}`;
 
-  const { data, error, response } = await useApi(url).json();
+  const { data, error } = await useApi(url).json();
 
   if (error.value) {
     throw new Error(error.value);
