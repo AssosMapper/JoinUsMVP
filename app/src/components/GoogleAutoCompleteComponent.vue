@@ -1,18 +1,5 @@
-<template>
-  <div>
-    <input
-        :id="inputId"
-        :value="modelValue"
-        @input="updateValue"
-        :class="inputClass"
-        :placeholder="placeholder"
-        class="w-full"
-    />
-  </div>
-</template>
-
 <script setup lang="ts">
-import { ref, onMounted, watch, toRef } from 'vue';
+import { onMounted, watch, toRef } from 'vue';
 import {useGoogleMapsLoader} from "@/composables/useGoogleMapLoader.ts";
 
 interface Props {
@@ -39,7 +26,7 @@ const emit = defineEmits<{
 }>();
 
 const inputValue = toRef(props, 'modelValue');
-const { isLoaded, loadError } = useGoogleMapsLoader();
+const { isLoaded } = useGoogleMapsLoader();
 
 let autocomplete: google.maps.places.Autocomplete | null = null;
 
@@ -79,3 +66,16 @@ function updateValue(event: Event) {
   emit('update:modelValue', value);
 }
 </script>
+
+<template>
+  <div>
+    <input
+        :id="inputId"
+        :value="modelValue"
+        @input="updateValue"
+        :class="inputClass"
+        :placeholder="placeholder"
+        class="w-full"
+    />
+  </div>
+</template>

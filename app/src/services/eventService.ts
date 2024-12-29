@@ -3,13 +3,29 @@ import { useApiStore } from "@/store/apiUrls.store.ts";
 import { IEvent } from "@/types/event.types.ts";
 import { ResponseError } from "@/types/http.types";
 import axios from "axios";
+import { useUserStore } from '@/store';
 
 const API_URL = import.meta.env.VITE_APP_BACKEND_URL;
 
 const createEvent = async (event: IEvent) => {
-  const { data, error, response } = await useApi(useApiStore().events.create)
-    .post(event)
+  const userStore = useUserStore();
+  const apiStore = useApiStore();
+  
+  const payload = {
+    ...event,
+    associationId: userStore.user?.associationId || event.associationId
+  };
+
+  const { data, error } = await useApi(apiStore.events.create)
+    .post(payload)
     .json();
+
+  if (error.value) {
+    console.error('Error creating event:', error.value);
+    throw error.value;
+  }
+
+  return data.value;
 };
 
 const getAllEvents = async (
@@ -24,7 +40,7 @@ const getAllEvents = async (
     url += `&isValid=${isValid}`;
   }
 
-  const { data, error, response } = await useApi(url).json();
+  const { data, error } = await useApi(url).json();
   if (error.value) {
     throw new Error(error.value);
   }
@@ -33,7 +49,7 @@ const getAllEvents = async (
 
 const getEventById = async (id: string) => {
   const apiStore = useApiStore();
-  const { data, error, response } = await useApi(
+  const { data, error } = await useApi(
     apiStore.resolveUrl(apiStore.events.detail, {
       id: id,
     })
@@ -52,7 +68,7 @@ const getEventsByUserId = async (userId: number) => {
 
 const updateEvent = async (id: string, event: Partial<IEvent>) => {
   const apiStore = useApiStore();
-  const { data, error, response } = await useApi(
+  const { data, error } = await useApi(
     apiStore.resolveUrl(apiStore.events.update, {
       id: id,
     })
@@ -81,7 +97,7 @@ const getEventsByAssociationId = async (
   const apiStore = useApiStore();
   const url = `${apiStore.events.byAssociation}?associationId=${associationId}&limit=${limit}`;
 
-  const { data, error, response } = await useApi(url).json();
+  const { data, error } = await useApi(url).json();
 
   if (error.value) {
     throw new Error(error.value);

@@ -5,9 +5,10 @@ import typeAssociationService from "@/services/typeAssociationService";
 import typeEventService from "@/services/typeEventService";
 import { useNotificationStore } from "@/store/notificationStore.ts";
 import { useUserStore } from "@/store/userStore";
-import { nextTick, onMounted, ref, watch } from "vue";
+import { nextTick, onMounted, reactive, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import GoogleAutoCompleteComponent from "../GoogleAutoCompleteComponent.vue";
+import { IEvent } from "@/types/event.types.ts";
 
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
@@ -29,9 +30,9 @@ const event = ref({
   isValid: false,
 });
 
-const associations = ref<{ id: number; name: string }[]>([]);
-const typeAssociations = ref<{ id: number; name: string }[]>([]);
-const typeEvents = ref<{ id: number; name: string }[]>([]);
+const associations = reactive<{ id: number; name: string }[]>([{ id: 0, name: '' }]);
+const typeAssociations = reactive<{ id: number; name: string }[]>([{ id: 0, name: '' }]);
+const typeEvents = reactive<{ id: number; name: string }[]>([{ id: 0, name: '' }]);
 const selectedTypeAssociation = ref<string | null>(null);
 
 const fetchAssociationByType = async () => {
@@ -64,9 +65,9 @@ const handleSubmit = async () => {
   try {
     event.value.isValid = isAdmin || isAssociationManager;
 
-    const dataToSend = {
+    const dataToSend: Omit<IEvent, 'id'> = {
       ...event.value,
-      associationId: userStore.user.association?.id,
+      associationId: userStore.user?.associationId ?? event.value.associationId,
       typeEventId: event.value.typeEventId,
     };
     console.log(dataToSend);
@@ -87,7 +88,7 @@ const handleSubmit = async () => {
 
 const fetchAssociations = async () => {
   try {
-    associations.value = await associationService.getAllAssociations();
+    Object.assign(associations, await associationService.getAllAssociations());
   } catch (error) {
     console.error("Error fetching associations:", error);
   }
@@ -95,7 +96,7 @@ const fetchAssociations = async () => {
 
 const fetchTypeEvents = async () => {
   try {
-    typeEvents.value = await typeEventService.getAllTypeEvents();
+    Object.assign(typeEvents, await typeEventService.getAllTypeEvents());
   } catch (error) {
     console.error("Error fetching type events:", error);
   }
@@ -103,8 +104,7 @@ const fetchTypeEvents = async () => {
 
 const fetchTypeAssociations = async () => {
   try {
-    typeAssociations.value =
-      await typeAssociationService.getAllTypeAssociations();
+    Object.assign(typeAssociations, await typeAssociationService.getAllTypeAssociations());
   } catch (error) {
     console.error("Error fetching type associations:", error);
   }

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import eventService from "@/services/eventService";
 import typeEventService from "@/services/typeEventService";
-import { Event } from "@shared/types/event";
-import { TypeEvents } from "@shared/types/type-events";
+import type { Event } from "@shared/types/event";
+import type { TypeEvents } from "@shared/types/type-events";
 import { useDebounce } from "@vueuse/core";
 import Dropdown from "primevue/dropdown";
 import IconField from "primevue/iconfield";
@@ -11,9 +11,10 @@ import InputText from "primevue/inputtext";
 import Tab from "primevue/tab";
 import TabList from "primevue/tablist";
 import { onMounted, ref, watch } from "vue";
+import Map from '@/components/Map.vue';
 
-const events = ref<Event[]>([]);
-const typeEvents = ref<TypeEvents[]>([]);
+const events = ref<Array<Event>>([]);
+const typeEvents = ref<Array<TypeEvents>>([]);
 const search = ref("");
 const loading = ref(false);
 const activeTab = ref("0");
@@ -25,7 +26,7 @@ const debouncedSearch = useDebounce(search, 300);
 const fetchTypeEvents = async () => {
   try {
     const data = await typeEventService.getAllTypeEvents();
-    typeEvents.value = data;
+    typeEvents.value = data as TypeEvents[];
   } catch (error) {
     console.error(
       "Erreur lors de la récupération des types d'événements :",
@@ -160,7 +161,12 @@ watch([debouncedSearch, selectedType], fetchEvents);
             </TabPanel>
 
             <TabPanel value="2">
-              <div class="text-center p-4">Fonctionnalité à venir</div>
+              <div class="h-[600px] w-full">
+                <Map 
+                  :events="events"
+                  :center="{ lat: 48.8566, lng: 2.3522 }"
+                />
+              </div>
             </TabPanel>
           </TabPanels>
         </div>
