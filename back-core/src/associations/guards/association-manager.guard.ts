@@ -34,7 +34,8 @@ export class AssociationManagerGuard implements CanActivate {
     // Vérifie si l'utilisateur est manager et membre de l'association
     const isAssociationManager =
       checkRole(user, RoleEnum.ASSOCIATION_MANAGER) &&
-      user.associations.some((assoc) => assoc.id === associationId);
+      (user.associations.some((assoc) => assoc.id === associationId) ||
+       user.associationId === associationId);
 
     if (!isAssociationManager) {
       throw new ForbiddenException({
