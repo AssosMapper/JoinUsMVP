@@ -18,16 +18,16 @@ const association = ref({
   name: "",
   localisation: "",
   description: "",
-  image: "",
+  image: null as any,
   applicationQuestion: "",
   user_id: userStore.user?.id,
   typeIds: [] as string[],
 });
 
 const selectedAssociationId = ref<string | null>(null);
-const selectedTypeIds = ref<number[]>([]);
+const selectedTypeIds = ref<string[]>([]);
 const availableAssociations = ref<{ id: string; name: string }[]>([]);
-const availableTypes = ref<{ id: number; name: string }[]>([]);
+const availableTypes = ref<{ id: string; name: string }[]>([]);
 
 const fetchTypes = async () => {
   try {
@@ -53,6 +53,7 @@ const fetchAssociationDetails = async (id: string) => {
       ...assoData,
       typeIds: assoData.types.map((type: any) => type.id),
       user_id: userStore.user?.id,
+      image: assoData.image || null,
     };
     selectedTypeIds.value = assoData.types.map((type: any) => type.id);
   } catch (error) {
