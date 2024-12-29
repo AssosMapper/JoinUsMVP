@@ -78,4 +78,17 @@ export class EventsController {
       enableImplicitConversion: true,
     });
   }
+
+  @Put(':id')
+  @BearAuthToken()
+  async update(
+    @Param('id') id: string,
+    @Body() updateEventDto: UpdateEventDto
+  ): Promise<EventDto> {
+    const event = await this.eventsService.update(id, updateEventDto);
+    return plainToInstance(EventDto, event, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
+  }
 }
