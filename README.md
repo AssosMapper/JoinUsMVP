@@ -6,3 +6,6 @@
 
 Pour executer les seeders :
 `docker compose exec backend npm run seed`
+
+Pour executer les migrations :
+`docker compose exec backend npm run migration:run`

@@ -68,7 +68,7 @@ const updateMarkers = () => {
           });
 
           marker.addListener('click', () => {
-            router.push(`/events/${event.id}`);
+            router.push(`/displayevent/${event.id}`);
           });
 
           marker.addListener('mouseover', () => {

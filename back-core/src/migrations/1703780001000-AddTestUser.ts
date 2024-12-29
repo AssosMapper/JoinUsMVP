@@ -4,28 +4,43 @@ import { v4 as uuidv4 } from 'uuid';
 
 export class AddTestUser1703780001000 implements MigrationInterface {
   public async up(queryRunner: QueryRunner): Promise<void> {
-    const hashedPassword = await hashPassword('test123');
-    const userId = uuidv4();
-    
-    // Insérer l'utilisateur test avec un ID
-    await queryRunner.query(`
-      INSERT INTO user (id, first_name, last_name, email, password)
-      VALUES ('${userId}', 'Test', 'User', 'user@test.com', '${hashedPassword}')
+    // Vérifier si l'utilisateur existe déjà
+    const existingUser = await queryRunner.query(`
+      SELECT * FROM user WHERE email = 'user@test.com'
     `);
 
-    // Récupérer l'ID du rôle User
-    const roleId = await queryRunner.query(`
-      SELECT id FROM role WHERE name = 'User'
-    `);
+    if (existingUser.length === 0) {
+      const hashedPassword = await hashPassword('test123');
+      const userId = uuidv4();
+      
+      await queryRunner.query(`
+        INSERT INTO user (id, first_name, last_name, email, password)
+        VALUES ('${userId}', 'Test', 'User', 'user@test.com', '${hashedPassword}')
+      `);
 
-    // Associer le rôle à l'utilisateur
-    await queryRunner.query(`
-      INSERT INTO user_roles_role (userId, roleId)
-      VALUES ('${userId}', '${roleId[0].id}')
-    `);
+      const roleId = await queryRunner.query(`
+        SELECT id FROM role WHERE name = 'User'
+      `);
+
+      if (roleId[0]) {
+        await queryRunner.query(`
+          INSERT INTO user_roles_role (userId, roleId)
+          VALUES ('${userId}', '${roleId[0].id}')
+        `);
+      }
+    }
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
+    // D'abord supprimer la relation spécifique dans user_roles_role
+    await queryRunner.query(`
+      DELETE FROM user_roles_role 
+      WHERE userId IN (
+        SELECT id FROM user WHERE email = 'user@test.com'
+      )
+    `);
+
+    // Ensuite supprimer l'utilisateur test
     await queryRunner.query(`
       DELETE FROM user WHERE email = 'user@test.com'
     `);

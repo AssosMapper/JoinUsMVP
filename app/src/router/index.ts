@@ -100,32 +100,18 @@ router.beforeEach((to, from, next) => {
   const isAuthenticated = userStore.isAuthenticated;
   const isAdmin = userStore.isAdmin;
   const isAssociationManager = userStore.isAssociationManager;
-  const isEventsManager = userStore.isEventsManager;
+
+  console.log('User roles:', userStore.user?.roles);
+  console.log('Is authenticated:', isAuthenticated);
+  console.log('Is admin:', isAdmin);
+  console.log('Is association manager:', isAssociationManager);
 
   if (to.meta.requiresAdmin && (!isAuthenticated || !isAdmin)) {
-    // TODO : envoyer vers page 404
-    next("/login");
-    alert(
-      "Vous devez être administrateur pour accéder à cette page. Veuillez vous connecter."
-    );
-  } else if (
-    to.meta.requiresAssociationManager &&
-    (!isAuthenticated || (!isAssociationManager && !isAdmin))
-  ) {
-    // TODO : envoyer vers page 404
-    next("/login");
-    alert(
-      "Vous devez être gestionnaire d'association pour accéder à cette page. Veuillez vous connecter."
-    );
-  } else if (
-    to.meta.requiresEventsManager &&
-    (!isAuthenticated || (!isEventsManager && !isAdmin))
-  ) {
-    // TODO : envoyer vers page 404
-    next("/login");
-    alert(
-      "Vous devez être gestionnaire d'events pour accéder à cette page. Veuillez vous connecter."
-    );
+    next('/login');
+    alert("Vous devez être administrateur pour accéder à cette page.");
+  } else if (to.meta.requiresAssociationManager && (!isAuthenticated || (!isAssociationManager && !isAdmin))) {
+    next('/login');
+    alert("Vous devez être gestionnaire d'association pour accéder à cette page.");
   } else {
     next();
   }
