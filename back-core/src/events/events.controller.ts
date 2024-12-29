@@ -20,6 +20,7 @@ import { YupValidationPipe } from '../utils/pipes/yup-validation.pipe';
 import { CreateEventDto } from './dto/create-events.dto';
 import { UpdateEventDto } from './dto/update-events.dto';
 import { EventsService } from './events.service';
+import { Event as EventEntity } from './entities/event.entity';
 
 @Controller('events')
 @ApiBearerAuth()
@@ -59,6 +60,14 @@ export class EventsController {
       excludeExtraneousValues: true,
       enableImplicitConversion: true,
     });
+  }
+
+  @Get('association/:associationId')
+  async getEventsByAssociation(
+    @Param('associationId') associationId: string,
+    @Query('limit') limit: number = 100
+  ): Promise<EventEntity[]> {
+    return this.eventsService.getEventsByAssociation(associationId);
   }
 
   @Get(':id')

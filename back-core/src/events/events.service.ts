@@ -58,14 +58,12 @@ export class EventsService {
     return event;
   }
 
-  async findByUserId(userId: string): Promise<Event[]> {
+  async getEventsByUserId(userId: string): Promise<Event[]> {
     return this.eventsRepository.find({
       where: {
-        user: {
-          id: userId,
-        },
+        user: { id: userId }
       },
-      relations: ['association', 'user', 'typeEvent'],
+      relations: ['association', 'typeEvent'],
     });
   }
 
@@ -248,5 +246,12 @@ export class EventsService {
     query.orderBy('event.date', 'ASC').addOrderBy('event.titre', 'ASC');
 
     return query.getMany();
+  }
+
+  async getEventsByAssociation(associationId: string): Promise<Event[]> {
+    return this.eventsRepository.find({
+      where: { association: { id: associationId } },
+      relations: ['association', 'typeEvent'],
+    });
   }
 }

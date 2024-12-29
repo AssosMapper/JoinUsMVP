@@ -61,7 +61,7 @@ const getEventById = async (id: string) => {
   return data.value;
 };
 
-const getEventsByUserId = async (userId: number) => {
+const getEventsByUserId = async (userId: string) => {
   const response = await axios.get(`${API_URL}/events/user/${userId}`);
   return response.data;
 };
@@ -81,7 +81,7 @@ const updateEvent = async (id: string, event: Partial<IEvent>) => {
   return data.value;
 };
 
-const deleteEvent = async (id: number, token: string) => {
+const deleteEvent = async (id: string, token: string) => {
   const response = await axios.delete(`${API_URL}/events/${id}`, {
     headers: {
       Authorization: `Bearer ${token}`,
@@ -90,15 +90,11 @@ const deleteEvent = async (id: number, token: string) => {
   return response.data;
 };
 
-const getEventsByAssociationId = async (
-  associationId: string,
-  limit: number
-) => {
+const getEventsByAssociationId = async (associationId: string, limit: number) => {
   const apiStore = useApiStore();
-  const url = `${apiStore.events.byAssociation}?associationId=${associationId}&limit=${limit}`;
+  const url = apiStore.resolveUrl(apiStore.events.byAssociation, { associationId });
 
   const { data, error } = await useApi(url).json();
-
   if (error.value) {
     throw new Error(error.value);
   }
