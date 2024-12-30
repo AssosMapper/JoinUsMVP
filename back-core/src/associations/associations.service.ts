@@ -84,6 +84,7 @@ export class AssociationsService {
     id: string,
     updateAssociationDto: UpdateAssociationDto,
   ): Promise<Association> {
+    console.log('Update DTO received:', updateAssociationDto);
     const existingAssociation = await this.findOne(id);
     if (!existingAssociation) {
       throw new NotFoundException(`Association with ID ${id} not found`);
@@ -99,11 +100,13 @@ export class AssociationsService {
       const media = await this.mediaRepository.findOne({
         where: { id: updateAssociationDto.image },
       });
-
       if (media) existingAssociation.image = media;
     }
 
+    console.log('Existing association before update:', existingAssociation);
     Object.assign(existingAssociation, updateAssociationDto);
+    console.log('Association after merge:', existingAssociation);
+
     return await this.associationsRepository.save(existingAssociation);
   }
 

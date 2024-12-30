@@ -14,6 +14,7 @@ const isAdmin = userStore.isAdmin;
 const isAssociationManager = userStore.isAssociationManager;
 
 const event = ref({
+  id: "" as string,
   titre: "",
   description: "",
   image: "",
@@ -25,12 +26,12 @@ const event = ref({
   association: null as any,
 });
 
-const selectedEventId = ref<number | null>(null);
-const associations = ref<{ id: number; name: string }[]>([]);
-const typeEvents = ref<{ id: number; name: string }[]>([]);
-const events = ref<{ id: number; titre: string }[]>([]);
+const selectedEventId = ref<string | null>(null);
+const associations = ref<{ id: string; name: string }[]>([]);
+const typeEvents = ref<{ id: string; name: string }[]>([]);
+const events = ref<{ id: string; titre: string }[]>([]);
 
-const fetchEventDetails = async (id: number) => {
+const fetchEventDetails = async (id: string) => {
   try {
     const eventData = await eventService.getEventById(id);
     console.log(eventData);
@@ -78,9 +79,11 @@ const fetchAssociations = async () => {
 
 const fetchTypeEvents = async () => {
   try {
-    typeEvents.value = await typeEventService.getAllTypeEvents();
+    const response = await typeEventService.getAllTypeEvents();
+    typeEvents.value = Array.isArray(response) ? response : [];
   } catch (error) {
     console.error("Error fetching type events:", error);
+    typeEvents.value = [];
   }
 };
 
@@ -90,11 +93,12 @@ const fetchEvents = async () => {
     if (isAdmin) {
       response = await eventService.getAllEvents();
     } else {
-      response = await eventService.getEventsByUserId(userStore.id as number);
+      response = await eventService.getEventsByAssociationId(userStore.user?.associationId || '', 100);
     }
-    events.value = response;
+    events.value = response || [];
   } catch (error) {
     console.error("Error fetching events:", error);
+    events.value = [];
   }
 };
 
@@ -235,6 +239,7 @@ watch(selectedEventId, (newId) => {
           id="localisation"
           v-model="event.localisation"
           :value="event.localisation"
+          @place-changed="handlePlaceChanged"
           required
           class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         />

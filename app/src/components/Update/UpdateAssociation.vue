@@ -14,20 +14,20 @@ const isAdmin = userStore.isAdmin;
 const isAssociationManager = userStore.isAssociationManager;
 
 const association = ref({
-  id: 0,
+  id: "" as string,
   name: "",
   localisation: "",
   description: "",
-  image: "",
-  user_id: userStore.id,
-  typeIds: [] as number[],
-  members: 0,
+  image: null as any,
+  applicationQuestion: "",
+  user_id: userStore.user?.id,
+  typeIds: [] as string[],
 });
 
-const selectedAssociationId = ref<number | null>(null);
-const selectedTypeIds = ref<number[]>([]);
-const availableAssociations = ref<{ id: number; name: string }[]>([]);
-const availableTypes = ref<{ id: number; name: string }[]>([]);
+const selectedAssociationId = ref<string | null>(null);
+const selectedTypeIds = ref<string[]>([]);
+const availableAssociations = ref<{ id: string; name: string }[]>([]);
+const availableTypes = ref<{ id: string; name: string }[]>([]);
 
 const fetchTypes = async () => {
   try {
@@ -46,13 +46,14 @@ const fetchAssociations = async () => {
   }
 };
 
-const fetchAssociationDetails = async (id: number) => {
+const fetchAssociationDetails = async (id: string) => {
   try {
     const assoData = await associationService.getAssociationById(id);
     association.value = {
       ...assoData,
       typeIds: assoData.types.map((type: any) => type.id),
-      user_id: userStore.id,
+      user_id: userStore.user?.id,
+      image: assoData.image || null,
     };
     selectedTypeIds.value = assoData.types.map((type: any) => type.id);
   } catch (error) {
@@ -62,20 +63,17 @@ const fetchAssociationDetails = async (id: number) => {
 
 const handleSubmit = async () => {
   try {
-    const { id, createdAt, updatedAt, types, ...rest } = association.value;
-
     const dataToSend = {
-      ...rest,
+      name: association.value.name,
+      description: association.value.description,
+      localisation: association.value.localisation,
       typeIds: selectedTypeIds.value,
-      user_id: association.value.user_id,
+      image: association.value.image?.id || null,
+      members: 0
     };
 
-    delete dataToSend.users;
-
-    console.log("Data to send:", JSON.stringify(dataToSend, null, 2));
-
     await associationService.updateAssociation(
-      association.value.id,
+      selectedAssociationId.value || "",
       dataToSend
     );
     useNotificationStore().showNotification(
@@ -184,6 +182,19 @@ watch(selectedAssociationId, (newId) => {
 
       <div class="mb-4">
         <label
+          for="applicationQuestion"
+          class="block text-sm font-medium leading-6 text-gray-900"
+        >Question d'adhésion</label>
+        <textarea
+          id="applicationQuestion"
+          v-model="association.applicationQuestion"
+          placeholder="Question posée aux membres souhaitant rejoindre l'association"
+          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
+        ></textarea>
+      </div>
+
+      <div class="mb-4">
+        <label
           for="image"
           class="block text-sm font-medium leading-6 text-gray-900"
           >Image</label
@@ -192,20 +203,6 @@ watch(selectedAssociationId, (newId) => {
           type="text"
           id="image"
           v-model="association.image"
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-        />
-      </div>
-
-      <div class="mb-4">
-        <label
-          for="members"
-          class="block text-sm font-medium leading-6 text-gray-900"
-          >Members</label
-        >
-        <input
-          type="number"
-          id="members"
-          v-model="association.members"
           class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
         />
       </div>
