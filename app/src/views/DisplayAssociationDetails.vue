@@ -6,7 +6,7 @@ import associationService from '@/services/associationService';
 import eventService from '@/services/eventService';
 import { loadGoogleMapsApi } from '@/utils/loadGoogleMapsApi';
 import EventList from '@/components/EventsList.vue';
-import Loader from '@/components/Loader.vue';
+import Loader from '@/components/ui/Loader.vue';
 import { AssociationApplication } from '@shared/types/association-applications';
 import associationApplicationService from '@/services/associationApplicationService';
 import JnsImage from '@/components/ui/JnsImage.vue';
@@ -25,7 +25,7 @@ const fetchAssociationDetails = async () => {
   loader.value = true;
   try {
     association.value = await associationService.getAssociationById(route.params.id as string);
-    const events = await eventService.getEventsByAssociationId(association.value.id, 5);
+    const events = await eventService.getEventsByAssociationId(association.value.id, 100);
     pastEvents.value = events.pastEvents;
     todayEvents.value = events.todayEvents;
     upcomingEvents.value = events.upcomingEvents;
@@ -49,7 +49,7 @@ const initMap = async () => {
 
   try {
 
-    await loadGoogleMapsApi();
+    await loadGoogleMapsApi(import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY);
     const mapElement = document.getElementById("map") as HTMLElement;
     
     if (!mapElement) {
@@ -59,7 +59,10 @@ const initMap = async () => {
     const geocoder = new google.maps.Geocoder();
     geocoder.geocode({ address: association.value.localisation }, (results, status) => {
       if (status === "OK" && results && results[0]) {
-        const location = results[0].geometry.location;
+        const location = {
+          lat: results[0].geometry.location.lat(),
+          lng: results[0].geometry.location.lng()
+        };
         map.value = new google.maps.Map(mapElement, {
           center: location,
           zoom: 15,
@@ -68,8 +71,8 @@ const initMap = async () => {
         const icon = {
           url: "/assets/associations-images/default.png",
           scaledSize: new google.maps.Size(50, 50),
-          origin: new google.maps.Point(0, 0),
-          anchor: new google.maps.Point(25, 25)
+          origin: { x: 0, y: 0 },
+          anchor: { x: 25, y: 25 }
         };
 
         marker.value = new google.maps.Marker({
@@ -136,9 +139,27 @@ onMounted(async () => {
         <div id="map" class="w-full h-64 md:h-full rounded-lg"></div>
       </div>
     </div>
-    <EventList title="Today's Events" :events="todayEvents" />
-    <EventList title="Past Events" :events="pastEvents" />
-    <EventList title="Upcoming Events" :events="upcomingEvents" />
+    <EventList 
+      :events="todayEvents"
+      :loading="loader"
+      :current-month-year="new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })"
+      :fetch-more="() => Promise.resolve()"
+      :has-more="false"
+    />
+    <EventList 
+      :events="pastEvents"
+      :loading="loader"
+      :current-month-year="new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })"
+      :fetch-more="() => Promise.resolve()"
+      :has-more="false"
+    />
+    <EventList 
+      :events="upcomingEvents"
+      :loading="loader"
+      :current-month-year="new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })"
+      :fetch-more="() => Promise.resolve()"
+      :has-more="false"
+    />
   </div>
 </template>
 
