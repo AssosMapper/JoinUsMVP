@@ -21,6 +21,7 @@ export const useUserStore = defineStore("user", {
       token: "",
       isAuth: false,
       user: null as UserState | null,
+      initialized: false
     };
   },
   getters: {
@@ -110,15 +111,34 @@ export const useUserStore = defineStore("user", {
     setUser(userData: any) {
       this.user = userData;
     },
+    async initializeStore() {
+      const token = localStorage.getItem('token');
+      if (token) {
+        this.token = token;
+        this.isAuth = true;
+      }
+      this.initialized = true;
+    },
   },
   persist: {
     storage: sessionStorage,
     paths: ["token"],
     async afterRestore(context) {
       if (context.store.$state.token) {
-        const data = await authService.getProfile(context.store.$state.token);
-        context.store.$state.user = data;
-        context.store.$state.isAuth = true;
+        try {
+          context.store.$state.loader = true;
+          const data = await authService.getProfile(context.store.$state.token);
+          context.store.$state.user = data;
+          context.store.$state.isAuth = true;
+          context.store.$state.initialized = true;
+        } catch (error) {
+          console.error('Failed to restore user session:', error);
+          context.store.$state.initialized = true;
+        } finally {
+          context.store.$state.loader = false;
+        }
+      } else {
+        context.store.$state.initialized = true;
       }
     },
   },

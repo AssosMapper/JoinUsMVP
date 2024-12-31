@@ -3,7 +3,6 @@ import {onMounted, ref} from 'vue';
 import {useRoute} from 'vue-router';
 import eventService from '@/services/eventService';
 import {loadGoogleMapsApi} from '@/utils/loadGoogleMapsApi';
-
 const route = useRoute();
 const event = ref(null);
 const map = ref<google.maps.Map | null>(null);
@@ -11,7 +10,7 @@ const marker = ref<google.maps.Marker | null>(null);
 
 const fetchEventDetails = async () => {
   try {
-    event.value = await eventService.getEventById(route.params.id);
+    event.value = await eventService.getEventById(route.params.id as string);
     initMap();
   } catch (error) {
     console.error('Error fetching event details:', error);
@@ -22,13 +21,17 @@ const initMap = async () => {
   if (!event.value || !event.value.localisation) return;
 
   try {
-    await loadGoogleMapsApi();
+    await loadGoogleMapsApi(import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY);
     const mapElement = document.getElementById("map") as HTMLElement;
 
     const geocoder = new google.maps.Geocoder();
     geocoder.geocode({ address: event.value.localisation }, (results, status) => {
       if (status === "OK" && results && results[0]) {
-        const location = results[0].geometry.location;
+        const latLng = results[0].geometry.location;
+        const location: google.maps.LatLngLiteral = {
+          lat: Number(latLng.lat()),
+          lng: Number(latLng.lng())
+        };
         map.value = new google.maps.Map(mapElement, {
           center: location,
           zoom: 15,
@@ -37,13 +40,13 @@ const initMap = async () => {
         const icon = {
           url: "/assets/events-images/default.png",
           scaledSize: new google.maps.Size(50, 50),
-          origin: new google.maps.Point(0, 0),
-          anchor: new google.maps.Point(25, 25)
+          origin: { x: 0, y: 0 },
+          anchor: { x: 25, y: 25 }
         };
 
         marker.value = new google.maps.Marker({
           map: map.value,
-          position: location,
+          position: { lat: location.lat, lng: location.lng },
           title: event.value.titre,
           icon: icon
         });

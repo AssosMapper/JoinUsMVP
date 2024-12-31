@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import AssociationForm from "@/components/AssociationDashboard/AssociationForm.vue";
 import AssociationMembers from "@/components/AssociationDashboard/AssociationMembers.vue";
-import ManageAssociationApplications from "@/components/AssociationDashboard/ManageAssociationApplications.vue";
 import JnsImage from "@/components/ui/JnsImage.vue";
 import Loader from "@/components/ui/Loader.vue";
 import associationService from "@/services/associationService";
+import eventService from "@/services/eventService";
 import mediaService from "@/services/mediaService";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useUserStore } from "@/store/userStore";
 import { canManageAssociation } from "@/utils/check-role";
 import { User } from "@shared/types";
-import type { Association } from "@shared/types/association";
+import type { Media } from "@shared/types/media";
+import type { PublicAssociationDto } from "@shared/dto/associations.dto";
 import ConfirmDialog from "primevue/confirmdialog";
 import Tab from "primevue/tab";
 import TabList from "primevue/tablist";
@@ -24,7 +24,8 @@ const route = useRoute();
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
 
-const association = ref<Association | null>(null);
+const association = ref<PublicAssociationDto | null>(null);
+const events = ref([]);
 const isLoading = ref(true);
 const activeTab = ref("0");
 
@@ -43,14 +44,21 @@ const loadAssociation = async () => {
   }
 };
 
-const onAssociationUpdated = async (updatedAssociation: Association) => {
-  association.value = updatedAssociation;
-  await loadAssociation();
+
+const fetchEvents = async () => {
+  try {
+    if (association.value?.id) {
+      events.value = await eventService.getEventsByAssociationId(association.value.id, 100);
+    }
+  } catch (error: any) {
+    notificationStore.showNotification(error.message, "error");
+  }
 };
 
 onMounted(async () => {
   try {
     await loadAssociation();
+    await fetchEvents();
   } finally {
     isLoading.value = false;
   }
@@ -68,7 +76,7 @@ onMounted(async () => {
       <div class="flex items-center space-x-6 bg-primary/10 p-6 rounded-lg">
         <JnsImage
           :name="association.name"
-          :src="mediaService.getMediaUrl(association.image)"
+          :src="mediaService.getMediaUrl(association.image as Media)"
           size="lg"
         />
         <div>
@@ -88,10 +96,7 @@ onMounted(async () => {
           <TabList>
             <Tab value="0">Informations</Tab>
             <Tab value="1">Membres</Tab>
-            <Tab v-if="canManageApplications" value="2"
-              >Gérer les candidatures</Tab
-            >
-            <Tab v-if="canManageApplications" value="3">Paramètres</Tab>
+            <Tab value="2">Événements</Tab>
           </TabList>
 
           <TabPanels>
@@ -109,16 +114,35 @@ onMounted(async () => {
               />
             </TabPanel>
 
-            <TabPanel v-if="canManageApplications" value="2">
-              <ManageAssociationApplications :associationId="association.id!" />
-            </TabPanel>
-
-            <TabPanel v-if="canManageApplications" value="3">
-              <AssociationForm
-                :association="association"
-                mode="edit"
-                @saved="onAssociationUpdated"
-              />
+            <TabPanel value="2">
+              <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-2xl font-bold mb-6">Événements de l'association</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <div v-for="event in events" :key="event.id" 
+                    class="bg-white border border-gray-200 rounded-lg shadow hover:shadow-lg transition-all duration-300">
+                    <JnsImage
+                      :name="event.titre"
+                      :src="event.image || '/default-event.jpg'"
+                      size="lg"
+                      :rounded="false"
+                      class="w-full h-48"
+                    />
+                    <div class="p-5">
+                      <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-xl font-bold tracking-tight text-gray-900">{{ event.titre }}</h3>
+                        <span class="text-sm text-gray-500">{{ event.type }}</span>
+                      </div>
+                      <p class="mb-3 font-normal text-gray-700">{{ event.description }}</p>
+                      <div class="flex items-center text-sm text-gray-500">
+                        <i class="pi pi-calendar mr-2"></i>
+                        <time>{{ new Date(event.date).toLocaleDateString() }}</time>
+                        <i class="pi pi-map-marker ml-4 mr-2"></i>
+                        <span>{{ event.location }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </TabPanel>
           </TabPanels>
         </Tabs>

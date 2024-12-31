@@ -43,7 +43,7 @@ const routes: Array<RouteRecordRaw> = [
     path: "/associationManagerInterface",
     name: "AssociationManagerInterface",
     meta: { requiresAssociationManager: true },
-    component: () => import("../views/AssociationManagerInterface.vue"),
+    component: () => import("../views/AssociationManagerDashboard.vue"),
   },
   {
     path: "/displayEvents",
@@ -95,8 +95,14 @@ const router = createRouter({
   routes,
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const userStore = useUserStore();
+
+  // Attendre que le store soit complètement initialisé
+  while (!userStore.initialized || userStore.loader) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+
   const isAuthenticated = userStore.isAuthenticated;
   const isAdmin = userStore.isAdmin;
   const isAssociationManager = userStore.isAssociationManager;
