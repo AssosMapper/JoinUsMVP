@@ -7,10 +7,11 @@ import Badge from "primevue/badge";
 import Card from "primevue/card";
 import ProgressSpinner from "primevue/progressspinner";
 import { useRouter } from "vue-router";
+import type { Event } from "@shared/types/event";
 
 const router = useRouter();
 const props = defineProps<{
-  events: any[];
+  events: Event[];
   loading: boolean;
   currentMonthYear: string;
   fetchMore: () => Promise<void>;
@@ -42,64 +43,66 @@ const goToEventDetails = (id: number) => {
 <template>
   <div
     ref="el"
-    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4"
+    class="w-full"
   >
-    <div
-      v-if="!loading && events.length === 0"
-      class="col-span-full text-center py-8 text-gray-500"
-    >
-      Il n'y a pas d'événements en {{ props.currentMonthYear }}
+    <div v-if="!loading">
+      <div 
+        v-if="events && events.length > 0"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+      >
+        <Card
+          v-for="event in events"
+          :key="event.id"
+          class="event-card cursor-pointer"
+          @click="goToEventDetails(event.id)"
+        >
+          <template #header>
+            <div class="relative">
+              <JnsImage
+                :name="event.titre"
+                :src="event.image || '/default-event.jpg'"
+                size="lg"
+                :rounded="false"
+                class="w-full h-48"
+              />
+              <div class="absolute top-2 right-2">
+                <Badge
+                  :value="event.typeEvent.name"
+                  severity="info"
+                  class="bg-black/50 text-white border-none"
+                />
+              </div>
+            </div>
+          </template>
+          <template #title>
+            {{ event.titre }}
+          </template>
+          <template #subtitle>
+            <div class="flex items-center gap-2">
+              <i class="pi pi-calendar"></i>
+              {{ friendlyDate(new Date(event.date)) }}
+            </div>
+          </template>
+          <template #content>
+            <p class="mb-3">{{ truncateDescription(event.description) }}</p>
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center gap-2">
+                <i class="pi pi-map-marker"></i>
+                {{ event.localisation }}
+              </div>
+              <div class="flex items-center gap-2">
+                <i class="pi pi-users"></i>
+                {{ event.association.name }}
+              </div>
+            </div>
+          </template>
+        </Card>
+      </div>
+      <div v-else class="text-center py-8 text-gray-500">
+        Il n'y a pas d'événements en {{ props.currentMonthYear }}
+      </div>
     </div>
-
-    <Card
-      v-else
-      v-for="event in events"
-      :key="event.id"
-      class="event-card cursor-pointer"
-      @click="goToEventDetails(event.id)"
-    >
-      <template #header>
-        <div class="relative">
-          <JnsImage
-            :name="event.titre"
-            :src="event.image || '/default-event.jpg'"
-            size="lg"
-            :rounded="false"
-            class="w-full h-48"
-          />
-          <div class="absolute top-2 right-2">
-            <Badge
-              :value="event.typeEvent.name"
-              severity="info"
-              class="bg-black/50 text-white border-none"
-            />
-          </div>
-        </div>
-      </template>
-      <template #title>
-        {{ event.titre }}
-      </template>
-      <template #subtitle>
-        <div class="flex items-center gap-2">
-          <i class="pi pi-calendar"></i>
-          {{ friendlyDate(new Date(event.date)) }}
-        </div>
-      </template>
-      <template #content>
-        <p class="mb-3">{{ truncateDescription(event.description) }}</p>
-        <div class="flex flex-col gap-2">
-          <div class="flex items-center gap-2">
-            <i class="pi pi-map-marker"></i>
-            {{ event.localisation }}
-          </div>
-          <div class="flex items-center gap-2">
-            <i class="pi pi-users"></i>
-            {{ event.association.name }}
-          </div>
-        </div>
-      </template>
-    </Card>
-    <div v-if="loading" class="col-span-full flex justify-center p-4">
+    <div v-if="loading" class="flex justify-center p-4">
       <ProgressSpinner />
     </div>
   </div>

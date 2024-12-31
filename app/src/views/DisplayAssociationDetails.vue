@@ -2,6 +2,7 @@
 import { onMounted, ref, nextTick } from 'vue';
 import { useRoute } from 'vue-router';
 import {useUserStore} from "@/store";
+import type { Event } from "@shared/types/event";
 import associationService from '@/services/associationService';
 import eventService from '@/services/eventService';
 import { loadGoogleMapsApi } from '@/utils/loadGoogleMapsApi';
@@ -16,19 +17,36 @@ const userStore = useUserStore();
 const association = ref<any>(null);
 const map = ref<google.maps.Map | null>(null);
 const marker = ref<google.maps.Marker | null>(null);
-const pastEvents = ref<any[]>([]);
-const todayEvents = ref<any[]>([]);
-const upcomingEvents = ref<any[]>([]);
+const pastEvents = ref<Event[]>([]);
+const todayEvents = ref<Event[]>([]);
+const upcomingEvents = ref<Event[]>([]);
 const loader = ref(false);
 const associationApplication = ref<AssociationApplication | null>(null);
 const fetchAssociationDetails = async () => {
   loader.value = true;
   try {
     association.value = await associationService.getAssociationById(route.params.id as string);
+    console.log('Association:', association.value);
     const events = await eventService.getEventsByAssociationId(association.value.id, 100);
-    pastEvents.value = events.pastEvents;
-    todayEvents.value = events.todayEvents;
-    upcomingEvents.value = events.upcomingEvents;
+    console.log('Events received:', events);
+    // Trier les événements par date
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    pastEvents.value = events.filter((event: Event) => new Date(event.date) < today);
+    todayEvents.value = events.filter(event => {
+      const eventDate = new Date(event.date);
+      return eventDate.getFullYear() === today.getFullYear() &&
+             eventDate.getMonth() === today.getMonth() &&
+             eventDate.getDate() === today.getDate();
+    });
+    upcomingEvents.value = events.filter(event => new Date(event.date) > today);
+
+    console.log('Events split:', {
+      past: pastEvents.value,
+      today: todayEvents.value,
+      upcoming: upcomingEvents.value
+    });
     await nextTick(); // Ensure DOM is rendered before initializing the map
     await initMap();
   } catch (error) {
@@ -90,11 +108,15 @@ const initMap = async () => {
 };
 
 const fetchAssociationApplication = async () => {
-   try {
-      associationApplication.value = await associationApplicationService.getCurrentApplication(association.value.id) as AssociationApplication;
-   } catch (error) {
+  if (!association.value?.id) return;
+  
+  try {
+    associationApplication.value = await associationApplicationService.getCurrentApplication(association.value.id) as AssociationApplication;
+  } catch (error: any) {
+    if (error?.statusCode !== 404) {
       console.error('Error fetching association application:', error);
-   }
+    }
+  }
 }
 
 onMounted(async () => {

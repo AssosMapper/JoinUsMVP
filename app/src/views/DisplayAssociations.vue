@@ -57,7 +57,7 @@ const goToDetails = (id: string) => {
 };
 const isLoading = ref(true);
 const getImageSrc = (associationName: string) => {
-  if (!associationName) return "/assets/associations-images/default.png";
+  if (!associationName?.trim()) return "/assets/associations-images/default.png";
   const sanitizedAssociationName = associationName
     .replace(/\s+/g, "")
     .toLowerCase();
