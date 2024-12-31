@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Event } from "@shared/types/event";
-import { computed, emit, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import JnsImage from "./ui/JnsImage.vue";
 
@@ -18,12 +18,12 @@ const router = useRouter();
 const selectedDate = ref(new Date());
 const isMobile = ref(window.innerWidth < 768);
 
-const currentMonthYear = computed(() => {
-  return props.currentDate.toLocaleString("default", {
-    month: "long",
-    year: "numeric",
-  });
-});
+// const currentMonthYear = computed(() => {
+//   return props.currentDate.toLocaleString("default", {
+//     month: "long",
+//     year: "numeric",
+//   });
+// });
 
 const calendarDays = computed(() => {
   const year = props.currentDate.getFullYear();
@@ -131,16 +131,16 @@ const isSelectedDate = (date: Date) => {
   return date.toDateString() === selectedDate.value.toDateString();
 };
 
-const formatTime = (dateString: string) => {
-  const date = new Date(dateString);
+const formatTime = (dateString: string | Date) => {
+  const date = dateString instanceof Date ? dateString : new Date(dateString);
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 };
 
-const goToAssociationDetails = (id: number) => {
+const goToAssociationDetails = (id: string) => {
   router.push({ name: "AssociationDetails", params: { id } });
 };
 
-const goToEventDetails = (id: number) => {
+const goToEventDetails = (id: string) => {
   router.push({ name: "EventDetails", params: { id } });
 };
 

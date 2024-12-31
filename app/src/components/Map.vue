@@ -2,7 +2,8 @@
 import { ref, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import type { Event } from '@shared/types/event';
-// import JnsImage from './ui/JnsImage.vue';
+import mediaService from "@/services/mediaService";
+// import JnsImage from '@/components/ui/JnsImage.vue';
 import { useGoogleMapsLoader } from "@/composables/useGoogleMapLoader";
 
 interface Props {
@@ -16,12 +17,6 @@ const mapDiv = ref<HTMLElement | null>(null);
 const { isLoaded } = useGoogleMapsLoader();
 let map: google.maps.Map | null = null;
 let markers: google.maps.Marker[] = [];
-
-const getImageSrc = (associationName: string) => {
-  if (!associationName) return "/assets/associations-images/default.png";
-  const sanitizedAssociationName = associationName.replace(/\s+/g, "").toLowerCase();
-  return `/assets/associations-images/${sanitizedAssociationName}.png`;
-};
 
 const initMap = () => {
   if (!mapDiv.value) return;
@@ -43,6 +38,11 @@ const updateMarkers = () => {
       const geocoder = new google.maps.Geocoder();
       geocoder.geocode({ address: event.localisation }, (results, status) => {
         if (status === 'OK' && results?.[0]?.geometry?.location) {
+          console.log('Event:', event);
+          console.log('Association:', event.association);
+          console.log('Association image:', event.association?.image);
+          const imageUrl = event.association?.image ? mediaService.getMediaUrl(event.association.image) : "/assets/events-images/default.png";
+          console.log('Final image URL:', imageUrl);
           const marker = new google.maps.Marker({
             position: {
               lat: results[0].geometry.location.lat(),
@@ -51,8 +51,8 @@ const updateMarkers = () => {
             map: map,
             title: event.titre,
             icon: {
-              url: getImageSrc(event.association?.name || ''),
-              scaledSize: new google.maps.Size(32, 32),
+              url: event.association?.image ? mediaService.getMediaUrl(event.association.image) : "/assets/associations-images/default.png",
+              scaledSize: new google.maps.Size(32, 32)
             }
           });
 
@@ -60,9 +60,14 @@ const updateMarkers = () => {
           const infowindow = new google.maps.InfoWindow({
             content: `
               <div class="flex items-center p-2">
-                <h3 class="font-bold">${event.titre}</h3>
-                <p class="text-sm">${event.description}</p>
-                <p class="text-xs">${new Date(event.date).toLocaleString()}</p>
+                <img src="${event.association?.image ? mediaService.getMediaUrl(event.association.image) : "/assets/associations-images/default.png"}" 
+                     alt="${event.association?.name || 'Association'}"
+                     class="w-8 h-8 mr-2">
+                <div>
+                  <h3 class="font-bold">${event.titre}</h3>
+                  <p class="text-sm">${event.description}</p>
+                  <p class="text-xs">${new Date(event.date).toLocaleString()}</p>
+                </div>
               </div>
             `
           });
