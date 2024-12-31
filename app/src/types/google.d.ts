@@ -20,12 +20,12 @@ declare namespace google.maps {
   }
 
   interface MapOptions {
-    center: { lat: number; lng: number };
+    center: LatLngLiteral;
     zoom: number;
   }
 
   interface MarkerOptions {
-    position: { lat: number; lng: number };
+    position: LatLngLiteral;
     map?: Map;
     title?: string;
     icon?: string | Icon;
@@ -71,5 +71,10 @@ declare namespace google.maps {
     interface PlaceResult {
       formatted_address?: string;
     }
+  }
+
+  interface LatLngLiteral {
+    lat: number;
+    lng: number;
   }
 } 

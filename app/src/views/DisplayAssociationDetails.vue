@@ -143,21 +143,21 @@ onMounted(async () => {
       :events="todayEvents"
       :loading="loader"
       :current-month-year="new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })"
-      :fetch-more="() => Promise.resolve()"
+      :fetch-more="async () => {}"
       :has-more="false"
     />
     <EventList 
       :events="pastEvents"
       :loading="loader"
       :current-month-year="new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })"
-      :fetch-more="() => Promise.resolve()"
+      :fetch-more="async () => {}"
       :has-more="false"
     />
     <EventList 
       :events="upcomingEvents"
       :loading="loader"
       :current-month-year="new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })"
-      :fetch-more="() => Promise.resolve()"
+      :fetch-more="async () => {}"
       :has-more="false"
     />
   </div>
