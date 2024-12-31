@@ -8,6 +8,7 @@ import Card from "primevue/card";
 import ProgressSpinner from "primevue/progressspinner";
 import { useRouter } from "vue-router";
 import type { Event } from "@shared/types/event";
+import mediaService from "@/services/mediaService";
 
 const router = useRouter();
 const props = defineProps<{
@@ -35,7 +36,7 @@ const truncateDescription = (description: string, maxLength: number = 255) => {
   return description.substring(0, maxLength) + "...";
 };
 
-const goToEventDetails = (id: number) => {
+const goToEventDetails = (id: string) => {
   router.push({ name: "EventDetails", params: { id } });
 };
 </script>
@@ -60,7 +61,7 @@ const goToEventDetails = (id: number) => {
             <div class="relative">
               <JnsImage
                 :name="event.titre"
-                :src="event.image || '/default-event.jpg'"
+                :src="event.image ? mediaService.getMediaUrl(event.image) : '/default-event.jpg'"
                 size="lg"
                 :rounded="false"
                 class="w-full h-48"
