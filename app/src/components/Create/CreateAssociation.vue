@@ -2,6 +2,7 @@
 import {ref, onMounted} from 'vue';
 import {useRouter} from 'vue-router';
 import GoogleAutoCompleteComponent from '../GoogleAutoCompleteComponent.vue';
+<<<<<<< HEAD
 import {useUserStore} from "@/store";
 import {useNotificationStore} from "@/store/notificationStore.ts";
 import typeAssociationService from "@/services/typeAssociationService.ts";
@@ -15,17 +16,36 @@ const loader = ref(false);
 const userId = userStore.id !== null ? userStore.id : 0;
 
 const association = ref<IAssociation>({
+=======
+import {useNotificationStore} from "@/store/notificationStore";
+import typeAssociationService from "@/services/typeAssociationService";
+import {Association} from "@/types/association.types";
+import associationService from "@/services/associationService";
+
+const router = useRouter();
+const notificationStore = useNotificationStore();
+const loader = ref(false);
+
+const association = ref<Association>({
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
   name: '',
   localisation: '',
   description: '',
   image: '',
   members: 0,
+<<<<<<< HEAD
   userId: userId,
   typeIds: []
 });
 
 
 const selectedTypeIds = ref<number[]>([]);
+=======
+  typeIds: []
+});
+
+const selectedTypeIds = ref<string[]>([]);
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
 const availableTypes = ref([]);
 
 const handleSubmit = async () => {
@@ -33,7 +53,11 @@ const handleSubmit = async () => {
   try {
     association.value.typeIds = selectedTypeIds.value;
     await associationService.createAssociation(association.value);
+<<<<<<< HEAD
     notificationStore.showNotification("L'association a été créé !", "success");
+=======
+    notificationStore.showNotification("L'association a été créée !", "success");
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
     await router.push('/');
   } catch (error) {
     console.error('Error creating association:', error);

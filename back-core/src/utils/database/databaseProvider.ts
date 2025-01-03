@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 import { DataSource } from 'typeorm';
 import * as process from 'process';
+=======
+import * as process from 'process';
+import { DataSource } from 'typeorm';
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
 
 export const DatabaseProvider = {
   provide: 'DATA_SOURCE',
@@ -18,4 +23,8 @@ export const DatabaseProvider = {
 
     return dataSource.initialize();
   },
+<<<<<<< HEAD
 };
+=======
+};
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370

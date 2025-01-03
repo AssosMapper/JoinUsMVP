@@ -11,5 +11,18 @@
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
+<<<<<<< HEAD
   }
 }
+=======
+    "paths": {
+      "@shared/*": ["../shared/*", "./shared/*"],      
+      "@src/*": ["./src/*"]
+    }
+  },
+  "include": [
+    "src/**/*",
+    "../shared/**/*"
+  ]
+}
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370

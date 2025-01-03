@@ -1,7 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
+<<<<<<< HEAD
 import { User } from '../../users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { Role } from '../../roles/entities/role.entity';
+=======
+import { Repository } from 'typeorm';
+import { Association } from '../../associations/entities/association.entity';
+import { Role } from '../../roles/entities/role.entity';
+import { User } from '../../users/entities/user.entity';
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
 import { OnDev } from '../../utils/decorators/on-dev.decorator';
 import { hashPassword } from '../../utils/functions';
 
@@ -12,6 +19,11 @@ export class UserSeedService {
     private readonly userRepository: Repository<User>,
     @Inject('ROLE_REPOSITORY')
     private readonly roleRepository: Repository<Role>,
+<<<<<<< HEAD
+=======
+    @Inject('ASSOCIATION_REPOSITORY')
+    private readonly associationRepository: Repository<Association>,
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
   ) {}
 
   @OnDev()
@@ -19,6 +31,13 @@ export class UserSeedService {
     await this.drop();
     const users = [];
 
+<<<<<<< HEAD
+=======
+    // Récupérer toutes les associations
+    const associations = await this.associationRepository.find();
+
+    // Create SuperAdmin user
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
     const superAdminRole = await this.roleRepository.findOne({
       where: { name: 'SuperAdmin' },
     });
@@ -32,8 +51,15 @@ export class UserSeedService {
     user.email = 'admin@test.com';
     user.password = await hashPassword('Password123!');
     user.roles = [superAdminRole];
+<<<<<<< HEAD
     users.push(user);
 
+=======
+    user.associations = associations; // L'admin est membre de toutes les associations
+    users.push(user);
+
+    // Create AssociationManager user
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
     const associationManagerRole = await this.roleRepository.findOne({
       where: { name: 'AssociationManager' },
     });
@@ -49,6 +75,10 @@ export class UserSeedService {
     user.roles = [associationManagerRole];
     users.push(user);
 
+<<<<<<< HEAD
+=======
+    // Create EventsManager user
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
     const eventsManagerRole = await this.roleRepository.findOne({
       where: { name: 'EventsManager' },
     });

@@ -24,8 +24,13 @@ export class PermissionGuard implements CanActivate {
     if (!user) {
       return false;
     } else {
+<<<<<<< HEAD
       let permissions = user.roles.map((role) => role.permissions);
       let flattedPermissions = permissions
+=======
+      const permissions = user.roles.map((role) => role.permissions);
+      const flattedPermissions = permissions
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
         .flat()
         .map((permission) => permission.permission);
       if (flattedPermissions.includes('*')) return true;
@@ -37,4 +42,8 @@ export class PermissionGuard implements CanActivate {
     }
     return true;
   }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370

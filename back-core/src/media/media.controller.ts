@@ -9,6 +9,7 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
+<<<<<<< HEAD
 import { MediaService } from './media.service';
 import { UpdateMediaDto } from './dto/update-media.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -19,6 +20,19 @@ import { Media } from './entities/media.entity';
 import {BearAuthToken} from "../utils/decorators/BearerAuth.decorator";
 import {NeedPermissions} from "../utils/decorators/need-permission.decorator";
 import {ApiPaginationQuery} from "../utils/decorators/ApiPaginationQuery.decorator";
+=======
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBody, ApiConsumes, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { PublicMediaDto } from '@shared/dto/media.dto';
+import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
+import { ApiPaginationQuery } from '../utils/decorators/ApiPaginationQuery.decorator';
+import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
+import { NeedPermissions } from '../utils/decorators/need-permission.decorator';
+import { CreateMediaDto } from './dto/create-media.dto';
+import { UpdateMediaDto } from './dto/update-media.dto';
+import { Media } from './entities/media.entity';
+import { MediaService } from './media.service';
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
 
 @Controller({
   path: 'media',
@@ -73,10 +87,25 @@ export class MediaController {
     description: 'File to upload',
     type: CreateMediaDto,
   })
+<<<<<<< HEAD
   uploadFile(
     @UploadedFile() file: Express.Multer.File,
     @Body() createMediaDto: CreateMediaDto,
   ) {
     return this.mediaService.create(createMediaDto, file);
+=======
+  async uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createMediaDto: CreateMediaDto,
+  ): Promise<PublicMediaDto> {
+    const media = await this.mediaService.create(createMediaDto, file);
+    return {
+      id: media.id,
+      filename: media.filename,
+      mimetype: media.mimetype,
+      size: media.size,
+      createdAt: media.createdAt,
+    };
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
   }
 }

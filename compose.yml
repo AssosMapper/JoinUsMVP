@@ -1,10 +1,51 @@
 services:
+<<<<<<< HEAD
+=======
+  frontend:
+    build:
+      context: .
+      dockerfile: .docker/frontend.Dockerfile
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./app:/app
+      - ./shared:/app/shared
+      - ./.docker/scripts/init-frontend.sh:/docker-entrypoint.sh
+    env_file:
+      - ./app/.env
+    command: "sh /docker-entrypoint.sh"
+    depends_on:
+      - backend
+  backend:
+    build:
+      context: .
+      dockerfile: .docker/backend.Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./back-core:/app
+      - ./shared:/app/shared
+      - ./.docker/scripts/init-backend.sh:/docker-entrypoint.sh
+    env_file:
+      - ./back-core/.env
+    command: "sh /docker-entrypoint.sh"
+    depends_on:
+      - database
+  shared:
+    image: node:latest
+    working_dir: /app/shared
+    volumes:
+      - ./shared:/app/shared
+    command: "npm install --legacy-peer-deps"
+    restart: no
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
   database:
     image: mysql:8.0
     restart: always
     ports:
       - "3306:3306"
     environment:
+<<<<<<< HEAD
       MYSQL_DATABASE: join_us_mvp
       MYSQL_USER: join_us_mvp_admin
       MYSQL_PASSWORD: SN384yGAETYrwsxJd6tLcM
@@ -22,3 +63,14 @@ services:
       PMA_USER: join_us_mvp_admin
       PMA_PASSWORD: SN384yGAETYrwsxJd6tLcM
       
+=======
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370

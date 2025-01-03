@@ -33,9 +33,16 @@ const currentView = shallowRef('CreateAssociation')
     <component :is="components[currentView]"></component>
   </div>
 </template>
+<<<<<<< HEAD
 
+=======
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
 <style scoped>
 .font-bold {
   font-weight: bold;
 }
 </style>
+<<<<<<< HEAD
+=======
+
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370

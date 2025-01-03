@@ -10,14 +10,33 @@
   },
   "dependencies": {
     "@googlemaps/js-api-loader": "^1.16.6",
+<<<<<<< HEAD
     "@vee-validate/i18n": "^4.13.2",
+=======
+    "@primevue/auto-import-resolver": "^4.2.5",
+    "@primevue/themes": "^4.1.0",
+    "@vee-validate/i18n": "^4.13.2",
+    "@vee-validate/rules": "^4.13.2",
+    "@vitejs/plugin-basic-ssl": "^1.1.0",
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
     "@vueuse/core": "^10.11.0",
     "@vueuse/integrations": "^10.11.0",
     "axios": "^1.7.2",
     "destr": "^2.0.3",
+<<<<<<< HEAD
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.1",
     "universal-cookie": "^7",
+=======
+    "event-source-polyfill": "^1.0.31",
+    "pinia": "^2.1.7",
+    "pinia-plugin-persistedstate": "^3.2.1",
+    "primeicons": "^7.0.0",
+    "primevue": "^4.1.0",
+    "tailwindcss-primeui": "^0.3.4",
+    "universal-cookie": "^7",
+    "unplugin-vue-components": "^0.28.0",
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
     "vee-validate": "^4.13.2",
     "vue": "^3.4.31",
     "vue-router": "^4.4.0",
@@ -28,6 +47,10 @@
     "@vitejs/plugin-vue": "^5.0.5",
     "autoprefixer": "^10.4.19",
     "postcss": "^8.4.39",
+<<<<<<< HEAD
+=======
+    "postcss-import": "^16.1.0",
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
     "tailwindcss": "^3.4.6",
     "typescript": "^5.2.2",
     "vite": "^5.3.4",

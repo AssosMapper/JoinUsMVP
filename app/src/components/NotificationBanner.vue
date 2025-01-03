@@ -1,4 +1,5 @@
 <script setup lang="ts">
+<<<<<<< HEAD
 import { computed } from 'vue';
 import { useNotificationStore } from '@/store/notificationStore';
 
@@ -42,3 +43,30 @@ notificationStore.visible = false;
     background-color: #e53e3e;
 }
 </style>
+=======
+import { watch } from 'vue';
+import { useNotificationStore } from '@/store/notificationStore';
+import { useToast } from "primevue/usetoast";
+import Toast from 'primevue/toast';
+
+const toast = useToast();
+const notificationStore = useNotificationStore();
+
+watch(() => notificationStore.visible, () => {
+  if(notificationStore.visible){
+    toast.add({
+      severity: notificationStore.type as 'success' | 'info' | 'warn' | 'error' | 'secondary' | 'contrast' | undefined,
+      summary: notificationStore.notificationTitle,
+      detail: notificationStore.message,
+      life: 3000
+    });
+    notificationStore.visible = false;
+  }
+});
+
+</script>
+
+<template>
+  <Toast position="top-right"/>
+</template>
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
@@ -5,6 +6,14 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import * as morgan from 'morgan';
 import * as dotenv from 'dotenv';
 
+=======
+import { ValidationPipe, VersioningType } from '@nestjs/common';
+import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import '@shared/validations/config';
+import * as morgan from 'morgan';
+import { AppModule } from './app.module';
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   /**
@@ -25,8 +34,13 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       enableDebugMessages: false,
+<<<<<<< HEAD
       whitelist: true,
       forbidNonWhitelisted: true,
+=======
+      whitelist: false,
+      forbidNonWhitelisted: false,
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
     }),
   );
 

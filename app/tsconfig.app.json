@@ -3,6 +3,10 @@
     "composite": true,
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
     "target": "ES2020",
+<<<<<<< HEAD
+=======
+    "strictNullChecks": false,
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
     "useDefineForClassFields": true,
     "module": "ESNext",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
@@ -22,6 +26,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
+<<<<<<< HEAD
       "@/*": [
         "./src/*"
       ],
@@ -31,4 +36,19 @@
     "types": ["node"]
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
+=======
+      "@/*": ["./src/*"],
+      "@stores/*": ["/app/src/store*"],
+      "@shared/*": ["../shared/*"]
+    },
+    "types": ["node"]
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    "../shared/**/*.ts"
+  ],
+  "exclude": ["../shared/node_modules/*"]
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
 }

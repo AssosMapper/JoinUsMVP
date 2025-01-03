@@ -1,6 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
+<<<<<<< HEAD
 import { Permission } from '../../permissions/entities/permission.entity';
 import { DataSource, Repository } from 'typeorm';
+=======
+import { DataSource, Repository } from 'typeorm';
+import { Permission } from '../../permissions/entities/permission.entity';
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
 import { Role } from '../../roles/entities/role.entity';
 
 @Injectable()
@@ -29,6 +34,7 @@ export class RoleSeedService {
     const allPermissions = await this.permissionRepository.find();
     const excludedPermissions = ['typeevents', 'typeassociation', 'user'];
     const associationManagerPermissions = allPermissions.filter(
+<<<<<<< HEAD
       (perm) => !excludedPermissions.some((excl) => perm.permission.startsWith(excl)),
     );
 
@@ -38,6 +44,19 @@ export class RoleSeedService {
 
     const userPermissions = [...eventPermissions];
     
+=======
+      (perm) =>
+        !excludedPermissions.some((excl) => perm.permission.startsWith(excl)),
+    );
+
+    const eventPermissions = allPermissions.filter((perm) =>
+      perm.permission.startsWith('events'),
+    );
+
+    const userPermissions = [...eventPermissions];
+
+    // Add permission for updating roles to user role
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
     const roleUpdatePermission = await this.permissionRepository.findOne({
       where: { permission: 'role:update' },
     });
@@ -46,6 +65,10 @@ export class RoleSeedService {
       userPermissions.push(roleUpdatePermission);
     }
 
+<<<<<<< HEAD
+=======
+    // Create roles
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
     const roles = [] as Array<Role>;
 
     let role = new Role();

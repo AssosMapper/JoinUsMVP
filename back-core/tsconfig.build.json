@@ -3,6 +3,9 @@
   "exclude": ["node_modules", "test", "dist", "**/*spec.ts"],
   "include": [
     "src/**/*.ts",
+<<<<<<< HEAD
     "../interfaces/**/*.ts"
+=======
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
   ]
 }

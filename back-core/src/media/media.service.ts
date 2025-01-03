@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+<<<<<<< HEAD
 import { UpdateMediaDto } from './dto/update-media.dto';
 import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
@@ -14,6 +15,18 @@ import { CreateMediaDto } from './dto/create-media.dto';
 import { Repository } from 'typeorm';
 import { Media } from './entities/media.entity';
 import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
+=======
+import * as fs from 'fs';
+import * as path from 'path';
+import { v4 as uuidv4 } from 'uuid';
+import { UpdateMediaDto } from './dto/update-media.dto';
+
+import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
+import { Duplex } from 'stream';
+import { Repository } from 'typeorm';
+import { CreateMediaDto } from './dto/create-media.dto';
+import { Media } from './entities/media.entity';
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
 
 @Injectable()
 export class MediaService {
@@ -150,9 +163,15 @@ export class MediaService {
    */
   uploadFile(file: Express.Multer.File): Promise<any> {
     const uploadDir = path.resolve(__dirname, '../../uploads');
+<<<<<<< HEAD
     if (!fs.existsSync(uploadDir)) {
       fs.mkdirSync(uploadDir, { recursive: true });
     }
+=======
+    console.log(path.resolve(__dirname, '../../uploads'));
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
     const fileExtension = path.extname(file.originalname);
     const filename = uuidv4() + fileExtension;
     const filepath = path.resolve(__dirname, '../../uploads', filename);

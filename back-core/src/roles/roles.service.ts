@@ -23,6 +23,10 @@ export class RolesService {
       },
     });
     if (existingRole) {
+<<<<<<< HEAD
+=======
+      // throw duplicate error
+>>>>>>> 76a9b7bd6cb9f8449d9b2a871c37df0c393bf370
       throw new HttpException('Role with this name already exists', 409);
     }
     const role = new Role();
