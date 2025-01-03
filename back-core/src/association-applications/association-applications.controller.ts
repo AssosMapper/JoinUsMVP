@@ -49,12 +49,12 @@ export class AssociationApplicationsController {
     });
   }
 
-  @Patch(':id')
+  @Patch(':id/status/:associationId')
   @UseGuards(AssociationManagerGuard)
   async updateApplicationStatus(
     @Param('id') id: string,
-    @Body(new YupValidationPipe(updateApplicationStatusSchema))
-    updateApplicationStatusDto: UpdateApplicationStatusDto,
+    @Param('associationId') associationId: string,
+    @Body() updateApplicationStatusDto: UpdateApplicationStatusDto,
   ): Promise<AssociationApplicationDto> {
     const application = await this.applicationService.updateApplicationStatus(
       id,

@@ -7,31 +7,46 @@ import Button from "primevue/button";
 import Column from "primevue/column";
 import DataTable from "primevue/datatable";
 import { onMounted, ref } from "vue";
+import { useUserStore } from "@/store/userStore";
 
 const props = defineProps<{
   associationId: string;
 }>();
+
+const userStore = useUserStore();
+console.log('Props associationId:', props.associationId);
+console.log('Current association in userStore:', userStore.associationId);
 
 const notificationStore = useNotificationStore();
 const applications = ref<AssociationApplication[]>([]);
 
 const updateApplicationStatus = async (
   applicationId: string,
-  newStatus: ApplicationStatus
+  status: ApplicationStatus
 ) => {
+  if (!userStore.isAssociationManager) {
+    notificationStore.showNotification(
+      "Vous devez être gestionnaire d'association pour effectuer cette action",
+      "error"
+    );
+    return;
+  }
+
   try {
+    console.log('Updating application status:', { applicationId, status });
+    console.log('Current user permissions:', userStore.user?.roles);
     await associationApplicationService.updateApplicationStatus(
       applicationId,
-      newStatus
+      status
     );
     await loadApplications();
-    const message =
-      newStatus === ApplicationStatus.APPROVED
-        ? "Candidature approuvée avec succès"
-        : "Candidature refusée";
-    notificationStore.showNotification(message, "success");
+    notificationStore.showNotification(
+      'Statut de la candidature mis à jour avec succès',
+      'success'
+    );
   } catch (error: any) {
-    notificationStore.showNotification(error.message, "error");
+    console.error('Error updating status:', error);
+    notificationStore.showNotification(error.message, 'error');
   }
 };
 
@@ -46,7 +61,7 @@ const loadApplications = async () => {
         app.status === ApplicationStatus.IN_PROGRESS
     );
   } catch (error: any) {
-    notificationStore.showNotification(error.message, "error");
+    notificationStore.showNotification(error.message, 'error');
   }
 };
 

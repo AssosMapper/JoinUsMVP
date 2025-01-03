@@ -31,7 +31,11 @@ const activeTab = ref(0)
 const fetchAssociationDetails = async () => {
   try {
     if (userStore.associationId) {
+      console.log('User association ID:', userStore.associationId);
+      console.log('User roles:', userStore.user?.roles);
+      console.log('User associations:', userStore.user?.associations);
       association.value = await associationService.getAssociationById(userStore.associationId)
+      console.log('Fetched association:', association.value);
     }
   } catch (error: any) {
     notificationStore.showNotification(error.message, "error")
@@ -51,6 +55,9 @@ const fetchEvents = async () => {
 };
 
 onMounted(() => {
+  console.log('User roles:', userStore.user?.roles);
+  console.log('Is Association Manager:', userStore.isAssociationManager);
+  console.log('Association ID:', userStore.associationId);
   fetchAssociationDetails().then(() => {
     fetchEvents();
   });
