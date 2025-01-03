@@ -20,13 +20,15 @@ import type { Event } from "@shared/types/event"
 import type { Media } from "@shared/types/media"
 import mediaService from "@/services/mediaService"
 import eventService from "@/services/eventService"
+import Button from 'primevue/button'
 
 const userStore = useUserStore()
 const notificationStore = useNotificationStore()
 const association = ref<PublicAssociationDto | null>(null)
 const events = ref<Event[]>([])
 const isLoading = ref(true)
-const activeTab = ref(0)
+const activeTab = ref('0')
+const selectedEventId = ref<string | null>(null)
 
 const fetchAssociationDetails = async () => {
   try {
@@ -105,7 +107,7 @@ onMounted(() => {
             <Tab value="3">Paramètres</Tab>
             <Tab value="4">Créer un événement</Tab>
             <Tab value="5">Gérer les événements</Tab>
-            <Tab value="6">Événements</Tab>
+            <Tab value="6" style="display: none">Modifier l'événement</Tab>
           </TabList>
 
           <TabPanels>
@@ -144,13 +146,6 @@ onMounted(() => {
 
             <TabPanel value="5">
               <div class="bg-white rounded-lg shadow p-6">
-                <UpdateEvent />
-              </div>
-            </TabPanel>
-
-            <TabPanel value="6">
-              <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-2xl font-bold mb-6">Événements de l'association</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                   <div v-for="event in events" :key="event.id" 
                     class="bg-white border border-gray-200 rounded-lg shadow hover:shadow-lg transition-all duration-300">
@@ -173,9 +168,29 @@ onMounted(() => {
                         <i class="pi pi-map-marker ml-4 mr-2"></i>
                         <span>{{ event.localisation }}</span>
                       </div>
+                      <div class="mt-4 flex justify-end">
+                        <Button
+                          class="w-full"
+                          icon="pi pi-pencil"
+                          severity="secondary"
+                          outlined
+                          @click="() => {
+                            selectedEventId = event.id;
+                            activeTab = '6';
+                          }"
+                        >
+                          Modifier
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
+              </div>
+            </TabPanel>
+
+            <TabPanel value="6">
+              <div class="bg-white rounded-lg shadow p-6">
+                <UpdateEvent v-if="selectedEventId" :eventId="selectedEventId" />
               </div>
             </TabPanel>
           </TabPanels>
