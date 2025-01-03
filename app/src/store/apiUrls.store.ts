@@ -38,6 +38,7 @@ export const useApiStore = defineStore("api", {
         all: "/association-applications",
         cancel: "/association-applications/:applicationId",
         current: "/association-applications/current/:associationId",
+        updateStatus: "/association-applications/:id/status/:associationId",
       },
       associationTypes: {
         list: "/type-associations",

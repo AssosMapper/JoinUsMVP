@@ -2,6 +2,7 @@ import { useApi } from "@/composables/useApi";
 import { useApiStore } from "@/store/apiUrls.store";
 import { ResponseError } from "@/types/http.types";
 import { JoinAssociationDto } from "@shared/dto/association-applications.dto";
+import { useUserStore } from "@/store";
 
 const associationApplicationService = {
   joinAssociation: async (JoinAssociationData: JoinAssociationDto) => {
@@ -27,9 +28,12 @@ const associationApplicationService = {
 
   updateApplicationStatus: async (applicationId: string, status: string) => {
     const apiStore = useApiStore();
+    const userStore = useUserStore();
+    
     const { data, error } = await useApi(
-      apiStore.resolveUrl(apiStore.associationApplications.base, {
+      apiStore.resolveUrl(apiStore.associationApplications.updateStatus, {
         id: applicationId,
+        associationId: userStore.associationId
       })
     )
       .patch({ status })

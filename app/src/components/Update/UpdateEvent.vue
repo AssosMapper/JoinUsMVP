@@ -3,15 +3,29 @@ import associationService from "@/services/associationService";
 import eventService from "@/services/eventService";
 import typeEventService from "@/services/typeEventService";
 import { useUserStore } from "@/store/userStore";
-import { onMounted, ref, watch } from "vue";
+import { useNotificationStore } from "@/store/notificationStore";
+import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import GoogleAutoCompleteComponent from "../GoogleAutoCompleteComponent.vue";
 
 const userStore = useUserStore();
+const notificationStore = useNotificationStore();
 const router = useRouter();
 
 const isAdmin = userStore.isAdmin;
 const isAssociationManager = userStore.isAssociationManager;
+
+const checkPermissions = () => {
+  if (!isAssociationManager && !isAdmin) {
+    notificationStore.showNotification(
+      "Vous devez être gestionnaire d'association pour modifier un événement",
+      "error"
+    );
+    router.push('/');
+    return false;
+  }
+  return true;
+};
 
 const event = ref({
   id: "" as string,
@@ -26,10 +40,12 @@ const event = ref({
   association: null as any,
 });
 
-const selectedEventId = ref<string | null>(null);
 const associations = ref<{ id: string; name: string }[]>([]);
 const typeEvents = ref<{ id: string; name: string }[]>([]);
-const events = ref<{ id: string; titre: string }[]>([]);
+
+const props = defineProps<{
+  eventId: string;
+}>();
 
 const fetchEventDetails = async (id: string) => {
   try {
@@ -55,14 +71,15 @@ const fetchEventDetails = async (id: string) => {
 
 const handleSubmit = async () => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    if (!checkPermissions()) return;
+
     const { association, id, ...dataToSend } = {
       ...event.value,
       associationId: event.value.associationId,
       typeEventId: event.value.typeEventId,
     };
 
-    await eventService.updateEvent(selectedEventId.value, dataToSend);
+    await eventService.updateEvent(props.eventId, dataToSend);
     await router.push("/");
   } catch (error) {
     console.error("Error updating event:", error);
@@ -87,21 +104,6 @@ const fetchTypeEvents = async () => {
   }
 };
 
-const fetchEvents = async () => {
-  try {
-    let response;
-    if (isAdmin) {
-      response = await eventService.getAllEvents();
-    } else {
-      response = await eventService.getEventsByAssociationId(userStore.user?.associationId || '', 100);
-    }
-    events.value = response || [];
-  } catch (error) {
-    console.error("Error fetching events:", error);
-    events.value = [];
-  }
-};
-
 const handlePlaceChanged = (place: any) => {
   event.value.localisation = place.formatted_address;
 };
@@ -114,62 +116,24 @@ const formatDateForInput = (dateString: string) => {
 };
 
 onMounted(() => {
+  if (!checkPermissions()) return;
+
   fetchAssociations();
   fetchTypeEvents();
-  fetchEvents();
-});
-
-watch(selectedEventId, (newId) => {
-  if (newId !== null) {
-    fetchEventDetails(newId);
+  if (props.eventId) {
+    fetchEventDetails(props.eventId);
   }
 });
 </script>
 
 <template>
   <div
-    class="form-container w-4/5 flex justify-center text-center mx-auto my-10 py-8 border border-gray-300 rounded-lg"
+    class="form-container w-4/5 flex justify-center text-center mx-auto my-10 py-8 border border-gray-300 rounded-lg text-black"
   >
     <form class="w-full max-w-md" @submit.prevent="handleSubmit">
       <h2 class="text-2xl font-semibold leading-7 text-gray-900 mb-6">
         Update Event
       </h2>
-
-      <div v-if="isAdmin" class="mb-4">
-        <label
-          for="event-select"
-          class="block text-sm font-medium leading-6 text-gray-900"
-          >Select Event</label
-        >
-        <select
-          id="event-select"
-          v-model="selectedEventId"
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-        >
-          <option value="" disabled>Select an event</option>
-          <option v-for="event in events" :key="event.id" :value="event.id">
-            {{ event.titre }}
-          </option>
-        </select>
-      </div>
-
-      <div v-if="isAssociationManager" class="mb-4">
-        <label
-          for="event-select"
-          class="block text-sm font-medium leading-6 text-gray-900"
-          >Select Event</label
-        >
-        <select
-          id="event-select"
-          v-model="selectedEventId"
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-        >
-          <option value="" disabled>Select an event</option>
-          <option v-for="event in events" :key="event.id" :value="event.id">
-            {{ event.titre }}
-          </option>
-        </select>
-      </div>
 
       <div class="mb-4">
         <label
