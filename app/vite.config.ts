@@ -13,11 +13,14 @@ export default defineConfig({
   ],
   server: {
     host: true,
+    watch: {
+      usePolling: true
+    }
   },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      "@shared": path.resolve(__dirname, "./shared"),
+      "@shared": path.resolve(__dirname, "../shared"),
       "@stores": path.resolve(__dirname, "./src/store"),
     },
   },
