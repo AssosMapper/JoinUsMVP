@@ -1,5 +1,5 @@
 .p-tabs {
-    @apply flex flex-col
+    @apply flex flex-col 
 }
 
 .p-tablist {

@@ -10,7 +10,7 @@ import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
 import Tab from "primevue/tab";
 import TabList from "primevue/tablist";
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref, watch, defineAsyncComponent, shallowRef } from "vue";
 import Map from '@/components/Map.vue';
 
 const events = ref<Array<Event>>([]);
@@ -22,6 +22,13 @@ const currentDate = ref(new Date());
 const selectedType = ref<TypeEvents | null>(null);
 
 const debouncedSearch = useDebounce(search, 300);
+
+const components = {
+  'CreateEvent': defineAsyncComponent(() => import('../components/Create/CreateEvent.vue')),
+  'UpdateEvent': defineAsyncComponent(() => import('../components/Update/UpdateEvent.vue')),
+}
+
+const currentComponent = shallowRef<'CreateEvent' | 'UpdateEvent' | null>(null);
 
 const fetchTypeEvents = async () => {
   try {
@@ -107,24 +114,45 @@ watch([debouncedSearch, selectedType], fetchEvents);
 
         <!-- Navigation des tabs -->
         <div>
-          <TabList class="flex justify-center">
-            <Tab value="0">
-              <template #default>
-                <i class="pi pi-list mr-2" />
-                Liste
-              </template>
-            </Tab>
-            <Tab value="1">
-              <template #default>
-                <i class="pi pi-calendar mr-2" />
-                Calendrier
-              </template>
-            </Tab>
-            <Tab value="2">
-              <template #default>
-                <i class="pi pi-map mr-2" />
-                Carte
-              </template>
+          <TabList class="flex justify-between">
+            <div class="flex flex-1">
+              <Tab value="0">
+                <template #default>
+                  <i class="pi pi-list mr-2" />
+                  Liste
+                </template>
+              </Tab>
+              <Tab value="1">
+                <template #default>
+                  <i class="pi pi-calendar mr-2" />
+                  Calendrier
+                </template>
+              </Tab>
+              <Tab value="2">
+                <template #default>
+                  <i class="pi pi-map mr-2" />
+                  Carte
+                </template>
+              </Tab>
+            </div>
+            <Tab value="3" class="ml-auto">
+              <Dropdown 
+                v-model="currentComponent" 
+                :options="['CreateEvent', 'UpdateEvent']"
+                placeholder="Mes événements" 
+                class="w-48 font-semibold"
+                :panelClass="'text-gray-700'"
+              >
+                <template #value="{ value }">
+                  <i class="pi pi-user mr-2" />
+                  {{ value === 'CreateEvent' ? 'Créer un événement' : 
+                     value === 'UpdateEvent' ? 'Modifier un événement' : 
+                     'Mes événements' }}
+                </template>
+                <template #option="{ option }">
+                  {{ option === 'CreateEvent' ? 'Créer un événement' : 'Modifier un événement' }}
+                </template>
+              </Dropdown>
             </Tab>
           </TabList>
         </div>
@@ -168,6 +196,16 @@ watch([debouncedSearch, selectedType], fetchEvents);
                 />
               </div>
             </TabPanel>
+
+            <TabPanel value="3">
+              <component 
+                v-if="currentComponent" 
+                :is="components[currentComponent]"
+              />
+              <div v-else class="text-center py-8">
+                Sélectionnez une action dans le menu déroulant
+              </div>
+            </TabPanel>
           </TabPanels>
         </div>
       </section>
@@ -189,12 +227,10 @@ watch([debouncedSearch, selectedType], fetchEvents);
 }
 
 :deep(.p-tab[data-p-highlight="true"]) {
-  color: var(--primary-color);
   border-bottom-color: var(--primary-color);
 }
 
 :deep(.p-tab:not([data-p-highlight="true"]):hover) {
-  color: var(--primary-color);
   border-bottom-color: var(--surface-hover);
 }
 
