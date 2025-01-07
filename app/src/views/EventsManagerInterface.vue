@@ -6,7 +6,7 @@ import eventService from "../services/eventService.ts";
 const router = useRouter();
 const events = ref([]); 
 const currentDate = ref(new Date()); 
-const selectedDate = ref(new Date()); 
+// const selectedDate = ref(new Date()); 
 const isMobile = ref(window.innerWidth < 768); 
 const loader = ref(false); 
 const currentPage = ref(1); 
@@ -20,7 +20,7 @@ const fetchEvents = async (isValid: boolean | undefined = undefined) => {
         const year = currentDate.value.getFullYear();
         const month = currentDate.value.getMonth() + 1;
 
-        const response = await eventService.getEventsByMonth(year, month, currentPage.value, pageSize.value, isValid);
+        const response = await eventService.getEventsByMonth(year, month, isValid);
 
         if (Array.isArray(response)) {
             events.value = response; 
@@ -81,18 +81,18 @@ const previousPage = () => {
     }
 };
 
-const selectedDateEvents = computed(() => {
-    return events.value.filter(event => {
-        const eventDate = new Date(event.date);
-        return eventDate.toDateString() === selectedDate.value.toDateString();
-    });
-});
+// const selectedDateEvents = computed(() => {
+//     return events.value.filter(event => {
+//         const eventDate = new Date(event.date);
+//         return eventDate.toDateString() === selectedDate.value.toDateString();
+//     });
+// });
 
 const goToEventDetails = (id: number) => {
     router.push({ name: 'EventDetails', params: { id } });
 };
 
-const toggleEventValidation = async (event) => {
+const toggleEventValidation = async (event: { id: string; isValid: boolean }) => {
     const confirmationMessage = event.isValid
         ? 'Voulez-vous vraiment invalider cet événement ?'
         : 'Voulez-vous vraiment valider cet événement ?';
@@ -147,7 +147,7 @@ const currentMonthYear = computed(() => {
         <li v-for="event in events" :key="event.id" class="cursor-pointer p-4 border-b border-gray-200 hover:bg-gray-50 flex justify-between items-center">
           <div @click="goToEventDetails(event.id)" class="flex-1">
             <h3 class="text-xl font-semibold">{{ event.titre }}</h3>
-            <p class="text-sm text-gray-600">{{ event.date | formatDate }}</p>
+            <p class="text-sm text-gray-600">{{ new Date(event.date).toLocaleDateString() }}</p>
             <p class="text-base">{{ event.description }}</p>
             <p class="text-sm text-gray-500">Localisation: {{ event.localisation }}</p>
             <p class="text-sm text-gray-500">Association: {{ event.association?.name }}</p>
