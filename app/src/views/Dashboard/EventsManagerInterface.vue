@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import eventService from "../services/eventService.ts";
+import eventService from "../../services/eventService.ts";
 
 const router = useRouter();
 const events = ref([]); 

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import Footer from "@/components/Footer.vue";
 import Navbar from "@/components/Navbar.vue";
-import NotificationBanner from "@/components/NotificationBanner.vue";
+import NotificationBanner from "@/components/Notification/NotificationBanner.vue";
 import { useLayoutRefStore } from "@/store/layoutRefStore.ts";
-import { useNotificationStore } from "@/store/notificationStore.ts";
+// import { useNotificationStore } from "@/store/notificationStore.ts";
 
-const notificationStore = useNotificationStore();
+// const notificationStore = useNotificationStore();
 const layoutRefStore = useLayoutRefStore();
 </script>
 

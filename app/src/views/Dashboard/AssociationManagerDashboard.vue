@@ -7,11 +7,11 @@ import TabPanels from 'primevue/tabpanels'
 import Tabs from 'primevue/tabs'
 import JnsImage from "@/components/ui/JnsImage.vue"
 import Loader from "@/components/ui/Loader.vue"
-import CreateEvent from '../components/Create/CreateEvent.vue'
-import UpdateEvent from '../components/Update/UpdateEvent.vue'
-import UpdateAssociation from '../components/Update/UpdateAssociation.vue'
+import CreateEvent from '../../components/Create/CreateEvent.vue'
+import UpdateEvent from '../../components/Update/UpdateEvent.vue'
+import UpdateAssociation from '../../components/Update/UpdateAssociation.vue'
 import AssociationMembers from "@/components/AssociationDashboard/AssociationMembers.vue"
-import ManageAssociationApplications from '../components/AssociationDashboard/ManageAssociationApplications.vue'
+import ManageAssociationApplications from '../../components/AssociationDashboard/ManageAssociationApplications.vue'
 import { useUserStore } from "@/store/userStore"
 import { useNotificationStore } from "@/store/notificationStore"
 import associationService from "@/services/associationService"
@@ -200,7 +200,7 @@ onMounted(() => {
   </div>
 </template>
 
-<style scoped>
+<style lang="postcss" scoped>
 :deep(.p-tabview-nav) {
   @apply border-b border-gray-200;
 }

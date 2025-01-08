@@ -4,7 +4,7 @@ import Avatar from "primevue/avatar";
 import Button from "primevue/button";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
-import NotificationButton from "./NotificationButton.vue";
+import NotificationButton from "./Notification/NotificationButton.vue";
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -232,7 +232,7 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
   />
 </template>
 
-<style scoped>
+<style lang="postcss" scoped>
 :deep(.p-sidebar) {
   @apply h-full;
 }

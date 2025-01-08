@@ -42,35 +42,35 @@ const routes: Array<RouteRecordRaw> = [
     path: "/associationManagerInterface",
     name: "AssociationManagerInterface",
     meta: { requiresAssociationManager: true },
-    component: () => import("@/views/AssociationManagerDashboard.vue"),
+    component: () => import("@/views/Dashboard/AssociationManagerDashboard.vue"),
   },
   {
     path: "/displayEvents",
     name: "DisplayEvents",
-    component: () => import("@/views/DisplayEvents.vue"),
+    component: () => import("@/views/Display/DisplayEvents.vue"),
   },
   {
     path: "/displayEvent/:id",
     name: "EventDetails",
-    component: () => import("@/views/DisplayEventDetails.vue"),
+    component: () => import("@/views/Display/DisplayEventDetails.vue"),
     props: true,
   },
   {
     path: "/displayAssociations",
     name: "DisplayAssociations",
-    component: () => import("@/views/DisplayAssociations.vue"),
+    component: () => import("@/views/Display/DisplayAssociations.vue"),
   },
   {
     path: "/displayAssociation/:id",
     name: "AssociationDetails",
-    component: () => import("@/views/DisplayAssociations.vue"),
+    component: () => import("@/views/Display/DisplayAssociations.vue"),
     props: true,
   },
   {
     path: "/eventsManagerInterface",
     name: "EventsManagerInterface",
     meta: { requiresEventsManager: true },
-    component: () => import("@/views/EventsManagerInterface.vue"),
+    component: () => import("@/views/Dashboard/EventsManagerInterface.vue"),
   },
   {
     path: "/my-associations",
@@ -84,8 +84,7 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: "/associations/:id/dashboard",
     name: "AssociationDashboard",
-    component: () =>
-      import("@/views/AssociationDashboard/AssociationDashboard.vue"),
+    component: () => import("@/views/Dashboard/AssociationDashboard.vue"),
     meta: {
       requiresAuth: true,
     },

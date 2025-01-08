@@ -24,8 +24,8 @@ const selectedType = ref<TypeEvents | null>(null);
 const debouncedSearch = useDebounce(search, 300);
 
 const components = {
-  'CreateEvent': defineAsyncComponent(() => import('../components/Create/CreateEvent.vue')),
-  'UpdateEvent': defineAsyncComponent(() => import('../components/Update/UpdateEvent.vue')),
+  'CreateEvent': defineAsyncComponent(() => import('../../components/Create/CreateEvent.vue')),
+  'UpdateEvent': defineAsyncComponent(() => import('../../components/Update/UpdateEvent.vue')),
 }
 
 const currentComponent = shallowRef<'CreateEvent' | 'UpdateEvent' | null>(null);

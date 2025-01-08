@@ -9,7 +9,7 @@ const router = useRouter();
 const notificationStore = useNotificationStore();
 
 
-const {values, errors, defineField} = useForm({
+const {errors, defineField} = useForm<{email: string; password: string}>({
   validationSchema: credentialSchema,
 });
 
