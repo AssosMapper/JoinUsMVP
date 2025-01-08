@@ -59,7 +59,7 @@ const updateMarkers = () => {
           // Ajouter un infowindow pour chaque marqueur
           const infowindow = new google.maps.InfoWindow({
             content: `
-              <div class="flex items-center p-2">
+              <div class="flex items-center p-2 text-black">
                 <img src="${event.association?.image ? mediaService.getMediaUrl(event.association.image) : "/assets/associations-images/default.png"}" 
                      alt="${event.association?.name || 'Association'}"
                      class="w-8 h-8 mr-2">

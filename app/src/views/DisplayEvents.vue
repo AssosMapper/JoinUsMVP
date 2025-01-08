@@ -140,7 +140,7 @@ watch([debouncedSearch, selectedType], fetchEvents);
                 v-model="currentComponent" 
                 :options="['CreateEvent', 'UpdateEvent']"
                 placeholder="Mes événements" 
-                class="w-48 font-semibold"
+                class="font-semibold"
                 :panelClass="'text-gray-700'"
               >
                 <template #value="{ value }">

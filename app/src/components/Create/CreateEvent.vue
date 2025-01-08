@@ -127,7 +127,7 @@ onMounted(async () => {
 
 <template>
   <div
-    class="form-container w-4/5 flex justify-center text-center mx-auto my-10 py-8 border border-gray-300 rounded-lg text-black"
+    class="form-container w-4/5 flex justify-center text-center mx-auto mb-10 py-8 border border-gray-300 rounded-lg text-black"
   >
     <form class="w-full max-w-md" @submit.prevent="handleSubmit">
       <h2 class="text-2xl font-semibold leading-7 text-gray-900 mb-6">

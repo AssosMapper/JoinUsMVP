@@ -1,83 +1,85 @@
 import { useUserStore } from "@/store";
-import MyAssociations from "@/views/MyAssociations.vue";
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: "/",
     name: "Home",
-    component: () => import("../views/Home.vue"),
+    component: () => import("@/views/Home.vue"),
   },
   {
     path: "/aboutUs",
     name: "AboutUs",
-    component: () => import("../views/AboutUs.vue"),
+    component: () => import("@/views/AboutUs.vue"),
   },
   {
     path: "/register",
     name: "Register",
-    component: () => import("../views/Register.vue"),
+    component: () => import("@/views/Register.vue"),
   },
   {
     path: "/updateProfile",
     name: "UpdateProfile",
-    component: () => import("../views/UpdateProfile.vue"),
+    component: () => import("@/views/UpdateProfile.vue"),
   },
   {
     path: "/login",
     name: "Login",
-    component: () => import("../views/Login.vue"),
+    component: () => import("@/views/Login.vue"),
   },
   {
     path: "/contactUs",
     name: "ContactUs",
-    component: () => import("../views/ContactUs.vue"),
+    component: () => import("@/views/ContactUs.vue"),
   },
   {
     path: "/adminInterface",
     name: "AdminInterface",
     meta: { requiresAdmin: true },
-    component: () => import("../views/AdminInterface.vue"),
+    component: () => import("@/views/AdminInterface.vue"),
   },
   {
     path: "/associationManagerInterface",
     name: "AssociationManagerInterface",
     meta: { requiresAssociationManager: true },
-    component: () => import("../views/AssociationManagerDashboard.vue"),
+    component: () => import("@/views/AssociationManagerDashboard.vue"),
   },
   {
     path: "/displayEvents",
     name: "DisplayEvents",
-    component: () => import("../views/DisplayEvents.vue"),
+    component: () => import("@/views/DisplayEvents.vue"),
   },
   {
     path: "/displayEvent/:id",
     name: "EventDetails",
-    component: () => import("../views/DisplayEventDetails.vue"),
+    component: () => import("@/views/DisplayEventDetails.vue"),
     props: true,
   },
   {
     path: "/displayAssociations",
     name: "DisplayAssociations",
-    component: () => import("../views/DisplayAssociations.vue"),
+    component: () => import("@/views/DisplayAssociations.vue"),
   },
   {
     path: "/displayAssociation/:id",
     name: "AssociationDetails",
-    component: () => import("../views/DisplayAssociationDetails.vue"),
+    component: () => import("@/views/DisplayAssociations.vue"),
     props: true,
   },
   {
     path: "/eventsManagerInterface",
     name: "EventsManagerInterface",
     meta: { requiresEventsManager: true },
-    component: () => import("../views/EventsManagerInterface.vue"),
+    component: () => import("@/views/EventsManagerInterface.vue"),
   },
   {
     path: "/my-associations",
     name: "my-associations",
-    component: MyAssociations,
-    meta: { requiresAuth: true },
+    component: () => import("@/views/MyAssociations.vue"),
+    meta: {
+      requiresAuth: true,
+      requiresAssociationManager: true
+    }
   },
   {
     path: "/associations/:id/dashboard",

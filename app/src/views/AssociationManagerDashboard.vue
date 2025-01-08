@@ -127,7 +127,7 @@ onMounted(() => {
             </TabPanel>
 
             <TabPanel value="2">
-              <div class="bg-white rounded-lg shadow p-6">
+              <div class="bg-white rounded-lg shadow p-6 text-black">
                 <ManageAssociationApplications :associationId="association.id" />
               </div>
             </TabPanel>
