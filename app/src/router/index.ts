@@ -78,7 +78,6 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("@/views/MyAssociations.vue"),
     meta: {
       requiresAuth: true,
-      requiresAssociationManager: true
     }
   },
   {

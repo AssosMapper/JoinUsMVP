@@ -2,7 +2,7 @@
 import notificationService from "@/services/notificationService";
 import { useUserStore } from "@/store";
 import { useNotificationStore } from "@/store/notificationStore";
-import { Notification, NotificationSseEnum } from "@shared/types/notification";
+import { Notification } from "@shared/types/notification";
 import { useInfiniteScroll } from "@vueuse/core";
 import { EventSourcePolyfill } from "event-source-polyfill";
 import Button from "primevue/button";
@@ -117,11 +117,9 @@ const markUnreadNotificationsAsRead = async () => {
 /**
  * Gère la réception d'une nouvelle notification via SSE
  */
-const handleNewNotification = (event: MessageEvent) => {
+const handleNewNotification = function(this: EventSourcePolyfill, event: MessageEvent) {
   try {
-    const { notification, unreadCount: newUnreadCount } = JSON.parse(
-      event.data
-    );
+    const { notification, unreadCount: newUnreadCount } = JSON.parse(event.data);
     notifications.value.unshift(notification);
     unreadCount.value = newUnreadCount;
     notificationStore.showNotification("Nouvelle notification reçue", "info");
@@ -169,10 +167,7 @@ watch(
 onMounted(async () => {
   await loadNotifications(true);
   eventSource.value = await notificationService.notificationStream();
-  eventSource.value.addEventListener(
-    NotificationSseEnum.NEW_NOTIFICATION,
-    handleNewNotification
-  );
+  eventSource.value.addEventListener('message', handleNewNotification);
 });
 
 onUnmounted(() => {

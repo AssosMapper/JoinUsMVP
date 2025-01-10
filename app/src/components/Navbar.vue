@@ -130,8 +130,11 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
     ]"
   >
     <!-- En-tête du sidebar -->
-    <div class="p-4 border-b flex items-center justify-between">
-      <span class="font-bold text-xl text-primary">Join Us</span>
+    <div class="p-4 border-b flex items-center justify-around">
+      <div class="font-bold text-xl">
+        <span style="color: var(--primary-color)">Horizon</span><br>
+        <span style="color: var(--danger-color)">Commun</span>
+      </div>
       <div class="flex items-center gap-2">
         <!-- Bouton notification toujours visible si authentifié -->
         <NotificationButton

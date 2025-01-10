@@ -1,0 +1,37 @@
+:root {
+  /* Couleurs principales */
+  --primary-color: #05ac36;
+  --danger-color: #ac0019;
+  --white-color: #ffffff;
+  --black-color: #000000;
+
+  /* Classes de texte */
+  .text-primary {
+    color: var(--primary-color);
+  }
+  .text-danger {
+    color: var(--danger-color);
+  }
+
+  /* Classes de fond */
+  .bg-primary {
+    background-color: var(--primary-color);
+  }
+  .bg-danger {
+    background-color: var(--danger-color);
+  }
+  .bg-primary-light {
+    background-color: rgba(5, 172, 54, 0.1);
+  }
+  .bg-danger-light {
+    background-color: rgba(172, 0, 25, 0.1);
+  }
+
+  /* Classes de bordure */
+  .border-primary {
+    border-color: var(--primary-color);
+  }
+  .border-danger {
+    border-color: var(--danger-color);
+  }
+} 
