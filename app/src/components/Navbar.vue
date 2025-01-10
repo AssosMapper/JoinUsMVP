@@ -130,10 +130,10 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
     ]"
   >
     <!-- En-tête du sidebar -->
-    <div class="p-4 border-b flex items-center justify-around">
+    <div class="p-4 border-b-danger flex items-center justify-around">
       <div class="font-bold text-xl">
-        <span style="color: var(--primary-color)">Horizon</span><br>
-        <span style="color: var(--danger-color)">Commun</span>
+        <span class="text-primary">Horizon</span><br>
+        <span class="text-danger">Commun</span>
       </div>
       <div class="flex items-center gap-2">
         <!-- Bouton notification toujours visible si authentifié -->
@@ -185,7 +185,7 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
     </div>
 
     <!-- Footer du sidebar -->
-    <div class="border-t p-4">
+    <div class="border-t-danger p-4">
       <div v-if="isAuthenticated" class="flex flex-col gap-3">
         <button
           class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200 w-full"

@@ -46,6 +46,8 @@ useInfiniteScroll(
   { distance: 10 }
 );
 
+type MessageEventHandler = (event: MessageEvent) => void;
+
 /**
  * Charge les notifications avec pagination
  * @param reset - Si true, réinitialise la pagination
@@ -117,7 +119,7 @@ const markUnreadNotificationsAsRead = async () => {
 /**
  * Gère la réception d'une nouvelle notification via SSE
  */
-const handleNewNotification = function(this: EventSourcePolyfill, event: MessageEvent) {
+const handleNewNotification: MessageEventHandler = (event) => {
   try {
     const { notification, unreadCount: newUnreadCount } = JSON.parse(event.data);
     notifications.value.unshift(notification);
@@ -167,7 +169,7 @@ watch(
 onMounted(async () => {
   await loadNotifications(true);
   eventSource.value = await notificationService.notificationStream();
-  eventSource.value.addEventListener('message', handleNewNotification);
+  eventSource.value.addEventListener('message', handleNewNotification as EventListener);
 });
 
 onUnmounted(() => {
