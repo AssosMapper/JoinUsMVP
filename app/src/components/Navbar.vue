@@ -75,14 +75,14 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
   <div
     class="lg:hidden fixed bottom-0 left-0 right-0 h-14 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-[90]"
   >
-    <div class="flex justify-around items-center h-full px-2">
+    <div class="flex justify-around items-center h-full px-2 bg-primary">
       <Button
         icon="pi pi-bars"
         @click="mobileSidebarVisible = true"
         class="p-button-text !bg-transparent"
         aria-label="Menu"
       >
-        <i class="pi pi-bars text-primary text-xl"></i>
+        <i class="pi pi-bars text-black text-xl"></i>
       </Button>
 
       <Button
@@ -90,10 +90,10 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
         @click="router.push('/')"
         :class="[
           'p-button-text !bg-transparent',
-          isActiveRoute('/') ? 'text-primary' : 'text-gray-500',
+          isActiveRoute('/') ? 'text-black' : 'text-black',
         ]"
       >
-        <i class="pi pi-home text-xl"></i>
+        <i class="pi pi-home text-xl text-black"></i>
       </Button>
 
       <Button
@@ -102,10 +102,10 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
         @click="router.push('/updateProfile')"
         :class="[
           'p-button-text !bg-transparent',
-          isActiveRoute('/updateProfile') ? 'text-primary' : 'text-gray-500',
+          isActiveRoute('/updateProfile') ? 'text-black' : 'text-black',
         ]"
       >
-        <i class="pi pi-user text-xl"></i>
+        <i class="pi pi-user text-xl text-black"></i>
       </Button>
 
       <Button
@@ -114,7 +114,7 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
         @click="router.push('/login')"
         class="p-button-text !bg-transparent"
       >
-        <i class="pi pi-sign-in text-xl text-gray-500"></i>
+        <i class="pi pi-sign-in text-xl text-black"></i>
       </Button>
     </div>
   </div>
@@ -122,7 +122,7 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
   <!-- Unified Sidebar -->
   <div
     :class="[
-      'bg-white shadow-lg z-[91] transition-transform duration-300 h-screen',
+      'bg-white shadow-lg z-[91] border-danger transition-transform duration-300 h-screen',
       'lg:w-64 w-[80vw]',
       'lg:relative fixed',
       'lg:translate-x-0',

@@ -14,11 +14,11 @@ const layoutRefStore = useLayoutRefStore();
     <Navbar />
     <main
       :ref="(el) => layoutRefStore.setMainRef(el as HTMLElement)"
-      class="w-full grid overflow-x-hidden overflow-y-auto max-w-full max-h-full lg:pb-0 pb-14"
+      class="w-full relative grid overflow-x-hidden overflow-y-auto max-w-full max-h-full lg:pb-0 pb-14"
     >
       <NotificationBanner />
       <router-view />
-      <Footer class="lg:block hidden" />
+      <Footer class="lg:block hidden footer border-danger absolute" />
     </main>
   </div>
 </template>
@@ -30,5 +30,11 @@ const layoutRefStore = useLayoutRefStore();
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
+}
+
+.footer{
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 </style>

@@ -3,8 +3,8 @@ import NewsLetters from './NewsLetters.vue';
 </script>
 
 <template>
-  <footer class="footer-container">
-    <div class="footer-links">
+  <footer class="footer-container d-flex justify-between items-center p-4 bg-danger">
+    <div class="footer-links d-flex text-white">
       <router-link to="/contactUs">Nous contacter</router-link> |
       <router-link to="/aboutUs">About us</router-link>
     </div>
@@ -15,17 +15,7 @@ import NewsLetters from './NewsLetters.vue';
 </template>
 
 <style scoped>
-.footer-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  background-color: #f8f8f8;
-  border-top: 1px solid #e7e7e7;
-}
-
 .footer-links {
-  display: flex;
   gap: 0.5rem;
   order: 2; 
 }
