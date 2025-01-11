@@ -61,3 +61,21 @@
 .d-flex {
   display: flex;
 } 
+
+/* Classes de padding */
+.pb-30 {
+    padding-bottom: 7.5rem;
+}
+
+.pb-40 {
+  padding-bottom: 10rem;
+}
+
+/* Classes de hauteur */
+.max-h-mobile {
+  max-height: calc(100vh - 18rem);
+}
+
+.max-h-desktop {
+  max-height: calc(100vh - 12rem);
+}

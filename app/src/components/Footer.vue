@@ -4,7 +4,7 @@ import NewsLetters from './NewsLetters.vue';
 
 <template>
   <footer class="footer-container d-flex justify-between items-center p-4 bg-danger">
-    <div class="footer-links d-flex text-white">
+    <div class="footer-links d-flex text-">
       <router-link to="/contactUs">Nous contacter</router-link> |
       <router-link to="/aboutUs">About us</router-link>
     </div>

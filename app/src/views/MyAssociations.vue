@@ -41,8 +41,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="p-4">
-    <h1 class="text-3xl font-bold mb-6 pb-4 text-primary border-b-danger">Mes Associations</h1>
+  <div class="bg-primary">
+    <div class="title-container border-b-danger bg-white">
+      <h1 class="text-3xl font-bold text-primary pt-4">Mes Associations</h1>
+    </div>
 
     <div v-if="isLoading">
       <Loader />
@@ -57,7 +59,8 @@ onMounted(() => {
 
     <div
       v-else
-      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6"
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6 overflow-y-auto mb-16"
+      style="max-height: calc(100vh - 8.5rem);"
     >
       <div
         v-for="association in associations"
@@ -107,3 +110,9 @@ onMounted(() => {
     </div>
   </div>
 </template>
+
+<style scoped>
+.title-container {
+  height: 4.5rem;
+}
+</style>

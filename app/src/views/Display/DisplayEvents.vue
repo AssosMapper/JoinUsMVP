@@ -160,7 +160,7 @@ watch([debouncedSearch, selectedType], fetchEvents);
 
       <section class="pt-32 md:pt-0 px-10">
         <!-- Date Switch -->
-        <div class="mt-10 flex justify-center md:justify-end w-full">
+        <div class="flex justify-center md:justify-end w-full">
           <DateSwitchComponent
             :current-date="currentDate"
             @previous="handlePreviousMonth"
@@ -169,7 +169,7 @@ watch([debouncedSearch, selectedType], fetchEvents);
         </div>
 
         <!-- Contenu -->
-        <div>
+        <div class="overflow-y-auto pb-20" style="max-height: calc(100vh - 18rem);">
           <TabPanels>
             <TabPanel value="0">
               <EventsList
@@ -189,7 +189,7 @@ watch([debouncedSearch, selectedType], fetchEvents);
             </TabPanel>
 
             <TabPanel value="2">
-              <div class="h-[600px] w-full">
+              <div class="h-[calc(100vh-12rem)] w-full">
                 <Map 
                   :events="events"
                   :center="{ lat: 48.8566, lng: 2.3522 }"

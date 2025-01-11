@@ -18,7 +18,7 @@ const layoutRefStore = useLayoutRefStore();
     >
       <NotificationBanner />
       <router-view />
-      <Footer class="lg:block hidden footer border-danger absolute" />
+      <Footer class="footer border-danger absolute lg:bottom-0 bottom-14" />
     </main>
   </div>
 </template>
@@ -32,9 +32,9 @@ const layoutRefStore = useLayoutRefStore();
   color: #2c3e50;
 }
 
-.footer{
-  bottom: 0;
+.footer {
   left: 0;
   right: 0;
+  bottom: 4.5rem;
 }
 </style>

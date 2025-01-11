@@ -75,7 +75,7 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
   <div
     class="lg:hidden fixed bottom-0 left-0 right-0 h-14 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-[90]"
   >
-    <div class="flex justify-around items-center h-full px-2 bg-primary">
+    <div class="mobileNavbar flex justify-around items-center h-full px-2 bg-primary">
       <Button
         icon="pi pi-bars"
         @click="mobileSidebarVisible = true"
@@ -130,7 +130,7 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
     ]"
   >
     <!-- En-tête du sidebar -->
-    <div class="p-4 border-b-danger flex items-center justify-around">
+    <div class="logo-container border-b-danger flex items-center justify-around">
       <div class="font-bold text-xl">
         <span class="text-primary">Horizon</span><br>
         <span class="text-danger">Commun</span>
@@ -253,5 +253,13 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
 /* Ajout de l'animation pour l'overlay */
 .backdrop-blur-sm {
   @apply transition-opacity duration-300;
+}
+
+.mobileNavbar {
+  height: 3.5rem;
+}
+
+.logo-container {
+  height: 4.5rem;
 }
 </style>
