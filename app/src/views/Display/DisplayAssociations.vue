@@ -92,12 +92,12 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="">
+  <div>
     <div class="title-container bg-white
                 shadow-[0_4px_6px_-2px_rgba(0,0,0,0.1)]
-                relative z-10">
-      <div class="px-10 pb-4">
-        <h1 class="text-3xl font-bold pt-4 text-primary italic">
+                relative z-10 flex justify-center items-center">
+      <div class="px-10">
+        <h1 class="text-3xl font-bold text-primary italic">
           Associations
         </h1>
       </div>
@@ -111,9 +111,9 @@ onMounted(async () => {
           v-for="association in associations"
           :key="association.id"
           class="flex flex-col bg-white rounded-xl border-primary 
-                 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)]
+                 shadow-[2px_2px_8px_-1px_rgba(0,0,0,0.1),4px_4px_12px_-2px_rgba(0,0,0,0.15)]
                  transform transition-all duration-200 ease-in-out
-                 hover:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-4px_rgba(0,0,0,0.1)]
+                 hover:shadow-[4px_4px_16px_-1px_rgba(0,0,0,0.15),8px_8px_20px_-4px_rgba(0,0,0,0.2)]
                  hover:-translate-y-1 hover:bg-primary-hover/5
                  cursor-pointer"
         >
