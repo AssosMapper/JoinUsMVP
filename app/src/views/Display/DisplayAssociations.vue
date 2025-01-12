@@ -92,19 +92,30 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="bg-primary">
-    <div class="title-container border-b-danger bg-white">
-      <h1 class="text-3xl font-bold pt-4 text-primary">Associations</h1>
+  <div class="">
+    <div class="title-container bg-white
+                shadow-[0_4px_6px_-2px_rgba(0,0,0,0.1)]
+                relative z-10">
+      <div class="px-10 pb-4">
+        <h1 class="text-3xl font-bold pt-4 text-primary italic">
+          Associations
+        </h1>
+      </div>
     </div>
     <div v-if="isLoading">
       <Loader />
     </div>
     <div v-else class="pt-4 px-10">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto pb-20" style="max-height: calc(100vh - 12rem);">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto pb-20 pt-2" style="max-height: calc(100vh - 12rem);">
         <div
           v-for="association in associations"
           :key="association.id"
-          class="flex flex-col bg-white shadow-md rounded-xl hover:shadow-lg transition-shadow border-primary"
+          class="flex flex-col bg-white rounded-xl border-primary 
+                 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-2px_rgba(0,0,0,0.1)]
+                 transform transition-all duration-200 ease-in-out
+                 hover:shadow-[0_10px_15px_-3px_rgba(0,0,0,0.1),0_4px_6px_-4px_rgba(0,0,0,0.1)]
+                 hover:-translate-y-1 hover:bg-primary-hover/5
+                 cursor-pointer"
         >
           <div class="flex items-center p-4 gap-4 border-b-primary">
             <div class="flex-shrink-0">
@@ -142,7 +153,7 @@ onMounted(async () => {
           </div>
 
           <div class="mt-auto p-4 flex justify-center gap-3 border-t-primary">
-            <Button @click="goToDetails(association.id as string)" type="button">
+            <Button @click="goToDetails(association.id as string)" type="button" class="bg-primary text-white">
               En savoir plus
             </Button>
 
@@ -151,6 +162,7 @@ onMounted(async () => {
                 v-if="association.isPublic"
                 @click="joinAssociation(association.id)"
                 :loading="joiningAssociation === association.id"
+                class="bg-primary text-white"
               >
                 Rejoindre
               </Button>

@@ -42,7 +42,7 @@ onMounted(() => {
 
 <template>
   <div class="bg-primary">
-    <div class="title-container border-b-danger bg-white">
+    <div class="title-container border-b-primary bg-white">
       <h1 class="text-3xl font-bold text-primary pt-4">Mes Associations</h1>
     </div>
 

@@ -122,15 +122,16 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
   <!-- Unified Sidebar -->
   <div
     :class="[
-      'bg-white shadow-lg z-[91] border-danger transition-transform duration-300 h-screen',
+      'bg-white transition-transform duration-300 h-screen shadow-[4px_0_15px_-3px_rgba(0,0,0,0.2)]',
       'lg:w-64 w-[80vw]',
       'lg:relative fixed',
       'lg:translate-x-0',
       mobileSidebarVisible ? 'translate-x-0' : '-translate-x-full',
     ]"
   >
+  
     <!-- En-tête du sidebar -->
-    <div class="logo-container border-b-danger flex items-center justify-around">
+    <div class="logo-container flex items-center justify-around shadow-[0_4px_15px_-3px_rgba(0,0,0,0.2)] w-full">
       <div class="font-bold text-xl">
         <span class="text-primary">Horizon</span><br>
         <span class="text-danger">Commun</span>
@@ -152,7 +153,7 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
     </div>
 
     <!-- Menu items -->
-    <div class="flex-1 overflow-y-auto py-4">
+    <div class="flex-1 overflow-y-auto py-4 bg-primary-hover">
       <div class="flex flex-col gap-1">
         <template v-for="item in menuItems" :key="item.label">
           <Button
@@ -185,7 +186,7 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
     </div>
 
     <!-- Footer du sidebar -->
-    <div class="border-t-danger p-4">
+    <div class="p-4 h-full bg-primary-hover">
       <div v-if="isAuthenticated" class="flex flex-col gap-3">
         <button
           class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200 w-full"
@@ -214,13 +215,13 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
         <Button
           label="Connexion"
           icon="pi pi-sign-in"
-          class="w-full"
+          class="w-full bg-primary text-white"
           @click="router.push('/login')"
         />
         <Button
           label="S'inscrire"
           icon="pi pi-user-plus"
-          class="w-full p-button-outlined"
+          class="w-full p-button-outlined bg-primary text-white"
           @click="router.push('/register')"
         />
       </div>

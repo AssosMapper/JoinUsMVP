@@ -18,7 +18,9 @@ const layoutRefStore = useLayoutRefStore();
     >
       <NotificationBanner />
       <router-view />
-      <Footer class="footer border-danger absolute lg:bottom-0 bottom-14" />
+      <Footer class="footer absolute lg:bottom-0 bottom-14 
+                     shadow-[0_-4px_6px_-2px_rgba(0,0,0,0.1)]
+                     z-10" />
     </main>
   </div>
 </template>

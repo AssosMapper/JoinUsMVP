@@ -98,7 +98,7 @@ const showButtonText = computed(() => {
 </script>
 
 <template>
-  <Button :label="showButtonText" @click="visible = true" />
+  <Button :label="showButtonText" class="bg-primary text-white" @click="visible = true" />
 
   <Dialog v-model:visible="visible" modal header="Votre candidature">
     <template #header>

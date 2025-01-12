@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import NewsLetters from './NewsLetters.vue';
+import NewsLetters from '@/components/NewsLetters.vue';
 </script>
 
 <template>

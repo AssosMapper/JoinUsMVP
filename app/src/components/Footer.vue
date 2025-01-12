@@ -3,7 +3,7 @@ import NewsLetters from './NewsLetters.vue';
 </script>
 
 <template>
-  <footer class="footer-container d-flex justify-between items-center p-4 bg-danger">
+  <footer class="footer-container d-flex justify-between items-center p-4 bg-primary-hover">
     <div class="footer-links d-flex text-">
       <router-link to="/contactUs">Nous contacter</router-link> |
       <router-link to="/aboutUs">About us</router-link>
