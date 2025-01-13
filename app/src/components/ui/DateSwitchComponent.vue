@@ -39,7 +39,7 @@ const formattedDate = computed(() => {
 </script>
 
 <template>
-  <div class="flex items-center justify-center py-4">
+  <div class="flex items-center justify-center">
     <Button
       icon="pi pi-chevron-left"
       rounded
