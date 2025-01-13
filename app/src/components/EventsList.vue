@@ -62,52 +62,49 @@ const goToEventDetails = (id: string) => {
                  cursor-pointer"
           @click="goToEventDetails(event.id)"
         >
-          <template #header>
-            <div class="relative">
-              <JnsImage
-                :name="event.titre"
-                :src="event.image ? mediaService.getMediaUrl(event.image) : '/default-event.jpg'"
-                size="lg"
-                :rounded="false"
-                class="w-full h-48"
-              />
-              <div class="absolute top-2 right-2 bg-primary text-white rounded-full">
-                <span
-                  class="px-3 py-1 bg-primary/10 rounded-full text-sm"
-                >
-                  {{ event.typeEvent.name }}
-                </span>
-              </div>
-            </div>
-          </template>
-          <template #title>
-            <div class="flex flex-col">
-              <span class="text-gray-800">{{ event.titre }}</span>
-              <span class="text-sm text-gray-600">
-                <i class="pi pi-users mr-1"></i>
-                {{ event.association.name }}
-              </span>
-            </div>
-          </template>
-          <template #subtitle>
-            <div class="flex items-center gap-2 text-gray-600">
-              <i class="pi pi-calendar"></i>
-              {{ friendlyDate(new Date(event.date)) }}
-            </div>
-          </template>
           <template #content>
-            <div class="flex flex-col p-4 border-t-primary">
-              <div class="flex items-center gap-2 text-gray-500">
-                <i class="pi pi-map-marker"></i>
-                {{ event.localisation }}
+            <div class="flex flex-col">
+              <div class="flex gap-4 mb-4">
+                <JnsImage
+                  :name="event.titre"
+                  :src="event.image ? mediaService.getMediaUrl(event.image) : '/default-event.jpg'"
+                  size="md"
+                  class="w-32 h-32 rounded-lg"
+                />
+                <div class="flex flex-col justify-center flex-1">
+                  <span class="text-lg font-semibold text-gray-700">
+                    <i class="pi pi-users mr-1"></i>
+                    {{ event.association.name }}
+                  </span>
+                  <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm w-fit mt-2 mx-auto">
+                    {{ event.typeEvent.name }}
+                  </span>
+                </div>
               </div>
-              <p class="text-gray-600 mb-3 line-clamp-2 max-w-prose mt-2 text-gray-700">
-                {{ truncateDescription(event.description) }}
-              </p>
-              <div class="mt-auto pt-3 flex justify-center gap-3 border-t-primary">
-                <Button @click.stop="goToEventDetails(event.id)" class="bg-primary text-white">
-                  En savoir plus
-                </Button>
+              <div class="flex flex-col p-4 border-t-primary border-surface-300 dark:border-surface-700">
+                <div class="flex flex-col mb-4">
+                  <span class="text-base font-semibold text-gray-700">{{ event.titre }}</span>
+                </div>
+                <div class="flex flex-col gap-2 mb-4 items-center">
+                  <div class="flex items-center gap-2 text-gray-600">
+                    <i class="pi pi-calendar"></i>
+                    {{ friendlyDate(new Date(event.date)) }}
+                  </div>
+                  <div class="flex items-center gap-2 text-gray-500">
+                    <i class="pi pi-map-marker"></i>
+                    {{ event.localisation }}
+                  </div>
+                </div>
+                <div class="flex flex-col justify-between flex-1">
+                  <p class="text-gray-600 line-clamp-3">
+                    {{ truncateDescription(event.description) }}
+                  </p>
+                </div>
+                <div class="mt-auto pt-3 flex justify-center gap-3">
+                  <Button @click.stop="goToEventDetails(event.id)" class="bg-primary text-white">
+                    En savoir plus
+                  </Button>
+                </div>
               </div>
             </div>
           </template>
