@@ -88,6 +88,14 @@ const routes: Array<RouteRecordRaw> = [
       requiresAuth: true,
     },
   },
+  {
+    path: '/associations/:id',
+    name: 'DisplayAssociationDetails',
+    component: () => import('@/views/Display/DisplayAssociationDetails.vue'),
+    meta: {
+      requiresAuth: true
+    }
+  }
 ];
 
 const router = createRouter({

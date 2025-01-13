@@ -73,7 +73,7 @@ onMounted(async () => {
 
     <div v-else-if="association" class="space-y-6">
       <!-- Header -->
-      <div class="flex items-center space-x-6 bg-primary/10 p-6 rounded-lg">
+      <div class="flex items-center space-x-6 bg-primary-hover p-6 rounded-lg">
         <JnsImage
           :name="association.name"
           :src="mediaService.getMediaUrl(association.image as Media)"

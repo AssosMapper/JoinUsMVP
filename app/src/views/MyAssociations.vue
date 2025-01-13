@@ -2,16 +2,27 @@
 import JnsImage from "@/components/ui/JnsImage.vue";
 import Loader from "@/components/ui/Loader.vue";
 import associationService from "@/services/associationService";
+import typeAssociationService from "@/services/typeAssociationService";
 import { useNotificationStore } from "@/store/notificationStore";
 import type { Association } from "@shared/types/association.ts";
+import type { TypeAssociation } from "@shared/types/type-association";
+import { useDebounce } from "@vueuse/core";
+import Dropdown from "primevue/dropdown";
+import IconField from "primevue/iconfield";
+import InputIcon from "primevue/inputicon";
+import InputText from "primevue/inputtext";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import Button from "primevue/button";
 
 const notificationStore = useNotificationStore();
 const associations = ref<Association[]>([]);
+const typeAssociations = ref<TypeAssociation[]>([]);
+const search = ref("");
 const isLoading = ref(true);
 const router = useRouter();
+
+const debouncedSearch = useDebounce(search, 300);
 
 const getImageSrc = (associationName: string | undefined) => {
   if (!associationName) return "/assets/associations-images/default.png";
@@ -35,18 +46,55 @@ const navigateToDashboard = (associationId: string) => {
   router.push(`/associations/${associationId}/dashboard`);
 };
 
+const fetchTypeAssociations = async () => {
+  try {
+    const data = await typeAssociationService.getAllTypeAssociations();
+    typeAssociations.value = data;
+  } catch (error) {
+    console.error("Erreur lors de la récupération des types d'associations:", error);
+  }
+};
+
 onMounted(() => {
+  fetchTypeAssociations();
   fetchAssociations();
 });
 </script>
 
 <template>
   <div class="overflow-x-hidden">
-    <div class="title-container bg-white
+    <div class="title-container 
                 shadow-[0_4px_15px_-3px_rgba(0,0,0,0.2)]
                 relative z-10 flex justify-center items-center">
       <div class="px-10 ">
         <h1 class="text-3xl font-bold text-primary italic">Mes Associations</h1>
+      </div>
+    </div>
+
+    <!-- Barre de recherche et filtres -->
+    <div class="px-10 py-4 ">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <Dropdown
+            v-model="selectedType"
+            :options="typeAssociations"
+            optionLabel="name"
+            placeholder="Type d'association"
+            :class="[
+              'font-semibold',
+              selectedType ? 'text-[#168003]' : 'text-gray-600'
+            ]"
+            :showClear="true"
+          />
+          <IconField class="w-[400px]">
+            <InputIcon class="pi pi-search" :class="search ? 'text-[#168003]' : 'text-gray-600'" />
+            <InputText
+              v-model="search"
+              placeholder="Rechercher une association..."
+              class="w-full placeholder:text-gray-600 text-[#168003]"
+            />
+          </IconField>
+        </div>
       </div>
     </div>
 
@@ -63,7 +111,7 @@ onMounted(() => {
 
     <div v-else class="pt-4 px-10">
       <div
-        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto pb-20"
+        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto pb-20 pt-2"
         style="max-height: calc(100vh - 12rem);"
       >
         <div

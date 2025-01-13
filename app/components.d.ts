@@ -46,4 +46,7 @@ declare module 'vue' {
     Uploader: typeof import('./src/components/ui/Uploader.vue')['default']
     UploadImage: typeof import('./src/components/ui/UploadImage.vue')['default']
   }
+  export interface ComponentCustomProperties {
+    Tooltip: typeof import('primevue/tooltip')['default']
+  }
 }

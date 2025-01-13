@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, nextTick } from 'vue';
+import { onMounted, ref, nextTick, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import {useUserStore} from "@/store";
 import type { Event } from "@shared/types/event";
@@ -27,7 +27,9 @@ const todayEvents = ref<Event[]>([]);
 const upcomingEvents = ref<Event[]>([]);
 const loader = ref(false);
 const associationApplication = ref<AssociationApplication | null>(null);
-const activeTab = ref(0);
+const activeTab = ref("0");
+const mapInitialized = ref(false);
+
 const fetchAssociationDetails = async () => {
   loader.value = true;
   try {
@@ -53,8 +55,6 @@ const fetchAssociationDetails = async () => {
       today: todayEvents.value,
       upcoming: upcomingEvents.value
     });
-    await nextTick(); // Ensure DOM is rendered before initializing the map
-    await initMap();
   } catch (error) {
     console.error('Error fetching association details:', error);
   } finally {
@@ -69,16 +69,13 @@ const getImageSrc = (associationName: string) => {
 };
 
 const initMap = async () => {
-  if (!association.value || !association.value.localisation) return;
+  if (!association.value || !association.value.localisation || mapInitialized.value) return;
 
   try {
-
     await loadGoogleMapsApi(import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY);
     const mapElement = document.getElementById("map") as HTMLElement;
     
-    if (!mapElement) {
-      return;
-    }
+    if (!mapElement) return;
 
     const geocoder = new google.maps.Geocoder();
     geocoder.geocode({ address: association.value.localisation }, (results, status) => {
@@ -105,7 +102,7 @@ const initMap = async () => {
           title: association.value.name,
           icon: icon
         });
-      } else {
+        mapInitialized.value = true;
       }
     });
   } catch (error) {
@@ -125,6 +122,13 @@ const fetchAssociationApplication = async () => {
   }
 }
 
+watch(() => activeTab.value, async (newValue) => {
+  if (newValue === "1") {
+    await nextTick();
+    initMap();
+  }
+});
+
 onMounted(async () => {
   await fetchAssociationDetails();
   await fetchAssociationApplication();
@@ -137,7 +141,7 @@ onMounted(async () => {
   <div v-if="association" class="p-6">
     <div class="space-y-6">
       <!-- Header -->
-      <div class="flex items-center space-x-6 bg-primary/10 p-6 rounded-lg">
+      <div class="flex items-center space-x-6 bg-primary-hover p-6 rounded-lg">
         <div class="flex-shrink-0">
           <JnsImage
             :name="association.name"
@@ -145,14 +149,21 @@ onMounted(async () => {
             size="lg"
           />
         </div>
-        <div>
+        <div class="flex flex-col items-start">
+          <div class="flex items-center gap-2 mb-2">
+            <span v-for="type in association.types" 
+                  :key="type.id" 
+                  class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+              {{ type.name }}
+            </span>
+          </div>
           <h1 class="text-3xl font-bold text-gray-900">
             {{ association.name }}
           </h1>
-          <p class="text-gray-600 mt-2">
+          <div class="text-gray-600 flex items-center mt-2 ml-[2px]">
             <i class="pi pi-map-marker mr-1"></i>
             {{ association.localisation }}
-          </p>
+          </div>
         </div>
       </div>
 
@@ -160,11 +171,11 @@ onMounted(async () => {
       <div class="card">
         <Tabs scrollable v-model:value="activeTab" :lazy="true">
           <TabList>
-            <Tab value="0">Informations</Tab>
-            <Tab value="1">Carte</Tab>
-            <Tab value="2">Événements du jour</Tab>
-            <Tab value="3">Événements passés</Tab>
-            <Tab value="4">Événements à venir</Tab>
+            <Tab value="0" class="p-tab">Informations</Tab>
+            <Tab value="1" class="p-tab">Carte</Tab>
+            <Tab value="2" class="p-tab">Événements du jour</Tab>
+            <Tab value="3" class="p-tab">Événements passés</Tab>
+            <Tab value="4" class="p-tab">Événements à venir</Tab>
           </TabList>
 
           <TabPanels>
@@ -174,12 +185,6 @@ onMounted(async () => {
                   <p class="text-lg">{{ association.description }}</p>
                   <p class="text-gray-600">Créée le: {{ new Date(association.createdAt).toLocaleDateString() }}</p>
                   <p class="text-gray-600">Membres: {{ association.members }}</p>
-                  <div class="flex flex-wrap gap-2">
-                    <span v-for="type in association.types" :key="type.id" 
-                          class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
-                      {{ type.name }}
-                    </span>
-                  </div>
                   <AssociationApplicationFormModal 
                     v-if="!userStore.getAssociation(association.id)"
                     :applicationQuestion="association.applicationQuestion"

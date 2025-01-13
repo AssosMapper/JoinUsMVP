@@ -1,31 +1,41 @@
 <script setup lang="ts">
-import {onMounted, ref} from 'vue';
+import {onMounted, ref, watch, nextTick} from 'vue';
 import {useRoute} from 'vue-router';
 import eventService from '@/services/eventService';
 import {loadGoogleMapsApi} from '@/utils/loadGoogleMapsApi';
 import ProgressSpinner from 'primevue/progressspinner';
 import mediaService from '@/services/mediaService';
 import JnsBadge from '@/components/JnsBadge.vue';
+import Tabs from 'primevue/tabs';
+import TabPanel from 'primevue/tabpanel';
+import TabPanels from 'primevue/tabpanels';
+import TabList from 'primevue/tablist';
+import Tab from 'primevue/tab';
+import Loader from '@/components/Loader.vue';
+
 const route = useRoute();
 const event = ref(null);
 const map = ref<google.maps.Map | null>(null);
 const marker = ref<google.maps.Marker | null>(null);
+const activeTab = ref("0");
+const loader = ref(true);
+const mapInitialized = ref(false);
 
 const fetchEventDetails = async () => {
   try {
     event.value = await eventService.getEventById(route.params.id as string);
-    initMap();
   } catch (error) {
     console.error('Error fetching event details:', error);
   }
 };
 
 const initMap = async () => {
-  if (!event.value || !event.value.localisation) return;
+  if (!event.value || !event.value.localisation || mapInitialized.value) return;
 
   try {
     await loadGoogleMapsApi(import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY);
     const mapElement = document.getElementById("map") as HTMLElement;
+    if (!mapElement) return;
 
     const geocoder = new google.maps.Geocoder();
     geocoder.geocode({ address: event.value.localisation }, (results, status) => {
@@ -53,8 +63,7 @@ const initMap = async () => {
           title: event.value.titre,
           icon: icon
         });
-      } else {
-        console.error('Geocode was not successful for the following reason: ' + status);
+        mapInitialized.value = true;
       }
     });
   } catch (error) {
@@ -62,77 +71,106 @@ const initMap = async () => {
   }
 };
 
+watch(() => activeTab.value, async (newValue) => {
+  if (newValue === "1") {
+    await nextTick();
+    initMap();
+  }
+});
+
 onMounted(() => {
   fetchEventDetails();
 });
 </script>
 
 <template>
+  <!-- <Loader v-if="loader" /> -->
   <div v-if="event" class="p-6">
-    <div class="flex flex-col md:flex-row gap-6">
-      <div class="w-full md:w-1/2">
-        <div class="flex flex-col bg-white rounded-xl border-primary 
-                    shadow-[2px_2px_8px_-1px_rgba(0,0,0,0.1),4px_4px_12px_-2px_rgba(0,0,0,0.15)]">
-          <!-- Image avec overlay -->
-          <div class="relative">
-            <JnsImage
-              :name="event.titre"
-              :src="event.image ? mediaService.getMediaUrl(event.image) : '/default-event.jpg'"
-              size="lg"
-              :rounded="false"
-              class="w-full h-96 object-cover rounded-t-xl"
-            />
-            <div class="absolute top-2 right-2 bg-primary text-white rounded-t-xl">
-              <span class="px-3 py-1 bg-primary/10 rounded-full text-sm">
-                {{ event.typeEvent.name }}
-              </span>
-            </div>
+    <div class="space-y-6">
+      <!-- Header -->
+      <div class="flex items-center space-x-6 bg-primary-hover p-6 rounded-lg">
+        <div class="flex-shrink-0">
+          <JnsImage
+            :name="event.titre"
+            :src="event.image ? mediaService.getMediaUrl(event.image) : '/default-event.jpg'"
+            size="lg"
+          />
+        </div>
+        
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm mb-2">
+              {{ event.typeEvent.name }}
+            </span>
           </div>
-          
-          <!-- Contenu -->
-          <div class="p-4">
-            <!-- Titre et association -->
-            <div class="flex flex-col mb-4">
-              <h1 class="text-xl font-semibold text-gray-800">{{ event.titre }}</h1>
-              <span class="text-sm text-gray-600">
-                <i class="pi pi-users mr-1"></i>
-                {{ event.association.name }}
-              </span>
-            </div>
-            
-            <!-- Date -->
-            <div class="flex items-center gap-2 text-gray-600 mb-4">
+          <h1 class="text-3xl font-bold text-gray-900">{{ event.titre }}</h1>
+          <div class="flex items-center text-gray-600 mt-2">
+            <i class="pi pi-users mr-2"></i>
+            {{ event.association.name }}
+          </div>
+          <div class="flex items-center gap-4 text-gray-600 mt-2">
+            <div class="flex items-center gap-2">
               <i class="pi pi-calendar"></i>
               {{ new Date(event.date).toLocaleDateString() }}
               {{ new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
             </div>
-            
-            <!-- Localisation -->
-            <div class="flex items-center gap-2 text-gray-500 mb-4">
+            <div class="flex items-center gap-2">
               <i class="pi pi-map-marker"></i>
               {{ event.localisation }}
-            </div>
-            
-            <!-- Description -->
-            <p class="text-gray-700 mb-4">
-              {{ event.description }}
-            </p>
-            
-            <!-- Statut public/privé -->
-            <div class="flex items-center gap-2 text-gray-600">
-              <i class="pi pi-lock-open" v-if="event.isPublic"></i>
-              <i class="pi pi-lock" v-else></i>
-              {{ event.isPublic ? 'Événement public' : 'Événement privé' }}
             </div>
           </div>
         </div>
       </div>
 
-      <div class="w-full md:w-1/2">
-        <div class="flex flex-col bg-white rounded-xl border-primary 
-                    shadow-[2px_2px_8px_-1px_rgba(0,0,0,0.1),4px_4px_12px_-2px_rgba(0,0,0,0.15)]">
-          <div id="map" class="w-full h-96 rounded-xl"></div>
-        </div>
+      <!-- Tabs -->
+      <div class="card">
+        <Tabs scrollable v-model:value="activeTab" :lazy="true">
+          <TabList>
+            <Tab value="0">Informations</Tab>
+            <Tab value="1">Carte</Tab>
+            <Tab value="2">Participants</Tab>
+            <Tab value="3">Commentaires</Tab>
+          </TabList>
+
+          <TabPanels>
+            <TabPanel value="0">
+              <div class="bg-white rounded-lg shadow p-6">
+                <div class="space-y-6">
+                  <div>
+                    <p class="text-lg">{{ event.description }}</p>
+                  </div>
+
+                  <div>
+                    <div class="flex items-center gap-2 text-gray-600">
+                      <i :class="event.isPublic ? 'pi pi-lock-open' : 'pi pi-lock'"></i>
+                      {{ event.isPublic ? 'Événement public' : 'Événement privé' }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </TabPanel>
+
+            <TabPanel value="1">
+              <div class="bg-white rounded-lg shadow p-6">
+                <div id="map" class="w-full h-[600px] rounded-lg"></div>
+              </div>
+            </TabPanel>
+
+            <TabPanel value="2">
+              <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold mb-4">Participants</h2>
+                <p class="text-gray-600">Liste des participants à venir...</p>
+              </div>
+            </TabPanel>
+
+            <TabPanel value="3">
+              <div class="bg-white rounded-lg shadow p-6">
+                <h2 class="text-lg font-semibold mb-4">Commentaires</h2>
+                <p class="text-gray-600">Commentaires à venir...</p>
+              </div>
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
       </div>
     </div>
   </div>
@@ -145,6 +183,28 @@ onMounted(() => {
 
 <style scoped>
 #map {
-  @apply rounded-xl;
+  min-height: 300px;
+}
+
+:deep(.p-tablist) {
+  border-bottom: 2px solid var(--surface-border);
+}
+
+:deep(.p-tab) {
+  padding: 1rem 2rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+:deep(.p-tab.p-tab-active) {
+  @apply border-b-2 border-[#168003];
+}
+
+:deep(.p-tab:not(.p-tab-active):hover) {
+  @apply border-b-2 border-gray-200;
+}
+
+:deep(.p-tabpanel) {
+  padding: 0;
 }
 </style>

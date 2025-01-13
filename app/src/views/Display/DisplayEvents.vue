@@ -104,7 +104,7 @@ watch([debouncedSearch, selectedType], fetchEvents);
         <div class="fixed md:static top-0 left-0 right-0 z-20 bg-white">
           <div class="px-4 pt-3">
             <!-- Navigation des tabs -->
-            <div class="flex items-center justify-between w-full mb-4 mt-3">
+            <div class="flex items-center justify-between w-full mb-2 mt-3">
               <div class="flex gap-4">
                 <Tab value="0">
                   <template #default>
@@ -145,7 +145,7 @@ watch([debouncedSearch, selectedType], fetchEvents);
             </div>
 
             <!-- Barre de recherche et filtres -->
-            <div class="flex items-center justify-between mt-4">
+            <div class="flex items-center justify-between">
               <div class="flex items-center gap-4">
                 <Dropdown
                   v-model="selectedType"

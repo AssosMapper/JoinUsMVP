@@ -6,7 +6,9 @@ import NewsLetters from './NewsLetters.vue';
   <footer class="footer-container d-flex justify-between items-center p-4 bg-primary-hover">
     <div class="footer-links d-flex text-">
       <router-link to="/contactUs">Nous contacter</router-link> |
-      <router-link to="/aboutUs">About us</router-link>
+      <router-link to="/aboutUs">Qui sommes-nous ?</router-link> |
+      <router-link to="/aboutUs">Charte d'utilisation</router-link> |
+      <router-link to="/aboutUs">Mentions légales</router-link> 
     </div>
     <div class="newsletter">
       <NewsLetters />

@@ -4,12 +4,20 @@ import JnsImage from "@/components/ui/JnsImage.vue";
 import Loader from "@/components/ui/Loader.vue";
 import associationApplicationService from "@/services/associationApplicationService.ts";
 import associationService from "@/services/associationService";
+import typeAssociationService from "@/services/typeAssociationService";
 import { useUserStore } from "@/store";
 import { useNotificationStore } from "@/store/notificationStore";
 import { Association } from "@shared/types/association";
 import { AssociationApplication } from "@shared/types/association-applications";
-import { computed, onMounted, ref } from "vue";
+import { TypeAssociation } from "@shared/types/type-association";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
+import { useDebounce } from "@vueuse/core";
+import Dropdown from "primevue/dropdown";
+import IconField from "primevue/iconfield";
+import InputIcon from "primevue/inputicon";
+import InputText from "primevue/inputtext";
+
 const router = useRouter();
 const notificationStore = useNotificationStore();
 const associations = ref<Association[]>([]);
@@ -17,14 +25,31 @@ const associationApplications = ref<AssociationApplication[]>([]);
 const loader = ref(false);
 const userStore = useUserStore();
 const joiningAssociation = ref<string | null>(null);
+const typeAssociations = ref<TypeAssociation[]>([]);
+const search = ref("");
+const selectedType = ref<TypeAssociation | null>(null);
 
+const debouncedSearch = useDebounce(search, 300);
+
+const fetchTypeAssociations = async () => {
+  try {
+    const data = await typeAssociationService.getAllTypeAssociations();
+    typeAssociations.value = data;
+  } catch (error) {
+    console.error("Erreur lors de la récupération des types d'associations:", error);
+  }
+};
 
 const fetchAssociations = async () => {
   loader.value = true;
   try {
-    associations.value = await associationService.getAllAssociations();
+    const response = await associationService.getAllAssociations({
+      search: debouncedSearch.value,
+      typeId: selectedType.value?.id
+    });
+    associations.value = response;
   } catch (error) {
-    console.error("Error fetching associations:", error);
+    console.error("Erreur lors de la récupération des associations:", error);
   } finally {
     loader.value = false;
   }
@@ -54,7 +79,7 @@ const getApplicationForAssociation = computed(() => (associationId: string) => {
   );
 });
 const goToDetails = (id: string) => {
-  router.push({ name: "AssociationDetails", params: { id } });
+  router.push({ name: "DisplayAssociationDetails", params: { id } });
 };
 const isLoading = ref(true);
 const getImageSrc = (associationName: string) => {
@@ -85,15 +110,18 @@ const joinAssociation = async (associationId: string) => {
 };
 
 onMounted(async () => {
-  await fetchAssociations();
+  await fetchTypeAssociations();
+  fetchAssociations();
   await fetchAssociationApplications();
   isLoading.value = false;
 });
+
+watch([debouncedSearch, selectedType], fetchAssociations);
 </script>
 
 <template>
   <div>
-    <div class="title-container bg-white
+    <div class="title-container 
                 shadow-[0_4px_6px_-2px_rgba(0,0,0,0.1)]
                 relative z-10 flex justify-center items-center">
       <div class="px-10">
@@ -106,6 +134,31 @@ onMounted(async () => {
       <Loader />
     </div>
     <div v-else class="pt-4 px-10">
+      <div class="pb-4 ">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <Dropdown
+              v-model="selectedType"
+              :options="typeAssociations"
+              optionLabel="name"
+              placeholder="Type d'association"
+              :class="[
+                'font-semibold',
+                selectedType ? 'text-[#168003]' : 'text-gray-600'
+              ]"
+              :showClear="true"
+            />
+            <IconField class="w-[400px]">
+              <InputIcon class="pi pi-search" :class="search ? 'text-[#168003]' : 'text-gray-600'" />
+              <InputText
+                v-model="search"
+                placeholder="Rechercher une association..."
+                class="w-full placeholder:text-gray-600 text-[#168003]"
+              />
+            </IconField>
+          </div>
+        </div>
+      </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto pb-20 pt-2" style="max-height: calc(100vh - 12rem);">
         <div
           v-for="association in associations"
@@ -116,6 +169,7 @@ onMounted(async () => {
                  hover:shadow-[4px_4px_16px_-1px_rgba(0,0,0,0.15),8px_8px_20px_-4px_rgba(0,0,0,0.2)]
                  hover:-translate-y-1 hover:bg-primary-hover/5
                  cursor-pointer"
+          @click="goToDetails(association.id)"
         >
           <div class="flex items-center p-4 gap-4 border-b-primary">
             <div class="flex-shrink-0">
