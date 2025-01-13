@@ -4,10 +4,10 @@ import NewsLetters from './NewsLetters.vue';
 
 <template>
   <footer class="footer-container d-flex justify-between items-center p-4 bg-primary-hover">
-    <div class="footer-links d-flex text-">
-      <router-link to="/contactUs">Nous contacter</router-link> |
-      <router-link to="/aboutUs">Qui sommes-nous ?</router-link> |
-      <router-link to="/aboutUs">Charte d'utilisation</router-link> |
+    <div class="footer-links d-flex flex-wrap">
+      <router-link to="/contactUs">Nous contacter <span class="separator">|</span></router-link> 
+      <router-link to="/aboutUs">Qui sommes-nous ? <span class="separator">|</span></router-link> 
+      <router-link to="/aboutUs">Charte d'utilisation <span class="separator">|</span></router-link> 
       <router-link to="/aboutUs">Mentions légales</router-link> 
     </div>
     <div class="newsletter">
@@ -24,7 +24,7 @@ import NewsLetters from './NewsLetters.vue';
 
 .newsletter {
   display: flex;
-  order: 1; /* Display newsletter first on desktop */
+  order: 1;
 }
 
 @media (max-width: 768px) {
@@ -35,12 +35,23 @@ import NewsLetters from './NewsLetters.vue';
   .footer-links {
     justify-content: center;
     margin-bottom: 1rem;
-    order: 1; /* Display links first on mobile */
+    order: 1;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
+    gap: 1rem;
+  }
+
+  .footer-links a {
+    text-align: center;
+  }
+
+  .separator {
+    display: none;
   }
 
   .newsletter {
-    justify-content: center;
-    order: 2; /* Display newsletter second on mobile */
+    display: none;
   }
 }
 </style>

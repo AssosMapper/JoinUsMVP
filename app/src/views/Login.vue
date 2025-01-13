@@ -34,47 +34,97 @@ const handleLogin = async () => {
 </script>
 
 <template>
-  <div
-      class="form-container w-4/5 flex justify-center text-center mx-auto my-10 py-8 border border-gray-300 rounded-lg">
-    <form class="w-full max-w-md" @submit.prevent="handleLogin">
-      <h2 class="text-2xl font-semibold leading-7 text-gray-900 mb-6">Login</h2>
-      <div class="mb-4">
-        <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email</label>
-        <input
-            type="email"
-            id="email"
-            v-model="email"
-            v-bind="emailAttrs"
-            required
-            :class="errors.email ? 'border-red-500' : 'border-gray-300'"
-            class="mt-1 block w-full border rounded-md shadow-sm sm:text-sm p-2"
-        />
-
-        <span v-if="errors.email" class="text-red-500 text-xs">{{ errors.email }}</span>
-      </div>
-
-      <div class="mb-6">
-        <label for="password" class="block text-sm font-medium leading-6 text-gray-900">Password</label>
-        <input
-            type="password"
-            id="password"
-            v-model="password"
-            v-bind="passwordAttrs"
-            required
-            :class="errors.password ? 'border-red-500' : 'border-gray-300'"
-            class="mt-1 block w-full border rounded-md  shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-        />
-        <span v-if="errors.password" class="text-red-500 text-xs">{{ errors.password }}</span>
-      </div>
-      <div class="flex items-center justify-between">
-        <button
-            :disabled="useUserStore().loader"
-            type="submit"
-            class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
-        >
+  <div>
+      <!-- Header -->
+    <div class="title-container 
+                shadow-[0_4px_6px_-2px_rgba(0,0,0,0.1)]
+                relative z-10 flex justify-center items-center">
+      <div class="px-10">
+        <h1 class="text-3xl font-bold text-primary italic">
           Connexion
-        </button>
+        </h1>
       </div>
-    </form>
-  </div>
+    </div>
+
+      <!-- Formulaire -->
+      <div class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-xl border-primary shadow-[2px_2px_8px_-1px_rgba(0,0,0,0.1),4px_4px_12px_-2px_rgba(0,0,0,0.15)] p-6 max-w-2xl mx-auto">
+          <form @submit.prevent="handleLogin">
+            <div class="space-y-4">
+              <div>
+                <label class="block text-gray-700 font-medium mb-2 text-left" for="email">Email</label>
+                <input
+                  type="text"
+                  placeholder="Email"
+                  v-model="email"
+                  v-bind="emailAttrs"
+                  required
+                  class="w-full px-4 py-2  bg-primary-hover border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                <span v-if="errors.email" class="text-red-500 text-sm">{{ errors.email }}</span>
+              </div>
+              <div class="mt-4">
+                <label class="block text-gray-700 font-medium mb-2 text-left">Mot de passe</label>
+                <input
+                  type="password"
+                  placeholder="Mot de passe"
+                  v-model="password"
+                  v-bind="passwordAttrs"
+                  required
+                  class="w-full px-4 py-2 bg-primary-hover border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                <span v-if="errors.password" class="text-red-500 text-sm">{{ errors.password }}</span>
+              </div>
+              <div class="flex flex-col space-y-4">
+                <button
+                  type="submit"
+                  class="w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                  :disabled="useUserStore().loader"
+                >
+                  {{ useUserStore().loader ? 'Connexion...' : 'Se connecter' }}
+                </button>
+
+                <!-- Liens supplémentaires -->
+                <div class="flex flex-col items-center space-y-2 pt-4 border-t">
+                  <router-link 
+                    to="/forgotpassword" 
+                    class="text-primary hover:text-primary-dark transition-colors"
+                  >
+                    Mot de passe oublié ?
+                  </router-link>
+                  
+                  <div class="text-gray-600">
+                    Pas encore de compte ?
+                    <router-link to="/register">
+                      <button 
+                        class="p-button p-component bg-primary text-white" 
+                        type="button" 
+                        data-pc-name="button"
+                        data-pc-section="root"
+                      >
+                        S'inscrire
+                      </button>
+                    </router-link>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
 </template>
+
+<style scoped>
+.title-container {
+  height: 4.5rem;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px var(--primary-hover) inset;
+  -webkit-text-fill-color: inherit;
+  transition: background-color 5000s ease-in-out 0s;
+}
+</style>

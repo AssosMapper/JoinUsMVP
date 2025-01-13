@@ -1,147 +1,163 @@
 <script setup lang="ts">
-import {ref} from 'vue';
-import {useRouter} from 'vue-router';
-import userService from '@/services/usersService';
-import {useNotificationStore} from '@/store/notificationStore.ts';
-import GoogleAutoCompleteComponent from "@/components/GoogleAutoCompleteComponent.vue";
-import {useForm} from "vee-validate";
-import {registerSchema} from "@/types/security.types.ts";
-import InputErrorMessage from "@/components/InputErrorMessage.vue";
-import {useUserStore} from "@/store";
+import { useRouter } from 'vue-router';
+import { useNotificationStore } from '@/store/notificationStore.ts';
+import { useUserStore } from "@/store";
+import { useForm } from 'vee-validate';
+import { registerSchema } from "@/types/security.types.ts";
 
 const router = useRouter();
 const notificationStore = useNotificationStore();
 
-// const firstName = ref("");
-// const lastName = ref("");
-// const email = ref("");
-// const password = ref("");
-// const confirmPassword = ref("");
-// const phone = ref("");
-const localisation = ref("");
-// const image = ref("");
-
-const {values, errors, defineField} = useForm({
+const { errors, defineField } = useForm<{
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+}>({
   validationSchema: registerSchema,
 });
 
-const [firstName, firstNameAttrs] = defineField('firstName');
-const [lastName, lastNameAttrs] = defineField('lastName');
 const [email, emailAttrs] = defineField('email');
 const [password, passwordAttrs] = defineField('password');
-const [confirmPassword, confirmPasswordAttrs] = defineField('confirmPassword');
-const [phone, phoneAttrs] = defineField('phone');
-// const [localisation, localisationAttrs] = defineField('localisation');
-const [image, imageAttrs] = defineField('image');
+const [firstName, firstNameAttrs] = defineField('firstName');
+const [lastName, lastNameAttrs] = defineField('lastName');
 
-
-
-const handleSubmit = async () => {
-
-  const user = {
-    firstName: firstName.value,
-    lastName: lastName.value,
+const handleRegister = async () => {
+  const credentials = {
     email: email.value,
     password: password.value,
-    confirmPassword: confirmPassword.value,
-    phone: phone.value,
-    localisation: localisation.value,
-    image: image.value
+    firstName: firstName.value,
+    lastName: lastName.value,
   };
-
+  const userStore = useUserStore()
   try {
-    await useUserStore().register(user);
-    await router.push('/login');
-    notificationStore.showNotification("Profil créé avec succès !", "success");
+    await userStore.register(credentials);
+    await router.push('/');
+    notificationStore.showNotification("Inscription réussie !", "success");
   } catch (error) {
-    notificationStore.showNotification("Erreur lors de la création du profil", "error");
+    console.error(error);
+    notificationStore.showNotification("Une erreur est survenue lors de l'inscription", "error");
   }
 };
 </script>
 
 <template>
-  <div
-      class="form-container w-4/5 flex justify-center text-center mx-auto my-10 py-8 border border-gray-300 rounded-lg">
-    <form class="w-full max-w-4xl" @submit.prevent="handleSubmit">
-      <div class="space-y-12">
-        <div class="border-b border-gray-900/10 pb-12">
-          <h2 class="text-base font-semibold leading-7 text-gray-900">Create User</h2>
+  <div>
+    <!-- Header -->
+    <div class="title-container 
+                shadow-[0_4px_6px_-2px_rgba(0,0,0,0.1)]
+                relative z-10 flex justify-center items-center">
+      <div class="px-10">
+        <h1 class="text-3xl font-bold text-primary italic">
+          Inscription
+        </h1>
+      </div>
+    </div>
 
-          <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-            <div class="sm:col-span-3">
-              <label for="first-name" class="block text-sm font-medium leading-6 text-gray-900">First name</label>
-              <input type="text" id="first-name" v-model="firstName" v-bind="firstNameAttrs" required
-                     class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"/>
-              <InputErrorMessage :error="errors.firstName" />
+    <!-- Formulaire -->
+    <div class="container mx-auto px-4 py-8">
+      <div class="bg-white rounded-xl border-primary shadow-[2px_2px_8px_-1px_rgba(0,0,0,0.1),4px_4px_12px_-2px_rgba(0,0,0,0.15)] p-6 max-w-2xl mx-auto">
+        <form @submit.prevent="handleRegister">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-gray-700 font-medium mb-2 text-left" for="firstName">Prénom</label>
+              <input
+                type="text"
+                placeholder="Prénom"
+                v-model="firstName"
+                v-bind="firstNameAttrs"
+                required
+                class="w-full px-4 py-2 bg-primary-hover border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <span v-if="errors.firstName" class="text-red-500 text-sm">{{ errors.firstName }}</span>
             </div>
 
-            <div class="sm:col-span-3">
-              <label for="last-name" class="block text-sm font-medium leading-6 text-gray-900">Last name</label>
-              <input type="text" id="last-name" v-model="lastName" v-bind="lastNameAttrs" required
-                     class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"/>
-              <InputErrorMessage :error="errors.lastName" />
-
+            <div>
+              <label class="block text-gray-700 font-medium mb-2 text-left" for="lastName">Nom</label>
+              <input
+                type="text"
+                placeholder="Nom"
+                v-model="lastName"
+                v-bind="lastNameAttrs"
+                required
+                class="w-full px-4 py-2 bg-primary-hover border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <span v-if="errors.lastName" class="text-red-500 text-sm">{{ errors.lastName }}</span>
             </div>
 
-            <div class="sm:col-span-3">
-              <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email address</label>
-              <input type="email" id="email" v-model="email" v-bind="emailAttrs" required
-                     class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"/>
-              <InputErrorMessage :error="errors.email" />
+            <div>
+              <label class="block text-gray-700 font-medium mb-2 text-left" for="email">Email</label>
+              <input
+                type="text"
+                placeholder="Email"
+                v-model="email"
+                v-bind="emailAttrs"
+                required
+                class="w-full px-4 py-2 bg-primary-hover border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <span v-if="errors.email" class="text-red-500 text-sm">{{ errors.email }}</span>
             </div>
 
-            <div class="sm:col-span-3">
-              <label for="phone" class="block text-sm font-medium leading-6 text-gray-900">Phone</label>
-              <input type="text" id="phone" v-model="phone" v-bind="phoneAttrs"
-                     class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"/>
-              <InputErrorMessage :error="errors.phone" />
+            <div>
+              <label class="block text-gray-700 font-medium mb-2 text-left">Mot de passe</label>
+              <input
+                type="password"
+                placeholder="Mot de passe"
+                v-model="password"
+                v-bind="passwordAttrs"
+                required
+                class="w-full px-4 py-2 bg-primary-hover border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <span v-if="errors.password" class="text-red-500 text-sm">{{ errors.password }}</span>
             </div>
 
-            <div class="sm:col-span-3">
-              <label for="password" class="block text-sm font-medium leading-6 text-gray-900">Password</label>
-              <input type="password" id="password" v-model="password" v-bind="passwordAttrs" required
-                     class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"/>
-              <InputErrorMessage :error="errors.password" />
-            </div>
+            <div class="flex flex-col space-y-4">
+              <button
+                type="submit"
+                class="w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
+                :disabled="useUserStore().loader"
+              >
+                {{ useUserStore().loader ? 'Inscription...' : "S'inscrire" }}
+              </button>
 
-            <div class="sm:col-span-3">
-              <label for="confirm-password" class="block text-sm font-medium leading-6 text-gray-900">Confirm
-                Password</label>
-              <input type="password" id="confirm-password" v-model="confirmPassword" v-bind="confirmPasswordAttrs" required
-                     class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"/>
-              <InputErrorMessage :error="errors.confirmPassword" />
-            </div>
-
-            <div class="col-span-full">
-              <label for="address" class="block text-sm font-medium leading-6 text-gray-900">localisation</label>
-              <GoogleAutoCompleteComponent
-                  id="address"
-                  v-model="localisation"
-                  placeholder="Enter location"
-                  required
-                  class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"/>
-            </div>
-
-            <div class="col-span-full">
-              <label for="image" class="block text-sm font-medium leading-6 text-gray-900">Image URL</label>
-              <input type="text" id="image" v-model="image" v-bind="imageAttrs"
-                     class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"/>
-              <InputErrorMessage :error="errors.image" />
+              <!-- Lien retour connexion -->
+              <div class="flex flex-col items-center space-y-2 pt-4 border-t">
+                <div class="text-gray-600">
+                  Déjà un compte ?
+                  <router-link to="/login">
+                    <button 
+                      class="p-button p-component bg-primary text-white" 
+                      type="button" 
+                      data-pc-name="button"
+                      data-pc-section="root"
+                    >
+                      Se connecter
+                    </button>
+                  </router-link>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </form>
       </div>
-
-      <div class="mt-6 flex items-center justify-end gap-x-6">
-        <button type="submit"
-                :disabled="useUserStore().loader"
-                class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
-          S'inscrire
-        </button>
-      </div>
-    </form>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.title-container {
+  height: 4.5rem;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px var(--primary-hover) inset;
+  -webkit-text-fill-color: inherit;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.container{
+  height: 900px;
+}
 </style>
