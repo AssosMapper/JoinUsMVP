@@ -1,0 +1,33 @@
+/* Style moderne pour les inputs et dropdowns */
+.p-inputtext,
+.p-dropdown {
+  border: none !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  border-radius: 0 !important;
+  transition: all 0.2s ease;
+  background: transparent !important;
+}
+
+.p-inputtext:hover,
+.p-dropdown:hover {
+  border-bottom: 1px solid #168003 !important;
+}
+
+.p-inputtext:focus,
+.p-dropdown:focus,
+.p-dropdown.p-focus {
+  box-shadow: none !important;
+  border-bottom: 2px solid #168003 !important;
+}
+
+/* Suppression des bordures du conteneur dropdown */
+.p-dropdown-panel {
+  border: none !important;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06) !important;
+  border-radius: 8px !important;
+}
+
+/* Style pour l'icône de recherche */
+.p-input-icon-left {
+  color: #9ca3af;
+} 

@@ -3,34 +3,18 @@
 @import './iconfield';
 
 .p-select {
-    @apply inline-flex cursor-pointer relative select-none 
+    @apply inline-flex cursor-pointer relative select-none rounded-md
+        border border-surface-300 dark:border-surface-700
         shadow-[0_1px_2px_0_rgba(18,18,23,0.05)]
-        transition-colors duration-200;
-    position: relative;
-}
-
-.p-select::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
-    height: 1px;
-    @apply bg-surface-300 dark:bg-surface-700;
-    transition: all 0.2s ease;
+        transition-colors duration-200
 }
 
 .p-select:not(.p-disabled):hover {
-    &::after {
-        @apply bg-surface-400 dark:bg-surface-600;
-    }
+    @apply border-surface-400 dark:border-surface-600
 }
 
 .p-select:not(.p-disabled).p-focus {
-    &::after {
-        @apply bg-[#168003];
-    }
+    @apply border-primary
 }
 
 .p-select.p-variant-filled {
@@ -54,7 +38,7 @@
 }
 
 .p-select-label {
-    @apply block whitespace-nowrap overflow-hidden flex-auto w-[1%] py-2 px-3 overflow-ellipsis bg-transparent border-none outline-none
+    @apply block whitespace-nowrap overflow-hidden flex-auto w-[1%] py-2 px-2 overflow-ellipsis bg-transparent border-none outline-none
 }
 /* 
 .p-select-label.p-placeholder {

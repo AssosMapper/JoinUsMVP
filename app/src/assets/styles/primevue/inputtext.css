@@ -1,24 +1,18 @@
 .p-inputtext {
-    @apply appearance-none
+    @apply appearance-none rounded-md
+        border border-surface-300 dark:border-surface-700 
+        enabled:hover:border-surface-400 dark:enabled:hover:border-surface-600
+        enabled:focus:border-primary
         disabled:bg-surface-200 disabled:text-surface-500 dark:disabled:bg-surface-700 dark:disabled:text-surface-400 disabled:opacity-100
         placeholder:text-surface-500 dark:placeholder:text-surface-400
         px-3 py-2
         transition-colors duration-200
+        shadow-[0_1px_2px_0_rgba(18,18,23,0.05)]
         outline-none
-        w-full
-        border-0 border-b border-solid border-surface-300 dark:border-surface-700;
-}
-
-.p-inputtext:not(.p-disabled):hover {
-    @apply border-surface-400 dark:border-surface-600;
-}
-
-.p-inputtext:not(.p-disabled):focus {
-    @apply border-[#168003] dark:border-[#168003];
 }
 
 .p-inputtext.p-invalid {
-    @apply border-red-400;
+    @apply border-red-400 dark:border-red-300
 }
 
 .p-inputtext.p-variant-filled {

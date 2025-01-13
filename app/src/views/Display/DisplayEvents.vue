@@ -91,60 +91,43 @@ watch([debouncedSearch, selectedType], fetchEvents);
     <div class="relative">
       <!-- Header fixe avec search et tabs -->
       <div class="fixed md:static top-0 left-0 right-0 z-20 bg-white shadow-md">
-        <div class="p-4">
-          <div class="flex flex-col md:flex-row justify-center gap-4">
-            <IconField class="w-full max-w-3xl">
-              <InputIcon class="pi pi-search" />
-              <InputText
-                v-model="search"
-                placeholder="Rechercher un événement..."
-                class="w-full"
+        <div class="px-4">
+          <TabList class="flex items-center gap-4">
+            <!-- Barre de recherche et filtres -->
+            <div class="flex items-center gap-4 flex-1">
+              <IconField class="flex-1">
+                <InputIcon class="pi pi-search" :class="search ? 'text-[#168003]' : 'text-gray-600'" />
+                <InputText
+                  v-model="search"
+                  placeholder="Rechercher un événement..."
+                  class="w-full placeholder:text-gray-600 text-[#168003]"
+                />
+              </IconField>
+              <Dropdown
+                v-model="selectedType"
+                :options="typeEvents"
+                optionLabel="name"
+                placeholder="Type d'événement"
+                :class="[
+                  'font-semibold',
+                  selectedType ? 'text-[#168003]' : 'text-gray-600'
+                ]"
+                :showClear="true"
               />
-            </IconField>
-            <Dropdown
-              v-model="selectedType"
-              :options="typeEvents"
-              optionLabel="name"
-              placeholder="Type d'événement"
-              class="hidden md:flex w-64 md:scale-100"
-              :showClear="true"
-            />
-          </div>
-        </div>
-
-        <!-- Navigation des tabs -->
-        <div>
-          <TabList class="flex justify-between">
-            <div class="flex flex-1">
-              <Tab value="0">
-                <template #default>
-                  <i class="pi pi-list mr-2" />
-                  Liste
-                </template>
-              </Tab>
-              <Tab value="1">
-                <template #default>
-                  <i class="pi pi-calendar mr-2" />
-                  Calendrier
-                </template>
-              </Tab>
-              <Tab value="2">
-                <template #default>
-                  <i class="pi pi-map mr-2" />
-                  Carte
-                </template>
-              </Tab>
             </div>
-            <Tab value="3" class="ml-auto">
+
+            <Tab value="3" class="ml-4">
               <Dropdown 
                 v-model="currentComponent" 
                 :options="['CreateEvent', 'UpdateEvent']"
                 placeholder="Mes événements" 
-                class="font-semibold"
-                :panelClass="'text-gray-700'"
+                :class="[
+                  'font-semibold',
+                  currentComponent ? 'text-[#168003]' : 'text-gray-600'
+                ]"
               >
                 <template #value="{ value }">
-                  <i class="pi pi-user mr-2" />
+                  <i class="pi pi-user mr-2" :class="currentComponent ? 'text-[#168003]' : 'text-gray-600'" />
                   {{ value === 'CreateEvent' ? 'Créer un événement' : 
                      value === 'UpdateEvent' ? 'Modifier un événement' : 
                      'Mes événements' }}
@@ -158,9 +141,41 @@ watch([debouncedSearch, selectedType], fetchEvents);
         </div>
       </div>
 
-      <section class="pt-32 md:pt-0 px-10">
-        <!-- Date Switch -->
-        <div class="flex justify-center md:justify-end w-full">
+      <!-- Navigation des tabs -->
+      <section class="px-10">
+        <div class="flex items-center justify-between w-full mb-4">
+          <div class="flex gap-4">
+            <Tab value="0">
+              <template #default>
+                <i class="pi pi-list mr-2" 
+                   :class="[
+                     activeTab === '0' ? 'text-[#168003]' : 'text-gray-600',
+                     'hover:text-[#168003] transition-colors duration-200'
+                   ]" />
+                Liste
+              </template>
+            </Tab>
+            <Tab value="1">
+              <template #default>
+                <i class="pi pi-calendar mr-2" 
+                   :class="[
+                     activeTab === '1' ? 'text-[#168003]' : 'text-gray-600',
+                     'hover:text-[#168003] transition-colors duration-200'
+                   ]" />
+                Calendrier
+              </template>
+            </Tab>
+            <Tab value="2">
+              <template #default>
+                <i class="pi pi-map mr-2" 
+                   :class="[
+                     activeTab === '2' ? 'text-[#168003]' : 'text-gray-600',
+                     'hover:text-[#168003] transition-colors duration-200'
+                   ]" />
+                Carte
+              </template>
+            </Tab>
+          </div>
           <DateSwitchComponent
             :current-date="currentDate"
             @previous="handlePreviousMonth"
