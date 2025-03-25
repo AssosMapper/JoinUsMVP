@@ -12,6 +12,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         transport: {
           host: config.get('EMAIL_HOST'),
           port: config.get('EMAIL_PORT'),
+          ...(config.get('NODE_ENV') === 'production' && {
+            auth: {
+              user: config.get('EMAIL_USER'),
+              pass: config.get('EMAIL_PASSWORD'),
+            },
+          }),
         },
         defaults: {
           from: `"JoinUs" <${config.get('EMAIL_FROM') || 'noreply@joinus.fr'}>`,
