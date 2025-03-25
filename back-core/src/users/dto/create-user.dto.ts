@@ -1,5 +1,11 @@
-import {IsString, IsEmail, IsDate, IsNumber, IsOptional, MinLength, Matches, IsStrongPassword} from 'class-validator';
-import {IsMatch, IsMatchConstraint} from "../../utils/decorators/IsMatchConstraint.decorator";
+import { Localisation } from '@src/localisation/entities/localisation.entity';
+import {
+  IsEmail,
+  IsOptional,
+  IsString,
+  IsStrongPassword,
+} from 'class-validator';
+import { IsMatch } from '../../utils/decorators/IsMatchConstraint.decorator';
 
 export class CreateUserDto {
   @IsString()
@@ -7,7 +13,6 @@ export class CreateUserDto {
 
   @IsString()
   lastName: string;
-
 
   @IsEmail()
   email: string;
@@ -29,13 +34,13 @@ export class CreateUserDto {
 
   @IsOptional()
   @IsString()
-  localisation?: string;
+  localisation?: Localisation;
 
   @IsOptional()
   @IsString()
   image?: string;
 
   @IsOptional()
-  @IsString ()
+  @IsString()
   associationId?: string;
 }

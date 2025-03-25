@@ -1,3 +1,5 @@
+import { Localisation } from '@src/localisation/entities/localisation.entity';
+import { Media } from '@src/media/entities/media.entity';
 import {
   Column,
   DeleteDateColumn,
@@ -12,7 +14,6 @@ import { Association } from '../../associations/entities/association.entity';
 import { Notification } from '../../notifications/entities/notification.entity';
 import { Role } from '../../roles/entities/role.entity';
 import { EntityStructure } from '../../utils/structures/entity.structure';
-import { Media } from '@src/media/entities/media.entity';
 
 @Entity()
 export class User extends EntityStructure {
@@ -31,8 +32,9 @@ export class User extends EntityStructure {
   @Column({ nullable: true })
   phone: string;
 
-  @Column({ nullable: true })
-  localisation: string;
+  @OneToOne(() => Localisation, { nullable: true })
+  @JoinColumn()
+  localisation: Localisation;
 
   @OneToOne(() => Media, { nullable: true })
   @JoinColumn()
@@ -56,4 +58,10 @@ export class User extends EntityStructure {
 
   @Column({ nullable: true })
   associationId?: string;
+
+  @Column({ nullable: true })
+  resetPasswordToken: string;
+
+  @Column({ nullable: true })
+  resetPasswordExpires: Date;
 }

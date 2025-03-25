@@ -13,6 +13,9 @@ import { Association } from './associations/entities/association.entity';
 import { AuthModule } from './auth/auth.module';
 import { Event } from './events/entities/event.entity';
 import { EventsModule } from './events/events.module';
+import { Localisation } from './localisation/entities/localisation.entity';
+import { LocalisationModule } from './localisation/localisation.module';
+import { MailerAppModule } from './mailer/mailer.module';
 import { Media } from './media/entities/media.entity';
 import { MediaModule } from './media/media.module';
 import { Notification } from './notifications/entities/notification.entity';
@@ -48,6 +51,7 @@ import { LoggingMiddleware } from './utils/middlewares/logging.middleware';
       Media,
       AssociationApplication,
       Notification,
+      Localisation,
     ]),
     ConfigModule.forRoot({
       isGlobal: true,
@@ -65,6 +69,8 @@ import { LoggingMiddleware } from './utils/middlewares/logging.middleware';
     ProfileModule,
     AssociationApplicationsModule,
     NotificationsModule,
+    LocalisationModule,
+    MailerAppModule,
   ],
   providers: [
     {
