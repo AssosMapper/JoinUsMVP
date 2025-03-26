@@ -39,6 +39,7 @@ export class UserSeedService {
     user.email = 'admin@test.com';
     user.password = await hashPassword('Password123!');
     user.roles = [superAdminRole];
+    user.isActive = true;
     user.associations = associations; // L'admin est membre de toutes les associations
     users.push(user);
 
@@ -56,6 +57,7 @@ export class UserSeedService {
     user.email = 'associationmanager@test.com';
     user.password = await hashPassword('Password123!');
     user.roles = [associationManagerRole];
+    user.isActive = true;
     users.push(user);
 
     // Create EventsManager user
@@ -72,6 +74,7 @@ export class UserSeedService {
     user.email = 'eventsmanager@test.com';
     user.password = await hashPassword('Password123!');
     user.roles = [eventsManagerRole];
+    user.isActive = true;
     users.push(user);
 
     console.log('Seeding users...');

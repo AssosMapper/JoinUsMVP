@@ -64,4 +64,7 @@ export class User extends EntityStructure {
 
   @Column({ nullable: true })
   resetPasswordExpires: Date;
+
+  @Column({ default: false })
+  isActive: boolean;
 }

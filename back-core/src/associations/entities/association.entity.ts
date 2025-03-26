@@ -41,4 +41,7 @@ export class Association extends EntityStructure {
   )
   @JoinTable()
   types: Array<TypeAssociations>;
+
+  @Column({ default: false })
+  isActive: boolean;
 }
