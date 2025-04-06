@@ -21,6 +21,7 @@ import { AssociationsService } from './associations.service';
 import { CreateAssociationDto } from './dto/create-association.dto';
 import { UpdateAssociationDto } from './dto/update-association.dto';
 import { AssociationManagerGuard } from './guards/association-manager.guard';
+import { AssociationMemberGuard } from './guards/association-member.guard';
 
 @Controller('associations')
 export class AssociationsController {
@@ -108,6 +109,7 @@ export class AssociationsController {
   }
 
   @Get(':id/members')
+  @UseGuards(AssociationMemberGuard)
   @BearAuthToken()
   async getMembers(@Param('id') id: string): Promise<PublicUserDto[]> {
     const members = await this.associationsService.getMembers(id);

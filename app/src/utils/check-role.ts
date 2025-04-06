@@ -10,6 +10,9 @@ export function canManageAssociation(
   user: User | null,
   associationId: string
 ): boolean {
+  console.log(user);
+  console.log(user);
+  console.log(user);
   if (!user) return false;
 
   // Si l'utilisateur est SuperAdmin, il peut tout gérer

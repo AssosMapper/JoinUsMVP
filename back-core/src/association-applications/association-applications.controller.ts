@@ -15,17 +15,13 @@ import {
   JoinAssociationDto,
   UpdateApplicationStatusDto,
 } from '@shared/dto/association-applications.dto';
-import {
-  joinAssociationSchema,
-  updateApplicationStatusSchema,
-} from '@shared/validations/association-applications.validation';
+import { joinAssociationSchema } from '@shared/validations/association-applications.validation';
 import { YupValidationPipe } from '@src/utils/pipes/yup-validation.pipe';
 import { plainToInstance } from 'class-transformer';
 import { AssociationManagerGuard } from '../associations/guards/association-manager.guard';
 import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
 import { CurrentUserId } from '../utils/decorators/current-user-id.decorator';
 import { AssociationApplicationsService } from './association-applications.service';
-
 @Controller('association-applications')
 @BearAuthToken()
 export class AssociationApplicationsController {
@@ -80,6 +76,7 @@ export class AssociationApplicationsController {
         userId,
         associationIds,
       );
+
     return plainToInstance(AssociationApplicationDto, applications, {
       excludeExtraneousValues: true,
       enableImplicitConversion: true,

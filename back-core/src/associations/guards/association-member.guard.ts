@@ -6,12 +6,12 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { RoleEnum } from '@shared/types/roles';
+import { checkRole } from '@src/utils/functions/check-role';
 import { Repository } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-import { checkRole } from '../../utils/functions/check-role';
 
 @Injectable()
-export class AssociationManagerGuard implements CanActivate {
+export class AssociationMemberGuard implements CanActivate {
   constructor(
     @Inject('USER_REPOSITORY')
     private userRepository: Repository<User>,
@@ -22,26 +22,27 @@ export class AssociationManagerGuard implements CanActivate {
     const userId = request.user?.userId;
     const associationId = request.params.associationId || request.params.id;
 
-    // Charger l'utilisateur avec ses relations
+    if (!userId || !associationId) {
+      throw new ForbiddenException('Accès non autorisé');
+    }
+
     const user = await this.userRepository.findOne({
       where: { id: userId },
-      relations: ['roles', 'associations'],
+      relations: ['associations', 'roles'],
     });
 
-    // SuperAdmin peut tout faire
+    if (!user) throw new ForbiddenException('Utilisateur non trouvé');
+
     if (checkRole(user, RoleEnum.SUPER_ADMIN)) return true;
 
-    // Vérifie si l'utilisateur est manager et membre de l'association
-    const isAssociationManager =
-      checkRole(user, RoleEnum.ASSOCIATION_MANAGER) &&
-      (user.associations.some((assoc) => assoc.id === associationId) ||
-        user.associationId === associationId);
+    const isMember = user.associations.some(
+      (association) => association.id === associationId,
+    );
 
-    if (!isAssociationManager) {
-      throw new ForbiddenException({
-        message:
-          "Vous n'avez pas les permissions nécessaires pour gérer cette association. Vous devez être gestionnaire et membre de l'association.",
-      });
+    if (!isMember) {
+      throw new ForbiddenException(
+        'Vous devez être membre de cette association pour accéder à cette ressource',
+      );
     }
 
     return true;

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AssociationMembers from "@/components/AssociationDashboard/AssociationMembers.vue";
+import ManageAssociationApplications from "@/components/AssociationDashboard/ManageAssociationApplications.vue";
 import JnsImage from "@/components/ui/JnsImage.vue";
 import Loader from "@/components/ui/Loader.vue";
 import associationService from "@/services/associationService";
@@ -8,9 +9,9 @@ import mediaService from "@/services/mediaService";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useUserStore } from "@/store/userStore";
 import { canManageAssociation } from "@/utils/check-role";
+import type { PublicAssociationDto } from "@shared/dto/associations.dto";
 import { User } from "@shared/types";
 import type { Media } from "@shared/types/media";
-import type { PublicAssociationDto } from "@shared/dto/associations.dto";
 import ConfirmDialog from "primevue/confirmdialog";
 import Tab from "primevue/tab";
 import TabList from "primevue/tablist";
@@ -44,11 +45,13 @@ const loadAssociation = async () => {
   }
 };
 
-
 const fetchEvents = async () => {
   try {
     if (association.value?.id) {
-      events.value = await eventService.getEventsByAssociationId(association.value.id, 100);
+      events.value = await eventService.getEventsByAssociationId(
+        association.value.id,
+        100
+      );
     }
   } catch (error: any) {
     notificationStore.showNotification(error.message, "error");
@@ -97,6 +100,9 @@ onMounted(async () => {
             <Tab value="0">Informations</Tab>
             <Tab value="1">Membres</Tab>
             <Tab value="2">Événements</Tab>
+            <Tab v-if="canManageApplications" value="3">
+              Gérer les candidatures
+            </Tab>
           </TabList>
 
           <TabPanels>
@@ -116,10 +122,17 @@ onMounted(async () => {
 
             <TabPanel value="2">
               <div class="bg-white rounded-lg shadow p-6">
-                <h2 class="text-2xl font-bold mb-6">Événements de l'association</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  <div v-for="event in events" :key="event.id" 
-                    class="bg-white border border-gray-200 rounded-lg shadow hover:shadow-lg transition-all duration-300">
+                <h2 class="text-2xl font-bold mb-6">
+                  Événements de l'association
+                </h2>
+                <div
+                  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+                >
+                  <div
+                    v-for="event in events"
+                    :key="event.id"
+                    class="bg-white border border-gray-200 rounded-lg shadow hover:shadow-lg transition-all duration-300"
+                  >
                     <JnsImage
                       :name="event.titre"
                       :src="event.image || '/default-event.jpg'"
@@ -129,13 +142,23 @@ onMounted(async () => {
                     />
                     <div class="p-5">
                       <div class="flex justify-between items-start mb-4">
-                        <h3 class="text-xl font-bold tracking-tight text-gray-900">{{ event.titre }}</h3>
-                        <span class="text-sm text-gray-500">{{ event.type }}</span>
+                        <h3
+                          class="text-xl font-bold tracking-tight text-gray-900"
+                        >
+                          {{ event.titre }}
+                        </h3>
+                        <span class="text-sm text-gray-500">{{
+                          event.type
+                        }}</span>
                       </div>
-                      <p class="mb-3 font-normal text-gray-700">{{ event.description }}</p>
+                      <p class="mb-3 font-normal text-gray-700">
+                        {{ event.description }}
+                      </p>
                       <div class="flex items-center text-sm text-gray-500">
                         <i class="pi pi-calendar mr-2"></i>
-                        <time>{{ new Date(event.date).toLocaleDateString() }}</time>
+                        <time>{{
+                          new Date(event.date).toLocaleDateString()
+                        }}</time>
                         <i class="pi pi-map-marker ml-4 mr-2"></i>
                         <span>{{ event.location }}</span>
                       </div>
@@ -143,6 +166,11 @@ onMounted(async () => {
                   </div>
                 </div>
               </div>
+            </TabPanel>
+            <TabPanel v-if="canManageApplications" value="3">
+              <ManageAssociationApplications
+                :associationId="route.params.id as string"
+              />
             </TabPanel>
           </TabPanels>
         </Tabs>

@@ -21,7 +21,7 @@ export const useUserStore = defineStore("user", {
       token: "",
       isAuth: false,
       user: null as UserState | null,
-      initialized: false
+      initialized: false,
     };
   },
   getters: {
@@ -30,23 +30,28 @@ export const useUserStore = defineStore("user", {
     },
     isAdmin(): boolean {
       return (
-        this.user?.roles?.some((role: Role) => role.name === "SuperAdmin") ?? false
+        this.user?.roles?.some((role: Role) => role.name === "SuperAdmin") ??
+        false
       );
     },
 
     isAssociationManager(): boolean {
       return (
-        this.user?.roles?.some((role: Role) => role.name === "AssociationManager") ??
-        false
+        this.user?.roles?.some(
+          (role: Role) => role.name === "AssociationManager"
+        ) ?? false
       );
     },
     isEventsManager(): boolean {
       return (
-        this.user?.roles?.some((role: Role) => role.name === "EventsManager") ?? false
+        this.user?.roles?.some((role: Role) => role.name === "EventsManager") ??
+        false
       );
     },
     isUser(): boolean {
-      return this.user?.roles?.some((role: Role) => role.name === "User") ?? false;
+      return (
+        this.user?.roles?.some((role: Role) => role.name === "User") ?? false
+      );
     },
     fullName(): string {
       return `${this.user?.first_name} ${this.user?.last_name}`.trim();
@@ -65,7 +70,7 @@ export const useUserStore = defineStore("user", {
         if (e instanceof Error) {
           throw new Error(e.message);
         }
-        throw new Error('Une erreur est survenue');
+        throw new Error("Une erreur est survenue");
       } finally {
         this.loader = false;
       }
@@ -89,7 +94,7 @@ export const useUserStore = defineStore("user", {
         if (e instanceof Error) {
           throw new Error(e.message);
         }
-        throw new Error('Une erreur est survenue');
+        throw new Error("Une erreur est survenue");
       } finally {
         this.loader = false;
       }
@@ -103,7 +108,7 @@ export const useUserStore = defineStore("user", {
         if (e instanceof Error) {
           throw new Error(e.message);
         }
-        throw new Error('Une erreur est survenue');
+        throw new Error("Une erreur est survenue");
       } finally {
         this.loader = false;
       }
@@ -112,7 +117,7 @@ export const useUserStore = defineStore("user", {
       this.user = userData;
     },
     async initializeStore() {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (token) {
         this.token = token;
         this.isAuth = true;
@@ -132,7 +137,7 @@ export const useUserStore = defineStore("user", {
           context.store.$state.isAuth = true;
           context.store.$state.initialized = true;
         } catch (error) {
-          console.error('Failed to restore user session:', error);
+          console.error("Failed to restore user session:", error);
           context.store.$state.initialized = true;
         } finally {
           context.store.$state.loader = false;
