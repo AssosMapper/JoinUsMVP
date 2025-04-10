@@ -8,6 +8,7 @@ import {
   Put,
   UseGuards,
 } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import {
   MyAssociationsDto,
   PublicAssociationDto,
@@ -23,6 +24,7 @@ import { UpdateAssociationDto } from './dto/update-association.dto';
 import { AssociationManagerGuard } from './guards/association-manager.guard';
 import { AssociationMemberGuard } from './guards/association-member.guard';
 
+@ApiTags('associations')
 @Controller('associations')
 export class AssociationsController {
   constructor(private readonly associationsService: AssociationsService) {}
@@ -37,6 +39,7 @@ export class AssociationsController {
   }
 
   @Get('/my')
+  @ApiBearerAuth()
   @BearAuthToken()
   async findUserAssociations(
     @CurrentUserId() userId: string,
@@ -68,6 +71,7 @@ export class AssociationsController {
   }
 
   @Post()
+  @ApiBearerAuth()
   @BearAuthToken()
   async create(
     @CurrentUserId() user: User,
@@ -84,6 +88,7 @@ export class AssociationsController {
   }
 
   @Put(':id')
+  @ApiBearerAuth()
   @UseGuards(AssociationManagerGuard)
   @BearAuthToken()
   async update(
@@ -102,6 +107,7 @@ export class AssociationsController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth()
   @UseGuards(AssociationManagerGuard)
   @BearAuthToken()
   async remove(@Param('id') id: string): Promise<void> {
@@ -109,6 +115,7 @@ export class AssociationsController {
   }
 
   @Get(':id/members')
+  @ApiBearerAuth()
   @UseGuards(AssociationMemberGuard)
   @BearAuthToken()
   async getMembers(@Param('id') id: string): Promise<PublicUserDto[]> {
@@ -120,6 +127,7 @@ export class AssociationsController {
   }
 
   @Delete(':id/members/:userId')
+  @ApiBearerAuth()
   @UseGuards(AssociationManagerGuard)
   @BearAuthToken()
   removeMember(@Param('id') id: string, @Param('userId') userId: string) {
