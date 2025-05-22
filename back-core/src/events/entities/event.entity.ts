@@ -1,9 +1,17 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import { Media } from '@src/media/entities/media.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+} from 'typeorm';
 import { Association } from '../../associations/entities/association.entity';
 import { TypeEvents } from '../../type-events/entities/type-events.entity';
 import { User } from '../../users/entities/user.entity';
 import { EntityStructure } from '../../utils/structures/entity.structure';
-import { Media } from '@src/media/entities/media.entity';
+import { EventParticipation } from './event-participation.entity';
 
 @Entity()
 export class Event extends EntityStructure {
@@ -40,4 +48,9 @@ export class Event extends EntityStructure {
 
   @Column({ default: false })
   isValid: boolean;
+
+  @OneToMany(() => EventParticipation, (participation) => participation.event, {
+    cascade: true,
+  })
+  participants: EventParticipation[];
 }

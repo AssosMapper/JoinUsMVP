@@ -87,6 +87,31 @@ export class AuthService {
       },
     };
   }
+
+  /**
+   * Génère un JWT à partir d'un email pour les tests d'intégration
+   * @param email Email de l'utilisateur
+   * @returns Le token JWT généré
+   */
+  async generateJwtByEmail(email: string): Promise<string> {
+    const user = await this.userService.findByEmail(email);
+
+    if (!user) {
+      throw new NotFoundException(
+        `Utilisateur avec l'email ${email} non trouvé`,
+      );
+    }
+
+    return this.jwtService.sign(
+      {
+        sub: user.id,
+      },
+      {
+        expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '1h',
+      },
+    );
+  }
+
   /**
    * Register user
    */

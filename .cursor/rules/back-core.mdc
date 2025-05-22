@@ -1,0 +1,141 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# Règles de Développement Back-Core NestJS
+
+## 1. Structure et Conventions NestJS
+
+- Suivre la structure modulaire de NestJS
+- Chaque fonctionnalité doit avoir son propre module
+- Respecter la structure : entities, controllers, services, dtos
+- Utiliser des interfaces pour les DTOs dans le dossier shared
+- Valider les DTOs avec yup
+- Utiliser les décorateurs NestJS appropriés (@Controller, @Injectable, etc.)
+- Implémenter des gardes pour les autorisations (RoleGuard)
+- Suivre la convention de nommage CamelCase pour les méthodes
+- Ajouter les nouveaux modules dans app.module.ts
+
+### Architecture modulaire
+- Module → module.ts
+- Controller → controller.ts
+- Service → service.ts
+- Entité → entities/entity.ts
+- DTOs → ../shared/dto/feature.dto.ts
+
+## 2. Conventions TypeORM pour les Entités
+
+- Toutes les entités doivent étendre EntityStructure
+- Utiliser les décorateurs @Entity(), @Column(), @ManyToOne(), etc.
+- Ne pas oublier d'ajouter les nouvelles entités dans DatabaseModule.forRoot([...]) dans app.module.ts
+- Définir explicitement les relations dans les entités
+- Utiliser le camelCase pour les propriétés
+
+### Exemple d'entité
+```typescript
+@Entity()
+export class MaFonctionnalite extends EntityStructure {
+  @Column()
+  nom: string;
+
+  @Column({ nullable: true })
+  description: string;
+
+  @ManyToOne(() => User)
+  utilisateur: User;
+}
+```
+
+## 3. Conventions des Controllers
+
+- Utiliser @Controller('nom-route')
+- Ajouter @BearAuthToken() pour la sécurité des routes
+- Valider les DTOs avec YupValidationPipe
+- Implémenter CRUD: Get, Post, Put, Delete
+- Documenter les réponses possibles
+- Gérer correctement les exceptions
+- Les methodes controller doivent obligatoirement retourner des DTO qui se trouve dans le dossier shared
+### Exemple de Controller
+```typescript
+@Controller('ma-fonctionnalite')
+@BearAuthToken()
+export class MaFonctionnaliteController {
+  constructor(private service: MaFonctionnaliteService) {}
+
+  @Post()
+  create(
+    @Body(new YupValidationPipe(schemaValidation)) dto: CreateDto,
+    @User() user: UserPayload
+  ) {
+    return this.service.create(dto, user.id);
+  }
+
+  @Get()
+  findAll() {
+    return this.service.findAll();
+  }
+}
+```
+
+## 4. DTOs et Validations
+
+- Créer les DTOs dans le dossier shared/dto
+- Créer les schémas de validation dans shared/validations
+- Utiliser yup pour la validation
+- Typer correctement les DTOs avec TypeScript
+- Utiliser satisfies yup.ObjectSchema<MonDto> pour la vérification de type
+
+### Exemple de validation
+```typescript
+// shared/dto/ma-fonctionnalite.dto.ts
+export class CreateMaFonctionnaliteDto {
+  nom: string;
+  description?: string;
+}
+
+// shared/validations/ma-fonctionnalite.validation.ts
+export const maFonctionnaliteSchema = yup.object().shape({
+  nom: yup.string().required('Le nom est requis'),
+  description: yup.string().max(255, 'Description trop longue'),
+}) satisfies yup.ObjectSchema<CreateMaFonctionnaliteDto>;
+```
+
+## 5. Gestion des Erreurs
+
+- Utiliser les exceptions NestJS (NotFoundException, ConflictException, etc.)
+- Fournir des messages d'erreur en français
+- Structurer les messages d'erreur comme des objets pour plus de contexte
+- Vérifier l'existence des entités avant manipulation
+- Valider les permissions de l'utilisateur avant les opérations
+
+### Exemple de gestion d'erreur
+```typescript
+if (!entity) {
+  throw new NotFoundException({
+    message: `La ressource avec l'ID ${id} n'a pas été trouvée`,
+  });
+}
+
+if (user.associations.some((a) => a.id === entityId)) {
+  throw new ConflictException({
+    message: `Vous êtes déjà dans cette entité`,
+  });
+}
+```
+
+## 6. Création d'un Nouveau Module
+
+Pour créer un nouveau module complet, suivre ces étapes :
+
+1. Utiliser la commande (dans le répertoire back-core) :
+```bash
+npx @nestjs/cli g resource nom-du-module
+```
+
+2. Définir l'entité dans `entities/nom-du-module.entity.ts`
+3. Créer les DTOs dans `shared/dto/nom-du-module.dto.ts`
+4. Définir les schémas de validation dans `shared/validations/nom-du-module.validation.ts`
+5. Ajouter la nouvelle entité dans `app.module.ts` → `DatabaseModule.forRoot([...])`
+6. Ajouter le nouveau module dans `app.module.ts` → `imports: [...]`
+

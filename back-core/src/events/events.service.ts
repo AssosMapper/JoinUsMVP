@@ -1,10 +1,20 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
+import {
+  EventParticipantResponseDto,
+  UserParticipationResponseDto,
+} from '@shared/dto/event-participation.dto';
 import { Repository } from 'typeorm';
 import { Association } from '../associations/entities/association.entity';
 import { TypeEvents } from '../type-events/entities/type-events.entity';
 import { User } from '../users/entities/user.entity';
 import { CreateEventDto } from './dto/create-events.dto';
 import { UpdateEventDto } from './dto/update-events.dto';
+import { EventParticipation } from './entities/event-participation.entity';
 import { Event } from './entities/event.entity';
 
 @Injectable()
@@ -16,6 +26,10 @@ export class EventsService {
     private associationRepository: Repository<Association>,
     @Inject('TYPE_EVENTS_REPOSITORY')
     private typeEventsRepository: Repository<TypeEvents>,
+    @Inject('EVENT_PARTICIPATION_REPOSITORY')
+    private eventParticipationRepository: Repository<EventParticipation>,
+    @Inject('USER_REPOSITORY')
+    private userRepository: Repository<User>,
   ) {}
   async findAll(
     isValid?: boolean,
@@ -61,7 +75,7 @@ export class EventsService {
   async getEventsByUserId(userId: string): Promise<Event[]> {
     return this.eventsRepository.find({
       where: {
-        user: { id: userId }
+        user: { id: userId },
       },
       relations: ['association', 'typeEvent'],
     });
@@ -69,11 +83,11 @@ export class EventsService {
 
   async create(user: User, createEventDto: CreateEventDto): Promise<Event> {
     const associationId = user.associationId || createEventDto.associationId;
-    
+
     const association = await this.associationRepository.findOne({
       where: { id: associationId },
     });
-    
+
     if (!association) {
       throw new NotFoundException(`Association not found`);
     }
@@ -253,5 +267,110 @@ export class EventsService {
       where: { association: { id: associationId } },
       relations: ['association', 'typeEvent'],
     });
+  }
+
+  /**
+   * Ajouter un utilisateur comme participant à un événement
+   */
+  async participateEvent(
+    userId: string,
+    eventId: string,
+  ): Promise<EventParticipation> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+
+    const event = await this.eventsRepository.findOne({
+      where: { id: eventId },
+    });
+    if (!event)
+      throw new NotFoundException(`Événement avec l'ID ${eventId} non trouvé`);
+
+    const oldParticipation = await this.eventParticipationRepository.findOne({
+      where: {
+        event: { id: eventId },
+        user: { id: userId },
+      },
+    });
+    if (oldParticipation) {
+      throw new InternalServerErrorException(
+        'Vous participez déjà à cet événement',
+      );
+    }
+    const participation = new EventParticipation();
+    participation.user = user;
+    participation.event = event;
+    participation.registrationDate = new Date();
+
+    return this.eventParticipationRepository.save(participation);
+  }
+
+  /**
+   * Récupérer tous les participants d'un événement
+   */
+  async getEventParticipants(
+    eventId: string,
+  ): Promise<EventParticipantResponseDto[]> {
+    const event = await this.eventsRepository.findOne({
+      where: { id: eventId },
+    });
+    if (!event)
+      throw new NotFoundException(`Événement avec l'ID ${eventId} non trouvé`);
+
+    const participations = await this.eventParticipationRepository.find({
+      where: { event: { id: eventId } },
+      relations: ['user'],
+    });
+
+    return participations.map((participation) => ({
+      id: participation.id,
+      eventId: eventId,
+      registrationDate: participation.registrationDate,
+      user: participation.user,
+    }));
+  }
+
+  /**
+   * Récupérer tous les événements auxquels un utilisateur participe
+   */
+  async getUserParticipations(
+    userId: string,
+  ): Promise<UserParticipationResponseDto[]> {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user)
+      throw new NotFoundException(`Utilisateur avec l'ID ${userId} non trouvé`);
+
+    const participations = await this.eventParticipationRepository.find({
+      where: { user: { id: userId } },
+      relations: [
+        'event',
+        'event.association',
+        'event.typeEvent',
+        'event.user',
+      ],
+    });
+
+    return participations.map((participation) => ({
+      id: participation.id,
+      registrationDate: participation.registrationDate,
+      event: participation.event,
+    }));
+  }
+
+  /**
+   * Annuler la participation d'un utilisateur à un événement
+   */
+  async cancelParticipation(userId: string, eventId: string): Promise<void> {
+    const participation = await this.eventParticipationRepository.findOne({
+      where: {
+        user: { id: userId },
+        event: { id: eventId },
+      },
+    });
+
+    if (!participation)
+      throw new NotFoundException(
+        `Participation non trouvée pour l'utilisateur ${userId} à l'événement ${eventId}`,
+      );
+
+    await this.eventParticipationRepository.remove(participation);
   }
 }

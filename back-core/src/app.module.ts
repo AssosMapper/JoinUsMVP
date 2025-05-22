@@ -11,6 +11,8 @@ import { AssociationApplication } from './association-applications/entities/asso
 import { AssociationsModule } from './associations/associations.module';
 import { Association } from './associations/entities/association.entity';
 import { AuthModule } from './auth/auth.module';
+import { CommentsModule } from './comments/comments.module';
+import { EventParticipation } from './events/entities/event-participation.entity';
 import { Event } from './events/entities/event.entity';
 import { EventsModule } from './events/events.module';
 import { Localisation } from './localisation/entities/localisation.entity';
@@ -44,6 +46,7 @@ import { LoggingMiddleware } from './utils/middlewares/logging.middleware';
       User,
       Association,
       Event,
+      EventParticipation,
       TypeEvents,
       TypeAssociations,
       Permission,
@@ -71,6 +74,7 @@ import { LoggingMiddleware } from './utils/middlewares/logging.middleware';
     NotificationsModule,
     LocalisationModule,
     MailerAppModule,
+    CommentsModule,
   ],
   providers: [
     {
