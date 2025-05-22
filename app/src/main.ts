@@ -1,3 +1,4 @@
+import "@/assets/styles/variables.css";
 import router from "@/router";
 import "@shared/validations/config";
 import { createPinia } from "pinia";
@@ -8,7 +9,6 @@ import ToastService from "primevue/toastservice";
 import { createApp } from "vue";
 import App from "./App.vue";
 import "./index.css";
-import "@/assets/styles/variables.css";
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
@@ -16,6 +16,13 @@ const app = createApp(App);
 app.use(PrimeVue, {
   theme: "none",
 });
+
+if (process.env.NODE_ENV === "production") {
+  console.log = () => {};
+  console.info = () => {};
+  console.warn = () => {};
+  console.error = () => {};
+}
 
 app.use(ToastService);
 app.use(router);
