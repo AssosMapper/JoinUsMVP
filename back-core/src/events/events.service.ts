@@ -334,10 +334,6 @@ export class EventsService {
   async getUserParticipations(
     userId: string,
   ): Promise<UserParticipationResponseDto[]> {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (!user)
-      throw new NotFoundException(`Utilisateur avec l'ID ${userId} non trouvé`);
-
     const participations = await this.eventParticipationRepository.find({
       where: { user: { id: userId } },
       relations: [

@@ -5,6 +5,7 @@ import { DatabaseModule } from '../utils/database/database.module';
 import { EventParticipation } from './entities/event-participation.entity';
 import { EventsController } from './events.controller';
 import { EventsService } from './events.service';
+import { IsParticipantGuard } from './guards/is-participant.guard';
 import { IsPublicGuard } from './guards/is-public.guard';
 
 @Module({
@@ -13,7 +14,7 @@ import { IsPublicGuard } from './guards/is-public.guard';
     AssociationsModule,
     UsersModule,
   ],
-  providers: [EventsService, IsPublicGuard],
+  providers: [EventsService, IsPublicGuard, IsParticipantGuard],
   controllers: [EventsController],
   exports: [EventsService],
 })

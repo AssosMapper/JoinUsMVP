@@ -33,6 +33,7 @@ import { CreateEventDto } from './dto/create-events.dto';
 import { UpdateEventDto } from './dto/update-events.dto';
 import { Event as EventEntity } from './entities/event.entity';
 import { EventsService } from './events.service';
+import { IsParticipantGuard } from './guards/is-participant.guard';
 import { IsPublicGuard } from './guards/is-public.guard';
 
 @Controller('events')
@@ -126,8 +127,11 @@ export class EventsController {
    * Récupérer tous les participants d'un événement
    */
   @Get(':id/participants')
+  @UseGuards(IsParticipantGuard)
   @BearAuthToken()
-  async getEventParticipants(@Param('id') eventId: string) {
+  async getEventParticipants(
+    @Param('id') eventId: string,
+  ): Promise<EventParticipantResponseDto[]> {
     const participants = await this.eventsService.getEventParticipants(eventId);
     return plainToInstance(EventParticipantResponseDto, participants, {
       excludeExtraneousValues: true,
@@ -140,7 +144,9 @@ export class EventsController {
    */
   @Get('participations')
   @BearAuthToken()
-  async getUserParticipations(@CurrentUserId() userId: string) {
+  async getUserParticipations(
+    @CurrentUserId() userId: string,
+  ): Promise<UserParticipationResponseDto[]> {
     const participations =
       await this.eventsService.getUserParticipations(userId);
     return plainToInstance(UserParticipationResponseDto, participations, {

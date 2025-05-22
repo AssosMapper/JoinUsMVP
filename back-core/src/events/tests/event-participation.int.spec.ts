@@ -39,18 +39,15 @@ describe('EventParticipation Integration Tests', () => {
     userRepository = moduleFixture.get('USER_REPOSITORY');
     associationRepository = moduleFixture.get('ASSOCIATION_REPOSITORY');
 
-    // Générer le token JWT pour les tests
     associationManagerToken = await authService.generateJwtByEmail(
       associationManagerEmail,
     );
 
-    // Récupérer l'utilisateur
     user = await userRepository.findOne({
       where: { email: associationManagerEmail },
       relations: ['associations'],
     });
 
-    // Récupérer l'association à laquelle l'utilisateur appartient
     association = user.associations[0];
 
     try {
@@ -184,6 +181,55 @@ describe('EventParticipation Integration Tests', () => {
         .set('Authorization', `Bearer ${associationManagerToken}`)
         .send({ eventId: privateEvent.id })
         .expect(HttpStatus.INTERNAL_SERVER_ERROR);
+    });
+  });
+
+  describe('GET /events/:id/participants', () => {
+    it("Devrait interdire l'accès à la liste des participants si l'utilisateur ne participe pas à l'événement", async () => {
+      // Créer un nouvel événement pour ce test
+      const testEvent = eventRepository.create({
+        titre: 'Événement test participants',
+        description: 'Description test',
+        date: new Date(),
+        localisation: 'Paris',
+        isPublic: true,
+        isValid: true,
+        association: association,
+        user: user,
+      });
+      await eventRepository.save(testEvent);
+
+      // Tenter d'accéder aux participants sans être participant
+      await request(app.getHttpServer())
+        .get(`/events/${testEvent.id}/participants`)
+        .set('Authorization', `Bearer ${associationManagerToken}`)
+        .expect(HttpStatus.FORBIDDEN);
+
+      // Nettoyer
+      await eventRepository.delete({ id: testEvent.id });
+    });
+
+    it("Devrait autoriser l'accès à la liste des participants si l'utilisateur participe à l'événement", async () => {
+      expect(publicEvent).toBeDefined();
+      expect(publicEvent.id).toBeDefined();
+
+      const participation = await eventParticipationRepository.findOne({
+        where: {
+          event: { id: publicEvent.id },
+          user: { id: user.id },
+        },
+      });
+      expect(participation).toBeDefined();
+
+      // Accéder aux participants avec succès
+      const response = await request(app.getHttpServer())
+        .get(`/events/${publicEvent.id}/participants`)
+        .set('Authorization', `Bearer ${associationManagerToken}`)
+        .expect(HttpStatus.OK);
+
+      expect(response.body).toBeDefined();
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.length).toBeGreaterThan(0);
     });
   });
 });
