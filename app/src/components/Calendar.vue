@@ -152,9 +152,7 @@ const emit = defineEmits<{
 <template>
   <div class="flex items-center justify-center">
     <div class="w-full shadow-lg">
-      <div
-        class="px-8 md:py-0 md:px-4 dark:bg-gray-800 bg-white rounded-t"
-      >
+      <div class="px-8 md:py-0 md:px-4 dark:bg-gray-800 bg-white rounded-t">
         <div class="flex items-center justify-between overflow-x-auto">
           <table class="w-full">
             <thead>
@@ -198,25 +196,10 @@ const emit = defineEmits<{
                       {{ day.getDate() }}
                     </p>
                     <div
-                      v-if="isMobile && getEventCountForDate(day) > 0"
-                      class="absolute top-1/2 right-2 transform -translate-y-1/2 bg-green-500 rounded-full w-5 h-5 flex items-center justify-center text-white text-xs"
+                      v-if="getEventCountForDate(day) > 0"
+                      class="absolute top-1/2 right-2 transform -translate-y-1/2 bg-green-500 rounded-full w-5 h-5 flex items-center justify-center text-white text-xs font-medium"
                     >
                       {{ getEventCountForDate(day) }}
-                    </div>
-                    <div
-                      v-else-if="!isMobile"
-                      class="flex gap-2 h-4 max-w-[80%] absolute right-2"
-                    >
-                      <JnsImage
-                        v-for="event in getEventsForDate(day)"
-                        :key="event.id"
-                        :name="event.association?.name || ''"
-                        :src="getImageSrc(event.association?.name || '')"
-                        :alt="event.association?.name || 'Association'"
-                        class="h-5 w-5"
-                        :rounded="false"
-                        size="sm"
-                      />
                     </div>
                   </div>
                 </td>

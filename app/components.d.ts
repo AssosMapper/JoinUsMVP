@@ -10,6 +10,7 @@ declare module 'vue' {
     AssociationApplicationFormModal: typeof import('./src/components/AssociationApplication/AssociationApplicationFormModal.vue')['default']
     AssociationForm: typeof import('./src/components/AssociationDashboard/AssociationForm.vue')['default']
     AssociationMembers: typeof import('./src/components/AssociationDashboard/AssociationMembers.vue')['default']
+    Bck_EventsList: typeof import('./src/components/Events/bck_EventsList.vue')['default']
     Button: typeof import('primevue/button')['default']
     Calendar: typeof import('./src/components/Calendar.vue')['default']
     CreateAssociation: typeof import('./src/components/Create/CreateAssociation.vue')['default']

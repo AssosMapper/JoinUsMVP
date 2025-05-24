@@ -1,0 +1,470 @@
+---
+description: 
+globs: app/**,shared/**
+alwaysApply: false
+---
+# Règles de Développement Frontend @app
+
+## 1. ARCHITECTURE ET STRUCTURE
+
+### Règles générales d'organisation
+- **Structure modulaire** : Organiser le code en modules fonctionnels dans `src/`
+- **Séparation des responsabilités** : Séparer clairement les composants, services, stores, types et vues
+- **Convention de nommage cohérente** : Utiliser PascalCase pour les composants et camelCase pour les services
+- **Imports organisés** : Grouper les imports par type (libraries, composants, services, types)
+
+### Structure des dossiers obligatoire
+```
+src/
+├── components/          # Composants réutilisables
+│   ├── ui/             # Composants UI de base (JnsField, JnsImage, etc.)
+│   └── [Feature]/      # Composants spécifiques à une fonctionnalité
+├── views/              # Pages de l'application
+├── services/           # Services API
+├── store/              # Stores Pinia
+├── router/             # Configuration des routes
+├── types/              # Types TypeScript spécifiques au frontend
+├── composables/        # Composables Vue
+├── utils/              # Fonctions utilitaires
+└── assets/             # Assets statiques
+```
+
+## 2. TECHNOLOGIES ET DÉPENDANCES
+
+### Stack technique obligatoire
+- **Vue 3** avec Composition API uniquement (pas d'Options API)
+- **TypeScript** pour le typage strict
+- **Vite** comme bundler
+- **PrimeVue** pour les composants UI
+- **Tailwind CSS** avec plugin PrimeUI pour le styling
+- **Pinia** pour la gestion d'état
+- **Vue Router** pour le routage
+- **VeeValidate + Yup** pour la validation des formulaires
+- **Primeicons** pour les icônes
+
+### Configuration obligatoire
+- **Auto-import** des composants PrimeVue via unplugin-vue-components
+- **Alias de chemin** : `@/` pour `src/`, `@shared/` pour le dossier partagé
+- **Plugin de persistance** Pinia avec pinia-plugin-persistedstate
+
+## 3. COMPOSANTS
+
+### Règles de nommage des composants
+- **PascalCase** pour tous les noms de fichiers de composants
+- **Suffixe descriptif** indiquant le type : Modal, Form, List, Card, etc.
+- **Préfixe par fonctionnalité** pour les composants métier : `AssociationApplication*`, `Events*`
+- **Préfixe Jns** pour les composants UI de base : `JnsField`, `JnsImage`
+
+### Structure des composants
+- Utiliser **`<script setup lang="ts">`** exclusivement
+- **Props typées** avec interface TypeScript
+- **Emits déclarés** avec defineEmits quand nécessaire
+- **Imports groupés** : librairies → composants → services → types
+
+### Composants UI réutilisables
+- Tous les composants UI dans `components/ui/`
+- Utiliser les composants PrimeVue comme base
+- Props minimales et flexibles pour la réutilisabilité
+
+## 4. SERVICES
+
+### Structure des services
+- **Un service par domaine métier** (associationService, eventService, etc.)
+- **Export default** d'un objet contenant toutes les méthodes
+- **Méthodes async** retournant des Promises
+- **Gestion d'erreur uniforme** avec try/catch et throw des ResponseError
+
+### Conventions de nommage des services
+- **camelCase** pour le nom du fichier avec suffixe Service
+- **camelCase** pour les méthodes avec verbes d'action : `create`, `update`, `delete`, `get*`
+- **Noms explicites** : `getApplicationsByAssociation` plutôt que `getApps`
+
+### Utilisation des APIs
+- Utiliser le composable `useApi` pour tous les appels
+- Récupérer les URLs via `useApiStore()`
+- **Gestion d'erreur systématique** : `if (error.value) throw error.value`
+- **Typage des paramètres** avec les DTOs partagés
+
+## 5. STORES PINIA
+
+### Structure des stores
+- **Un store par domaine** fonctionnel
+- **State typé** avec interface TypeScript
+- **Actions pour les mutations** et logique métier
+- **Getters pour les données calculées**
+- **Persistance** activée sélectivement
+
+### Conventions de nommage
+- **camelCase** avec suffixe Store : `userStore`, `notificationStore`
+- **Actions en verbes** : `login`, `logout`, `showNotification`
+- **State en nom** : `user`, `isAuthenticated`, `notifications`
+
+## 6. ROUTAGE
+
+### Structure des routes
+- **Routes groupées** par fonctionnalité
+- **Props: true** pour les paramètres de route
+- **Lazy loading** obligatoire : `() => import('@/views/...')`
+- **Meta données** pour les guards : `requiresAuth`, `requiresAdmin`
+
+### Guards et sécurité
+- **Guard global** `beforeEach` pour l'authentification
+- **Vérification des rôles** : admin, associationManager, eventsManager
+- **Attente de l'initialisation** du store utilisateur
+- **Redirections sécurisées** vers /login
+
+## 7. VALIDATION DES FORMULAIRES
+
+### VeeValidate + Yup
+- **Schémas Yup** dans le dossier `@shared/validations/`
+- **useForm** avec validationSchema obligatoire
+- **defineField** pour la liaison bi-directionnelle
+- **Validation en temps réel** avec affichage des erreurs
+
+### Structure des formulaires
+- Composant `JnsField` pour wrapper les champs avec erreurs
+- **FloatLabel** de PrimeVue pour les labels flottants
+- **Validation côté client ET serveur**
+- **Messages d'erreur en français**
+
+## 8. STYLING
+
+### Tailwind CSS
+- **Classes utility-first** exclusivement
+- **Pas de CSS custom** sauf dans index.css pour les variables globales
+- **Responsive design** avec préfixes sm:, md:, lg:
+- **Plugin PrimeUI** pour l'intégration avec PrimeVue
+
+### Conventions de classes
+- **Flexbox** pour les layouts : `flex flex-col gap-4`
+- **Spacing cohérent** : multiples de 4 (gap-1, gap-2, gap-4, gap-8)
+- **Couleurs sémantiques** : `bg-primary`, `text-white`, `p-error`
+
+## 9. GESTION DES ERREURS
+
+### Stratégie d'erreur
+- **Try/catch** dans tous les services
+- **ResponseError** typée pour les erreurs API
+- **Notifications** utilisateur via notificationStore
+- **Messages en français** compréhensibles
+
+### Notifications
+- **Toast system** de PrimeVue
+- **Store centralisé** pour les notifications
+- **Types** : success, error, warn, info
+- **Auto-dismiss** configuré
+
+## 10. PERFORMANCE ET OPTIMISATION
+
+### Règles de performance
+- **Lazy loading** des routes et composants lourds
+- **Ref vs Reactive** : préférer ref() pour les primitives
+- **Computed** pour les valeurs dérivées
+- **Watch** avec cleanup approprié
+
+### Build et production
+- **Tree shaking** activé
+- **Console logs supprimés** en production
+- **Minification** et optimisation automatique via Vite
+- **Auto-import** des composants PrimeVue
+
+## 11. TYPES ET INTERFACES
+
+### TypeScript strict
+- **Mode strict** activé
+- **Props typées** obligatoires
+- **Types importés** depuis @shared/types/
+- **Interfaces** plutôt que types quand possible
+
+### Conventions de typage
+- **PascalCase** pour les interfaces
+- **Import type** pour les types uniquement utilisés pour le typage
+- **Générics** quand approprié
+- **Types partagés** entre frontend et backend
+
+## 12. DÉVELOPPEMENT ET DEBUGGING
+
+### Outils de développement
+- **Vue DevTools** pour le debugging
+- **TypeScript** pour la vérification de type
+- **ESLint** pour la qualité du code
+- **Hot reload** via Vite
+
+### Bonnes pratiques
+- **Console.log** uniquement en développement
+- **Nommage explicite** des variables et fonctions
+- **Commentaires** pour la logique complexe
+- **Code review** obligatoire
+
+---
+
+# EXEMPLES DE CODE
+
+## Exemple de Composant avec Formulaire
+
+```vue
+<script setup lang="ts">
+import { useForm } from 'vee-validate';
+import { joinAssociationSchema } from '@shared/validations/association-applications.validation';
+import { JoinAssociationDto } from '@shared/dto/association-applications.dto';
+import JnsField from '@/components/ui/JnsField.vue';
+import FloatLabel from 'primevue/floatlabel';
+import { ref } from 'vue';
+
+const props = defineProps<{
+  associationId: string;
+  applicationQuestion?: string;
+}>();
+
+const isSubmitting = ref(false);
+
+const { handleSubmit, errors, defineField } = useForm<JoinAssociationDto>({
+  validationSchema: joinAssociationSchema,
+  initialValues: {
+    associationId: props.associationId,
+    applicationAnswer: ''
+  }
+});
+
+const [applicationAnswer, applicationAnswerAttrs] = defineField('applicationAnswer');
+
+const onSubmit = handleSubmit(async (formValues: JoinAssociationDto) => {
+  isSubmitting.value = true;
+  try {
+    // Logique de soumission
+  } catch (error: any) {
+    // Gestion d'erreur
+  } finally {
+    isSubmitting.value = false;
+  }
+});
+</script>
+
+<template>
+  <form @submit="onSubmit" class="flex flex-col gap-4">
+    <JnsField :errorMessage="errors.applicationAnswer">
+      <FloatLabel variant="in" class="w-full">
+        <Textarea
+          id="applicationAnswer"
+          v-model="applicationAnswer"
+          v-bind="applicationAnswerAttrs"
+          rows="5"
+          class="w-full"
+          :class="{ 'p-invalid': errors.applicationAnswer }"
+          autoResize
+        />
+        <label for="applicationAnswer">Votre réponse</label>
+      </FloatLabel>
+    </JnsField>
+    
+    <Button 
+      type="submit" 
+      label="Envoyer" 
+      :loading="isSubmitting"
+      class="bg-primary text-white"
+    />
+  </form>
+</template>
+```
+
+## Exemple de Service
+
+```typescript
+import { useApi } from '@/composables/useApi';
+import { useApiStore } from '@/store/apiUrls.store';
+import { ResponseError } from '@/types/http.types';
+import { CreateEventDto } from '@shared/dto/events.dto';
+
+const eventService = {
+  create: async (eventData: CreateEventDto) => {
+    const apiStore = useApiStore();
+    const { data, error } = await useApi(apiStore.events.create)
+      .post(eventData)
+      .json();
+    
+    if (error.value) throw error.value as ResponseError;
+    return data.value;
+  },
+
+  getById: async (id: string) => {
+    const apiStore = useApiStore();
+    const { data, error } = await useApi(
+      apiStore.resolveUrl(apiStore.events.getById, { id })
+    ).json();
+    
+    if (error.value) throw error.value as ResponseError;
+    return data.value;
+  }
+};
+
+export default eventService;
+```
+
+## Exemple de Store Pinia
+
+```typescript
+import { defineStore } from 'pinia';
+import { ref, computed } from 'vue';
+import { User } from '@shared/types/user';
+
+export const useUserStore = defineStore('user', () => {
+  const user = ref<User | null>(null);
+  const isAuthenticated = computed(() => !!user.value);
+  const isAdmin = computed(() => 
+    user.value?.roles?.includes('admin') ?? false
+  );
+
+  const login = async (credentials: LoginDto) => {
+    try {
+      const response = await authService.login(credentials);
+      user.value = response.user;
+    } catch (error) {
+      throw error;
+    }
+  };
+
+  const logout = () => {
+    user.value = null;
+  };
+
+  return {
+    user,
+    isAuthenticated,
+    isAdmin,
+    login,
+    logout
+  };
+}, {
+  persist: {
+    key: 'user-store',
+    storage: localStorage
+  }
+});
+```
+
+## Exemple de Route avec Guard
+
+```typescript
+import { createRouter, createWebHistory } from 'vue-router';
+import { useUserStore } from '@/store';
+
+const routes = [
+  {
+    path: '/admin',
+    name: 'AdminInterface',
+    component: () => import('@/views/AdminInterface.vue'),
+    meta: { requiresAdmin: true }
+  }
+];
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes
+});
+
+router.beforeEach(async (to, from, next) => {
+  const userStore = useUserStore();
+  
+  if (to.meta.requiresAdmin && !userStore.isAdmin) {
+    next('/login');
+    return;
+  }
+  
+  next();
+});
+
+export default router;
+```
+
+## Exemple de Composant UI Réutilisable
+
+```vue
+<script setup lang="ts">
+defineProps<{
+  errorMessage?: string;
+}>();
+</script>
+
+<template>
+  <div class="flex flex-col gap-1 w-full">
+    <slot></slot>
+    <small v-if="errorMessage" class="p-error">{{ errorMessage }}</small>
+  </div>
+</template>
+```
+
+## Configuration Vite
+
+```typescript
+import { PrimeVueResolver } from '@primevue/auto-import-resolver';
+import vue from '@vitejs/plugin-vue';
+import path from 'path';
+import Components from 'unplugin-vue-components/vite';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [
+    vue(),
+    Components({
+      resolvers: [PrimeVueResolver()],
+    }),
+  ],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+      '@shared': path.resolve(__dirname, '../shared'),
+      '@stores': path.resolve(__dirname, './src/store'),
+    },
+  },
+});
+```
+
+## Configuration Tailwind
+
+```javascript
+export default {
+  content: [
+    './index.html',
+    './src/**/*.{vue,js,ts,jsx,tsx}',
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [require('tailwindcss-primeui')]
+};
+```
+
+## Point d'entrée de l'application
+
+```typescript
+import '@/assets/styles/variables.css';
+import router from '@/router';
+import '@shared/validations/config';
+import { createPinia } from 'pinia';
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate';
+import 'primeicons/primeicons.css';
+import PrimeVue from 'primevue/config';
+import ToastService from 'primevue/toastservice';
+import { createApp } from 'vue';
+import App from './App.vue';
+import './index.css';
+
+const pinia = createPinia();
+pinia.use(piniaPluginPersistedstate);
+
+const app = createApp(App);
+app.use(PrimeVue, { theme: 'none' });
+app.use(ToastService);
+app.use(router);
+app.use(pinia);
+
+// Désactiver les logs en production
+if (process.env.NODE_ENV === 'production') {
+  console.log = () => {};
+  console.info = () => {};
+  console.warn = () => {};
+  console.error = () => {};
+}
+
+app.mount('#app');
+```

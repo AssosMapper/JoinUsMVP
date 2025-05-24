@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import EventsList from "@/components/EventsList.vue";
+import Map from "@/components/Map.vue";
 import eventService from "@/services/eventService";
 import typeEventService from "@/services/typeEventService";
 import type { Event } from "@shared/types/event";
@@ -9,9 +11,7 @@ import IconField from "primevue/iconfield";
 import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
 import Tab from "primevue/tab";
-import TabList from "primevue/tablist";
-import { onMounted, ref, watch, defineAsyncComponent, shallowRef } from "vue";
-import Map from '@/components/Map.vue';
+import { defineAsyncComponent, onMounted, ref, shallowRef, watch } from "vue";
 
 const events = ref<Array<Event>>([]);
 const typeEvents = ref<Array<TypeEvents>>([]);
@@ -24,11 +24,15 @@ const selectedType = ref<TypeEvents | null>(null);
 const debouncedSearch = useDebounce(search, 300);
 
 const components = {
-  'CreateEvent': defineAsyncComponent(() => import('../../components/Create/CreateEvent.vue')),
-  'UpdateEvent': defineAsyncComponent(() => import('../../components/Update/UpdateEvent.vue')),
-}
+  CreateEvent: defineAsyncComponent(
+    () => import("../../components/Create/CreateEvent.vue")
+  ),
+  UpdateEvent: defineAsyncComponent(
+    () => import("../../components/Update/UpdateEvent.vue")
+  ),
+};
 
-const currentComponent = shallowRef<'CreateEvent' | 'UpdateEvent' | null>(null);
+const currentComponent = shallowRef<"CreateEvent" | "UpdateEvent" | null>(null);
 
 const fetchTypeEvents = async () => {
   try {
@@ -88,13 +92,11 @@ watch([debouncedSearch, selectedType], fetchEvents);
 
 <template>
   <div>
-    <div class="title-container bg-white
-                shadow-[0_4px_6px_-2px_rgba(0,0,0,0.1)]
-                relative z-10 flex justify-center items-center">
+    <div
+      class="title-container bg-white shadow-[0_4px_6px_-2px_rgba(0,0,0,0.1)] relative z-10 flex justify-center items-center"
+    >
       <div class="px-10">
-        <h1 class="text-3xl font-bold text-primary italic">
-          Événements
-        </h1>
+        <h1 class="text-3xl font-bold text-primary italic">Événements</h1>
       </div>
     </div>
 
@@ -108,31 +110,37 @@ watch([debouncedSearch, selectedType], fetchEvents);
               <div class="flex gap-4">
                 <Tab value="0">
                   <template #default>
-                    <i class="pi pi-list mr-2" 
-                       :class="[
-                         activeTab === '0' ? 'text-[#168003]' : 'text-gray-600',
-                         'hover:text-[#168003] transition-colors duration-200'
-                       ]" />
+                    <i
+                      class="pi pi-list mr-2"
+                      :class="[
+                        activeTab === '0' ? 'text-[#168003]' : 'text-gray-600',
+                        'hover:text-[#168003] transition-colors duration-200',
+                      ]"
+                    />
                     Liste
                   </template>
                 </Tab>
                 <Tab value="1">
                   <template #default>
-                    <i class="pi pi-calendar mr-2" 
-                       :class="[
-                         activeTab === '1' ? 'text-[#168003]' : 'text-gray-600',
-                         'hover:text-[#168003] transition-colors duration-200'
-                       ]" />
+                    <i
+                      class="pi pi-calendar mr-2"
+                      :class="[
+                        activeTab === '1' ? 'text-[#168003]' : 'text-gray-600',
+                        'hover:text-[#168003] transition-colors duration-200',
+                      ]"
+                    />
                     Calendrier
                   </template>
                 </Tab>
                 <Tab value="2">
                   <template #default>
-                    <i class="pi pi-map mr-2" 
-                       :class="[
-                         activeTab === '2' ? 'text-[#168003]' : 'text-gray-600',
-                         'hover:text-[#168003] transition-colors duration-200'
-                       ]" />
+                    <i
+                      class="pi pi-map mr-2"
+                      :class="[
+                        activeTab === '2' ? 'text-[#168003]' : 'text-gray-600',
+                        'hover:text-[#168003] transition-colors duration-200',
+                      ]"
+                    />
                     Carte
                   </template>
                 </Tab>
@@ -154,12 +162,15 @@ watch([debouncedSearch, selectedType], fetchEvents);
                   placeholder="Type d'événement"
                   :class="[
                     'font-semibold',
-                    selectedType ? 'text-[#168003]' : 'text-gray-600'
+                    selectedType ? 'text-[#168003]' : 'text-gray-600',
                   ]"
                   :showClear="true"
                 />
                 <IconField class="w-[400px]">
-                  <InputIcon class="pi pi-search" :class="search ? 'text-[#168003]' : 'text-gray-600'" />
+                  <InputIcon
+                    class="pi pi-search"
+                    :class="search ? 'text-[#168003]' : 'text-gray-600'"
+                  />
                   <InputText
                     v-model="search"
                     placeholder="Rechercher un événement..."
@@ -167,23 +178,36 @@ watch([debouncedSearch, selectedType], fetchEvents);
                   />
                 </IconField>
               </div>
-              <Dropdown 
-                v-model="currentComponent" 
+              <Dropdown
+                v-model="currentComponent"
                 :options="['CreateEvent', 'UpdateEvent']"
-                placeholder="Mes événements" 
+                placeholder="Mes événements"
                 :class="[
                   'font-semibold',
-                  currentComponent ? 'text-[#168003]' : 'text-gray-600'
+                  currentComponent ? 'text-[#168003]' : 'text-gray-600',
                 ]"
               >
                 <template #value="{ value }">
-                  <i class="pi pi-user mr-2" :class="currentComponent ? 'text-[#168003]' : 'text-gray-600'" />
-                  {{ value === 'CreateEvent' ? 'Créer un événement' : 
-                     value === 'UpdateEvent' ? 'Modifier un événement' : 
-                     'Mes événements' }}
+                  <i
+                    class="pi pi-user mr-2"
+                    :class="
+                      currentComponent ? 'text-[#168003]' : 'text-gray-600'
+                    "
+                  />
+                  {{
+                    value === "CreateEvent"
+                      ? "Créer un événement"
+                      : value === "UpdateEvent"
+                      ? "Modifier un événement"
+                      : "Mes événements"
+                  }}
                 </template>
                 <template #option="{ option }">
-                  {{ option === 'CreateEvent' ? 'Créer un événement' : 'Modifier un événement' }}
+                  {{
+                    option === "CreateEvent"
+                      ? "Créer un événement"
+                      : "Modifier un événement"
+                  }}
                 </template>
               </Dropdown>
             </div>
@@ -192,7 +216,10 @@ watch([debouncedSearch, selectedType], fetchEvents);
 
         <!-- Contenu -->
         <section class="px-10">
-          <div class="overflow-y-auto pb-20" style="max-height: calc(100vh - 18rem);">
+          <div
+            class="overflow-y-auto pb-20"
+            style="max-height: calc(100vh - 18rem)"
+          >
             <TabPanels>
               <TabPanel value="0">
                 <EventsList
@@ -213,7 +240,7 @@ watch([debouncedSearch, selectedType], fetchEvents);
 
               <TabPanel value="2">
                 <div class="h-[calc(100vh-12rem)] w-full">
-                  <Map 
+                  <Map
                     :events="events"
                     :center="{ lat: 48.8566, lng: 2.3522 }"
                   />
@@ -221,8 +248,8 @@ watch([debouncedSearch, selectedType], fetchEvents);
               </TabPanel>
 
               <TabPanel value="3">
-                <component 
-                  v-if="currentComponent" 
+                <component
+                  v-if="currentComponent"
                   :is="components[currentComponent]"
                 />
                 <div v-else class="text-center py-8">

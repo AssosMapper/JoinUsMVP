@@ -1,7 +1,7 @@
 ---
 description: 
-globs: 
-alwaysApply: true
+globs: back-core/**,shared/**
+alwaysApply: false
 ---
 # Règles de Développement Back-Core NestJS
 
