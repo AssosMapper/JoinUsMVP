@@ -75,7 +75,9 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
   <div
     class="lg:hidden fixed bottom-0 left-0 right-0 h-14 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-[90]"
   >
-    <div class="mobileNavbar flex justify-around items-center h-full px-2 bg-primary">
+    <div
+      class="mobileNavbar flex justify-around items-center h-full px-2 bg-primary"
+    >
       <Button
         icon="pi pi-bars"
         @click="mobileSidebarVisible = true"
@@ -129,11 +131,12 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
       mobileSidebarVisible ? 'translate-x-0' : '-translate-x-full',
     ]"
   >
-  
     <!-- En-tête du sidebar -->
-    <div class="logo-container flex items-center justify-around shadow-[0_4px_15px_-3px_rgba(0,0,0,0.2)] w-full">
+    <div
+      class="logo-container flex items-center justify-around shadow-[0_4px_15px_-3px_rgba(0,0,0,0.2)] w-full"
+    >
       <div class="font-bold text-xl">
-        <span class="text-primary">Horizon</span><br>
+        <span class="text-primary">Horizon</span><br />
         <span class="text-danger">Commun</span>
       </div>
       <div class="flex items-center gap-2">

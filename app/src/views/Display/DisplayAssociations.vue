@@ -46,10 +46,7 @@ const fetchTypeAssociations = async () => {
 const fetchAssociations = async () => {
   loader.value = true;
   try {
-    const response = await associationService.getAllAssociations({
-      search: debouncedSearch.value,
-      typeId: selectedType.value?.id,
-    });
+    const response = await associationService.getAllAssociations();
     associations.value = response;
   } catch (error) {
     console.error("Erreur lors de la récupération des associations:", error);
@@ -62,6 +59,7 @@ const fetchAssociationApplications = async () => {
   const associationsIds = associations.value.map(
     (association) => association.id
   ) as string[];
+
   if (associationsIds.length === 0) return;
   loader.value = true;
   try {
@@ -115,7 +113,7 @@ const joinAssociation = async (associationId: string) => {
 
 onMounted(async () => {
   await fetchTypeAssociations();
-  fetchAssociations();
+  await fetchAssociations();
   await fetchAssociationApplications();
   isLoading.value = false;
 });

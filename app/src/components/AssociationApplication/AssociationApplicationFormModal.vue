@@ -10,7 +10,7 @@ import {
 import { joinAssociationSchema } from "@shared/validations/association-applications.validation";
 import FloatLabel from "primevue/floatlabel";
 import { useForm } from "vee-validate";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 
 const props = defineProps<{
   associationApplication?: AssociationApplication;
@@ -25,7 +25,13 @@ const applicationQuestion = ref(props.applicationQuestion);
 const associationApplication = ref<AssociationApplication | null>(
   props.associationApplication ?? null
 );
-
+watch(
+  () => props.associationApplication,
+  (newVal) => {
+    associationApplication.value = newVal;
+    setFieldValue("applicationAnswer", newVal?.applicationAnswer ?? null);
+  }
+);
 const { handleSubmit, errors, defineField, setFieldValue } =
   useForm<JoinAssociationDto>({
     validationSchema: joinAssociationSchema,
@@ -56,7 +62,7 @@ const onSubmit = handleSubmit(async (formValues: JoinAssociationDto) => {
     setFieldValue("applicationAnswer", result.applicationAnswer);
     applicationQuestion.value = result.applicationQuestion;
     associationApplication.value = { ...result } as AssociationApplication;
-    console.log(associationApplication.value);
+    console.log("Association application:", associationApplication.value);
   } catch (error: any) {
     notificationStore.showNotification(error.message, "error");
   } finally {
@@ -98,7 +104,11 @@ const showButtonText = computed(() => {
 </script>
 
 <template>
-  <Button :label="showButtonText" class="bg-primary text-white" @click="visible = true" />
+  <Button
+    :label="showButtonText"
+    class="bg-primary text-white"
+    @click="visible = true"
+  />
 
   <Dialog v-model:visible="visible" modal header="Votre candidature">
     <template #header>

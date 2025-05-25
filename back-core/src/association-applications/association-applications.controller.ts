@@ -1,14 +1,13 @@
 import {
   Body,
   Controller,
-  Delete,
-  Get,
+  Delete, Get,
   Param,
   ParseArrayPipe,
   Patch,
   Post,
   Query,
-  UseGuards,
+  UseGuards
 } from '@nestjs/common';
 import {
   AssociationApplicationDto,
@@ -78,6 +77,22 @@ export class AssociationApplicationsController {
       );
 
     return plainToInstance(AssociationApplicationDto, applications, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
+  }
+
+  @Get('current/:associationId')
+  async getCurrentApplication(
+    @CurrentUserId() userId: string,
+    @Param('associationId') associationId: string,
+  ): Promise<AssociationApplicationDto | null> {
+    const application = await this.applicationService.getCurrentApplication(
+      userId,
+      associationId,
+    );
+
+    return plainToInstance(AssociationApplicationDto, application, {
       excludeExtraneousValues: true,
       enableImplicitConversion: true,
     });

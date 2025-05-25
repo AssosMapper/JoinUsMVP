@@ -8,6 +8,8 @@ import {
   EventParticipantResponseDto,
   UserParticipationResponseDto,
 } from '@shared/dto/event-participation.dto';
+import { RoleEnum } from '@shared/types';
+import { checkRole } from '@src/utils/functions/check-role';
 import { Repository } from 'typeorm';
 import { Association } from '../associations/entities/association.entity';
 import { TypeEvents } from '../type-events/entities/type-events.entity';
@@ -233,6 +235,10 @@ export class EventsService {
   ): Promise<Event[]> {
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0, 23, 59, 59, 999);
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['roles'],
+    });
 
     const query = this.eventsRepository
       .createQueryBuilder('event')
@@ -246,14 +252,14 @@ export class EventsService {
         endDate,
       });
 
-    if (userId) {
+    if (userId && !checkRole(user, RoleEnum.SUPER_ADMIN)) {
       query.andWhere(
         '(event.isPublic = true OR associationUser.id = :userId)',
         {
           userId,
         },
       );
-    } else query.andWhere('event.isPublic = true');
+    }
 
     if (isValid !== undefined)
       query.andWhere('event.isValid = :isValid', { isValid });

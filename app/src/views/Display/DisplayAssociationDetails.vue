@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { onMounted, ref, nextTick, watch } from 'vue';
-import { useRoute } from 'vue-router';
-import {useUserStore} from "@/store";
+import EventList from "@/components/EventsList.vue";
+import JnsImage from "@/components/ui/JnsImage.vue";
+import Loader from "@/components/ui/Loader.vue";
+import associationApplicationService from "@/services/associationApplicationService";
+import associationService from "@/services/associationService";
+import eventService from "@/services/eventService";
+import { useUserStore } from "@/store";
+import { loadGoogleMapsApi } from "@/utils/loadGoogleMapsApi";
+import { AssociationApplication } from "@shared/types/association-applications";
 import type { Event } from "@shared/types/event";
-import associationService from '@/services/associationService';
-import eventService from '@/services/eventService';
-import { loadGoogleMapsApi } from '@/utils/loadGoogleMapsApi';
-import EventList from '@/components/EventsList.vue';
-import Loader from '@/components/ui/Loader.vue';
-import { AssociationApplication } from '@shared/types/association-applications';
-import associationApplicationService from '@/services/associationApplicationService';
-import JnsImage from '@/components/ui/JnsImage.vue';
-import Tab from 'primevue/tab';
-import TabList from 'primevue/tablist';
-import TabPanel from 'primevue/tabpanel';
-import TabPanels from 'primevue/tabpanels';
-import Tabs from 'primevue/tabs';
+import Tab from "primevue/tab";
+import TabList from "primevue/tablist";
+import TabPanel from "primevue/tabpanel";
+import TabPanels from "primevue/tabpanels";
+import Tabs from "primevue/tabs";
+import { nextTick, onMounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 
 const route = useRoute();
 const userStore = useUserStore();
@@ -31,105 +31,129 @@ const activeTab = ref("0");
 const mapInitialized = ref(false);
 
 const fetchAssociationDetails = async () => {
-  loader.value = true;
   try {
-    association.value = await associationService.getAssociationById(route.params.id as string);
-    console.log('Association:', association.value);
-    const events = await eventService.getEventsByAssociationId(association.value.id, 100);
-    console.log('Events received:', events);
+    association.value = await associationService.getAssociationById(
+      route.params.id as string
+    );
+    console.log("Association:", association.value);
+    const events = await eventService.getEventsByAssociationId(
+      association.value.id,
+      100
+    );
+    console.log("Events received:", events);
     // Trier les événements par date
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    
-    pastEvents.value = events.filter((event: Event) => new Date(event.date) < today);
+
+    pastEvents.value = events.filter(
+      (event: Event) => new Date(event.date) < today
+    );
     todayEvents.value = events.filter((event: Event) => {
       const eventDate = new Date(event.date);
-      return eventDate.getFullYear() === today.getFullYear() &&
-             eventDate.getMonth() === today.getMonth() &&
-             eventDate.getDate() === today.getDate();
+      return (
+        eventDate.getFullYear() === today.getFullYear() &&
+        eventDate.getMonth() === today.getMonth() &&
+        eventDate.getDate() === today.getDate()
+      );
     });
-    upcomingEvents.value = events.filter((event: Event) => new Date(event.date) > today);
+    upcomingEvents.value = events.filter(
+      (event: Event) => new Date(event.date) > today
+    );
 
-    console.log('Events split:', {
+    console.log("Events split:", {
       past: pastEvents.value,
       today: todayEvents.value,
-      upcoming: upcomingEvents.value
+      upcoming: upcomingEvents.value,
     });
   } catch (error) {
-    console.error('Error fetching association details:', error);
-  } finally {
-    loader.value = false;
+    console.error("Error fetching association details:", error);
   }
 };
 
 const getImageSrc = (associationName: string) => {
-  if (!associationName) return '/assets/associations-images/default.png';
-  const sanitizedAssociationName = associationName.replace(/\s+/g, '').toLowerCase();
+  if (!associationName) return "/assets/associations-images/default.png";
+  const sanitizedAssociationName = associationName
+    .replace(/\s+/g, "")
+    .toLowerCase();
   return `/assets/associations-images/${sanitizedAssociationName}.png`;
 };
 
 const initMap = async () => {
-  if (!association.value || !association.value.localisation || mapInitialized.value) return;
+  if (
+    !association.value ||
+    !association.value.localisation ||
+    mapInitialized.value
+  )
+    return;
 
   try {
     await loadGoogleMapsApi(import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY);
     const mapElement = document.getElementById("map") as HTMLElement;
-    
+
     if (!mapElement) return;
 
     const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ address: association.value.localisation }, (results, status) => {
-      if (status === "OK" && results && results[0]) {
-        const location = {
-          lat: results[0].geometry.location.lat(),
-          lng: results[0].geometry.location.lng()
-        };
-        map.value = new google.maps.Map(mapElement, {
-          center: location,
-          zoom: 15,
-        });
+    geocoder.geocode(
+      { address: association.value.localisation },
+      (results, status) => {
+        if (status === "OK" && results && results[0]) {
+          const location = {
+            lat: results[0].geometry.location.lat(),
+            lng: results[0].geometry.location.lng(),
+          };
+          map.value = new google.maps.Map(mapElement, {
+            center: location,
+            zoom: 15,
+          });
 
-        const icon = {
-          url: "/assets/associations-images/default.png",
-          scaledSize: new google.maps.Size(50, 50),
-          origin: { x: 0, y: 0 },
-          anchor: { x: 25, y: 25 }
-        };
+          const icon = {
+            url: "/assets/associations-images/default.png",
+            scaledSize: new google.maps.Size(50, 50),
+            origin: { x: 0, y: 0 },
+            anchor: { x: 25, y: 25 },
+          };
 
-        marker.value = new google.maps.Marker({
-          map: map.value,
-          position: location,
-          title: association.value.name,
-          icon: icon
-        });
-        mapInitialized.value = true;
+          marker.value = new google.maps.Marker({
+            map: map.value,
+            position: location,
+            title: association.value.name,
+            icon: icon,
+          });
+          mapInitialized.value = true;
+        }
       }
-    });
+    );
   } catch (error) {
-    console.error('Error loading Google Maps API:', error);
+    console.error("Error loading Google Maps API:", error);
   }
 };
 
 const fetchAssociationApplication = async () => {
   if (!association.value?.id) return;
-  
+
   try {
-    associationApplication.value = await associationApplicationService.getCurrentApplication(association.value.id) as AssociationApplication;
+    associationApplication.value =
+      (await associationApplicationService.getCurrentApplication(
+        association.value.id
+      )) as AssociationApplication;
   } catch (error: any) {
-    if (error?.statusCode !== 404) {
-      console.error('Error fetching association application:', error);
+    if (error?.statusCode !== 404)
+      console.error("Error fetching association application:", error);
+  }
+};
+
+watch(
+  () => activeTab.value,
+  async (newValue) => {
+    if (newValue === "1") {
+      await nextTick();
+      initMap();
     }
   }
-}
-
-watch(() => activeTab.value, async (newValue) => {
-  if (newValue === "1") {
-    await nextTick();
-    initMap();
-  }
-});
+);
 
 onMounted(async () => {
+  loader.value = true;
   await fetchAssociationDetails();
   await fetchAssociationApplication();
   loader.value = false;
@@ -151,9 +175,11 @@ onMounted(async () => {
         </div>
         <div class="flex flex-col items-start">
           <div class="flex items-center gap-2 mb-2">
-            <span v-for="type in association.types" 
-                  :key="type.id" 
-                  class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
+            <span
+              v-for="type in association.types"
+              :key="type.id"
+              class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
+            >
               {{ type.name }}
             </span>
           </div>
@@ -183,9 +209,14 @@ onMounted(async () => {
               <div class="bg-white rounded-lg shadow p-6">
                 <div class="space-y-4">
                   <p class="text-lg">{{ association.description }}</p>
-                  <p class="text-gray-600">Créée le: {{ new Date(association.createdAt).toLocaleDateString() }}</p>
-                  <p class="text-gray-600">Membres: {{ association.members }}</p>
-                  <AssociationApplicationFormModal 
+                  <p class="text-gray-600">
+                    Créée le:
+                    {{ new Date(association.createdAt).toLocaleDateString() }}
+                  </p>
+                  <p class="text-gray-600">
+                    Membres: {{ association.members }}
+                  </p>
+                  <AssociationApplicationFormModal
                     v-if="!userStore.getAssociation(association.id)"
                     :applicationQuestion="association.applicationQuestion"
                     :associationId="association.id"
@@ -203,10 +234,15 @@ onMounted(async () => {
 
             <TabPanel value="2">
               <div class="bg-white rounded-lg shadow p-6">
-                <EventList 
+                <EventList
                   :events="todayEvents"
                   :loading="loader"
-                  :current-month-year="new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })"
+                  :current-month-year="
+                    new Date().toLocaleDateString('fr-FR', {
+                      month: 'long',
+                      year: 'numeric',
+                    })
+                  "
                   :fetch-more="async () => {}"
                   :has-more="false"
                 />
@@ -215,10 +251,15 @@ onMounted(async () => {
 
             <TabPanel value="3">
               <div class="bg-white rounded-lg shadow p-6">
-                <EventList 
+                <EventList
                   :events="pastEvents"
                   :loading="loader"
-                  :current-month-year="new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })"
+                  :current-month-year="
+                    new Date().toLocaleDateString('fr-FR', {
+                      month: 'long',
+                      year: 'numeric',
+                    })
+                  "
                   :fetch-more="async () => {}"
                   :has-more="false"
                 />
@@ -227,10 +268,15 @@ onMounted(async () => {
 
             <TabPanel value="4">
               <div class="bg-white rounded-lg shadow p-6">
-                <EventList 
+                <EventList
                   :events="upcomingEvents"
                   :loading="loader"
-                  :current-month-year="new Date().toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })"
+                  :current-month-year="
+                    new Date().toLocaleDateString('fr-FR', {
+                      month: 'long',
+                      year: 'numeric',
+                    })
+                  "
                   :fetch-more="async () => {}"
                   :has-more="false"
                 />
