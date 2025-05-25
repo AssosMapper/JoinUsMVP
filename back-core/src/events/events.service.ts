@@ -229,33 +229,42 @@ export class EventsService {
     isValid?: boolean,
     search?: string,
     typeEventId?: string,
+    userId?: string,
   ): Promise<Event[]> {
     const startDate = new Date(year, month - 1, 1);
     const endDate = new Date(year, month, 0, 23, 59, 59, 999);
 
     const query = this.eventsRepository
       .createQueryBuilder('event')
+      .distinct()
       .leftJoinAndSelect('event.association', 'association')
       .leftJoinAndSelect('event.user', 'user')
       .leftJoinAndSelect('event.typeEvent', 'typeEvent')
+      .leftJoin('association.users', 'associationUser')
       .where('event.date BETWEEN :startDate AND :endDate', {
         startDate,
         endDate,
       });
 
-    if (isValid !== undefined) {
-      query.andWhere('event.isValid = :isValid', { isValid });
-    }
+    if (userId) {
+      query.andWhere(
+        '(event.isPublic = true OR associationUser.id = :userId)',
+        {
+          userId,
+        },
+      );
+    } else query.andWhere('event.isPublic = true');
 
-    if (search) {
+    if (isValid !== undefined)
+      query.andWhere('event.isValid = :isValid', { isValid });
+
+    if (search)
       query.andWhere('LOWER(event.titre) LIKE LOWER(:search)', {
         search: `%${search}%`,
       });
-    }
 
-    if (typeEventId) {
+    if (typeEventId)
       query.andWhere('event.typeEvent.id = :typeEventId', { typeEventId });
-    }
 
     query.orderBy('event.date', 'ASC').addOrderBy('event.titre', 'ASC');
 
@@ -336,12 +345,7 @@ export class EventsService {
   ): Promise<UserParticipationResponseDto[]> {
     const participations = await this.eventParticipationRepository.find({
       where: { user: { id: userId } },
-      relations: [
-        'event',
-        'event.association',
-        'event.typeEvent',
-        'event.user',
-      ],
+      relations: ['event'],
     });
 
     return participations.map((participation) => ({
@@ -349,6 +353,22 @@ export class EventsService {
       registrationDate: participation.registrationDate,
       event: participation.event,
     }));
+  }
+
+  async getUserParticipation(
+    eventId: string,
+    userId: string,
+  ): Promise<EventParticipation | null> {
+    const participation = await this.eventParticipationRepository.findOne({
+      where: { event: { id: eventId }, user: { id: userId } },
+      relations: ['event'],
+    });
+    if (!participation)
+      throw new NotFoundException(
+        `Participation non trouvée pour l'utilisateur ${userId} à l'événement ${eventId}`,
+      );
+
+    return participation;
   }
 
   /**

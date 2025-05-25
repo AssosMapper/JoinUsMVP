@@ -58,9 +58,11 @@ export class EventsController {
   @ApiQuery({ name: 'year', required: true, type: Number })
   @ApiQuery({ name: 'month', required: true, type: Number })
   @ApiQuery({ name: 'isValid', required: false, type: Boolean })
+  @BearAuthToken()
   async getEventsByMonth(
     @Query(new YupValidationPipe(getEventsByMonthSchema))
     query: GetEventsByMonthDto,
+    @CurrentUserId() userId: string,
   ): Promise<EventDto[]> {
     const { year, month, isValid, search, typeEventId } = query;
     const events = await this.eventsService.findEventsByMonth(
@@ -69,6 +71,7 @@ export class EventsController {
       isValid,
       search,
       typeEventId,
+      userId,
     );
     return plainToInstance(EventDto, events, {
       excludeExtraneousValues: true,
@@ -81,6 +84,55 @@ export class EventsController {
     @Param('associationId') associationId: string,
   ): Promise<EventEntity[]> {
     return this.eventsService.getEventsByAssociation(associationId);
+  }
+
+  /**
+   * Récupérer tous les événements auxquels un utilisateur participe
+   */
+  @Get('participations')
+  @BearAuthToken()
+  async getUserParticipations(
+    @CurrentUserId() userId: string,
+  ): Promise<UserParticipationResponseDto[]> {
+    const participations =
+      await this.eventsService.getUserParticipations(userId);
+    return plainToInstance(UserParticipationResponseDto, participations, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
+  }
+
+  @Get(':id/participation')
+  @BearAuthToken()
+  async getUserParticipation(
+    @Param('id') eventId: string,
+    @CurrentUserId() userId: string,
+  ): Promise<UserParticipationResponseDto> {
+    const participation = await this.eventsService.getUserParticipation(
+      eventId,
+      userId,
+    );
+
+    return plainToInstance(UserParticipationResponseDto, participation, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
+  }
+
+  /**
+   * Récupérer tous les participants d'un événement
+   */
+  @Get(':id/participants')
+  @UseGuards(IsParticipantGuard)
+  @BearAuthToken()
+  async getEventParticipants(
+    @Param('id') eventId: string,
+  ): Promise<EventParticipantResponseDto[]> {
+    const participants = await this.eventsService.getEventParticipants(eventId);
+    return plainToInstance(EventParticipantResponseDto, participants, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Get(':id')
@@ -115,41 +167,12 @@ export class EventsController {
     @CurrentUserId() userId: string,
     @Body(new YupValidationPipe(participateEventSchema))
     participateEventDto: ParticipateEventDto,
-  ) {
+  ): Promise<UserParticipationResponseDto> {
     const participateEvent = await this.eventsService.participateEvent(
       userId,
       participateEventDto.eventId,
     );
-    return participateEvent;
-  }
-
-  /**
-   * Récupérer tous les participants d'un événement
-   */
-  @Get(':id/participants')
-  @UseGuards(IsParticipantGuard)
-  @BearAuthToken()
-  async getEventParticipants(
-    @Param('id') eventId: string,
-  ): Promise<EventParticipantResponseDto[]> {
-    const participants = await this.eventsService.getEventParticipants(eventId);
-    return plainToInstance(EventParticipantResponseDto, participants, {
-      excludeExtraneousValues: true,
-      enableImplicitConversion: true,
-    });
-  }
-
-  /**
-   * Récupérer tous les événements auxquels un utilisateur participe
-   */
-  @Get('participations')
-  @BearAuthToken()
-  async getUserParticipations(
-    @CurrentUserId() userId: string,
-  ): Promise<UserParticipationResponseDto[]> {
-    const participations =
-      await this.eventsService.getUserParticipations(userId);
-    return plainToInstance(UserParticipationResponseDto, participations, {
+    return plainToInstance(UserParticipationResponseDto, participateEvent, {
       excludeExtraneousValues: true,
       enableImplicitConversion: true,
     });

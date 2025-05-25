@@ -144,7 +144,7 @@ src/
 
 ### Stratégie d'erreur
 - **Try/catch** dans tous les services
-- **ResponseError** typée pour les erreurs API
+- **ResponseError** typée pour les erreurs APIf
 - **Notifications** utilisateur via notificationStore
 - **Messages en français** compréhensibles
 
@@ -195,6 +195,69 @@ src/
 - **Nommage explicite** des variables et fonctions
 - **Commentaires** pour la logique complexe
 - **Code review** obligatoire
+
+## 13. CORRESPONDANCE AVEC LE BACKEND
+
+### Services et Controllers
+- **Les méthodes des services frontend doivent correspondre exactement aux endpoints du controller backend**
+- **Utiliser les mêmes noms de méthodes** que dans le controller (ex: `participateEvent` et non `participateToEvent`)
+- **Utiliser les DTOs partagés** importés depuis `@shared/dto/` pour typer les paramètres et retours
+- **Respecter la structure des URLs** définie dans le controller
+- **Importer et utiliser les types de réponse** appropriés pour le typage TypeScript
+
+### Exemple de correspondance Backend/Frontend
+
+#### Backend Controller
+```typescript
+@Post('participate')
+async participateEvent(
+  @CurrentUserId() userId: string,
+  @Body(new YupValidationPipe(participateEventSchema))
+  participateEventDto: ParticipateEventDto,
+) {
+  return await this.eventsService.participateEvent(userId, participateEventDto.eventId);
+}
+
+@Get(':id/participants')
+async getEventParticipants(
+  @Param('id') eventId: string,
+): Promise<EventParticipantResponseDto[]> {
+  // ...
+}
+```
+
+#### Service Frontend correspondant
+```typescript
+import { ParticipateEventDto, EventParticipantResponseDto } from '@shared/dto/event-participation.dto';
+
+const participateEvent = async (eventId: string) => {
+  const apiStore = useApiStore();
+  const participateDto: ParticipateEventDto = { eventId };
+  
+  const { data, error } = await useApi(apiStore.events.participate)
+    .post(participateDto)
+    .json();
+
+  if (error.value) throw error.value as ResponseError;
+  return data.value;
+};
+
+const getEventParticipants = async (eventId: string): Promise<EventParticipantResponseDto[]> => {
+  const apiStore = useApiStore();
+  const { data, error } = await useApi(
+    apiStore.resolveUrl(apiStore.events.participants, { eventId })
+  ).json();
+  
+  if (error.value) throw error.value as ResponseError;
+  return data.value;
+};
+```
+
+### Points concernant l'exemple donné
+- **Même nom de méthode** : `participateEvent` des deux côtés
+- **DTOs importés** : `ParticipateEventDto`, `EventParticipantResponseDto` depuis `@shared`
+- **Typage strict** : Typer les retours avec les DTOs appropriés
+- **URLs du store** : Ajouter les endpoints manquants dans `apiUrls.store.ts`
 
 ---
 

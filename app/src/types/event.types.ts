@@ -10,3 +10,8 @@ export interface IEvent {
   isPublic: boolean;
   isValid: boolean;
 }
+
+export interface EventParticipation {
+  id: string;
+  registrationDate: Date;
+}

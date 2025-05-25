@@ -1,19 +1,24 @@
 import { useApi } from "@/composables/useApi.ts";
+import { useUserStore } from "@/store";
 import { useApiStore } from "@/store/apiUrls.store.ts";
 import { IEvent } from "@/types/event.types.ts";
 import { ResponseError } from "@/types/http.types";
+import {
+  EventParticipantResponseDto,
+  ParticipateEventDto,
+  UserParticipationResponseDto,
+} from "@shared/dto/event-participation.dto";
 import axios from "axios";
-import { useUserStore } from '@/store';
 
 const API_URL = import.meta.env.VITE_APP_BACKEND_URL;
 
 const createEvent = async (event: IEvent) => {
   const userStore = useUserStore();
   const apiStore = useApiStore();
-  
+
   const payload = {
     ...event,
-    associationId: userStore.user?.associationId || event.associationId
+    associationId: userStore.user?.associationId || event.associationId,
   };
 
   const { data, error } = await useApi(apiStore.events.create)
@@ -21,7 +26,7 @@ const createEvent = async (event: IEvent) => {
     .json();
 
   if (error.value) {
-    console.error('Error creating event:', error.value);
+    console.error("Error creating event:", error.value);
     throw error.value;
   }
 
@@ -90,14 +95,18 @@ const deleteEvent = async (id: string, token: string) => {
   return response.data;
 };
 
-const getEventsByAssociationId = async (associationId: string, limit: number) => {
+const getEventsByAssociationId = async (
+  associationId: string,
+  limit: number
+) => {
   const apiStore = useApiStore();
-  const url = apiStore.resolveUrl(apiStore.events.byAssociation, { associationId });
+  const url = apiStore.resolveUrl(apiStore.events.byAssociation, {
+    associationId,
+  });
 
   const { data, error } = await useApi(url).json();
-  if (error.value) {
-    throw new Error(error.value);
-  }
+  if (error.value) throw new Error(error.value);
+
   return data.value;
 };
 
@@ -131,6 +140,75 @@ const getEventsByMonth = async (
   return data.value;
 };
 
+// Méthodes pour la participation aux événements
+const participateEvent = async (participateEventDto: ParticipateEventDto) => {
+  const apiStore = useApiStore();
+
+  const { data, error } = await useApi(apiStore.events.participate)
+    .post(participateEventDto)
+    .json();
+
+  if (error.value) {
+    console.error("Error participating to event:", error.value);
+    throw error.value as ResponseError;
+  }
+
+  return data.value;
+};
+
+const cancelParticipation = async (eventId: string) => {
+  const apiStore = useApiStore();
+  const { data, error } = await useApi(
+    apiStore.resolveUrl(apiStore.events.cancelParticipation, { eventId })
+  )
+    .delete()
+    .json();
+
+  if (error.value) {
+    console.error("Error canceling participation:", error.value);
+    throw error.value as ResponseError;
+  }
+
+  return data.value;
+};
+
+const getEventParticipants = async (
+  eventId: string
+): Promise<EventParticipantResponseDto[]> => {
+  const apiStore = useApiStore();
+  const { data, error } = await useApi(
+    apiStore.resolveUrl(apiStore.events.participants, { eventId })
+  ).json();
+
+  if (error.value) throw error.value as ResponseError;
+
+  return data.value;
+};
+
+const getUserParticipations = async (): Promise<
+  UserParticipationResponseDto[]
+> => {
+  const apiStore = useApiStore();
+  const { data, error } = await useApi(apiStore.events.participations).json();
+
+  if (error.value) throw error.value as ResponseError;
+
+  return data.value;
+};
+
+const getUserParticipation = async (
+  eventId: string
+): Promise<UserParticipationResponseDto> => {
+  const apiStore = useApiStore();
+  const { data, error } = await useApi(
+    apiStore.resolveUrl(apiStore.events.getUserParticipation, { eventId })
+  ).json();
+
+  if (error.value) throw error.value as ResponseError;
+
+  return data.value;
+};
+
 export default {
   createEvent,
   getAllEvents,
@@ -141,4 +219,9 @@ export default {
   getEventsByAssociationId,
   getEventsByDate,
   getEventsByMonth,
+  participateEvent,
+  cancelParticipation,
+  getEventParticipants,
+  getUserParticipations,
+  getUserParticipation,
 };

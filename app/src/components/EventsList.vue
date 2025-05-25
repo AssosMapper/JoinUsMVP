@@ -1,12 +1,17 @@
 <script setup lang="ts">
+import ParticipateEventButton from "@/components/Events/ParticipateEventButton.vue";
 import JnsImage from "@/components/ui/JnsImage.vue";
+import eventService from "@/services/eventService";
 import mediaService from "@/services/mediaService";
 import { useLayoutRefStore } from "@/store/layoutRefStore";
+import { EventParticipation } from "@/types/event.types";
+import { UserParticipationResponseDto } from "@shared/dto/event-participation.dto";
 import type { Event } from "@shared/types/event";
 import { friendlyDate } from "@shared/utils/date";
 import { useInfiniteScroll } from "@vueuse/core";
 import Card from "primevue/card";
 import ProgressSpinner from "primevue/progressspinner";
+import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 
 const router = useRouter();
@@ -19,6 +24,7 @@ const props = defineProps<{
 }>();
 
 const layoutRefStore = useLayoutRefStore();
+const userParticipations = ref<UserParticipationResponseDto[]>([]);
 
 useInfiniteScroll(
   layoutRefStore.mainRef,
@@ -30,6 +36,31 @@ useInfiniteScroll(
   }
 );
 
+const fetchUserParticipations = async () => {
+  try {
+    userParticipations.value = await eventService.getUserParticipations();
+  } catch (error) {
+    console.error("Error fetching user participations:", error);
+    userParticipations.value = [];
+  }
+};
+
+const getParticipationForEvent = (
+  eventId: string
+): EventParticipation | null => {
+  const participation = userParticipations.value.find(
+    (p) => p.event.id === eventId
+  );
+  return participation
+    ? {
+        id: participation.id,
+        registrationDate: participation.registrationDate,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      }
+    : null;
+};
+
 const truncateDescription = (description: string, maxLength: number = 255) => {
   if (description.length <= maxLength) return description;
   return description.substring(0, maxLength) + "...";
@@ -38,6 +69,10 @@ const truncateDescription = (description: string, maxLength: number = 255) => {
 const goToEventDetails = (id: string) => {
   router.push({ name: "EventDetails", params: { id } });
 };
+
+onMounted(() => {
+  fetchUserParticipations();
+});
 </script>
 
 <template>
@@ -102,6 +137,11 @@ const goToEventDetails = (id: string) => {
                   </p>
                 </div>
                 <div class="mt-auto pt-3 flex justify-center gap-3">
+                  <ParticipateEventButton
+                    :event-id="event.id"
+                    :participation="getParticipationForEvent(event.id)"
+                    @click.stop
+                  />
                   <Button
                     @click.stop="goToEventDetails(event.id)"
                     class="bg-primary text-white"
