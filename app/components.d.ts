@@ -34,6 +34,7 @@ declare module 'vue' {
     NotificationBanner: typeof import('./src/components/Notification/NotificationBanner.vue')['default']
     NotificationButton: typeof import('./src/components/Notification/NotificationButton.vue')['default']
     NotificationToast: typeof import('./src/components/Notification/NotificationToast.vue')['default']
+    ParticipantEventList: typeof import('./src/components/Events/ParticipantEventList.vue')['default']
     ParticipateEventButton: typeof import('./src/components/Events/ParticipateEventButton.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

@@ -1,6 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { CreateMediaDto } from '@src/media/dto/create-media.dto';
+import * as https from 'https';
 import { Repository } from 'typeorm';
 import { Association } from '../../associations/entities/association.entity';
+import { MediaService } from '../../media/media.service';
 import { Role } from '../../roles/entities/role.entity';
 import { User } from '../../users/entities/user.entity';
 import { OnDev } from '../../utils/decorators/on-dev.decorator';
@@ -15,6 +18,7 @@ export class UserSeedService {
     private readonly roleRepository: Repository<Role>,
     @Inject('ASSOCIATION_REPOSITORY')
     private readonly associationRepository: Repository<Association>,
+    private readonly mediaService: MediaService,
   ) {}
 
   @OnDev()
@@ -51,6 +55,22 @@ export class UserSeedService {
       console.log('Role AssociationManager not found');
       return;
     }
+
+    // Télécharger et uploader une image pour l'AssociationManager
+    console.log('Downloading image for AssociationManager...');
+    const imageFile = await this.downloadImageFromPicsum(200);
+    const createMediaDto: CreateMediaDto = {
+      title: 'Photo de profil AssociationManager',
+      description:
+        "Avatar téléchargé depuis Lorem Picsum pour le gestionnaire d'association",
+      file: imageFile,
+    };
+    const uploadedImage = await this.mediaService.create(
+      createMediaDto,
+      imageFile,
+    );
+    console.log('Image uploaded successfully:', uploadedImage.filename);
+
     user = new User();
     user.first_name = 'Manager';
     user.last_name = 'Association';
@@ -58,6 +78,7 @@ export class UserSeedService {
     user.password = await hashPassword('Password123!');
     user.roles = [associationManagerRole];
     user.isActive = true;
+    user.image = uploadedImage;
     users.push(user);
 
     // Create EventsManager user
@@ -86,5 +107,52 @@ export class UserSeedService {
     console.log('Dropping users...');
     await this.userRepository.delete({});
     console.log('Dropped users...');
+  }
+
+  /**
+   * Télécharge une image depuis Lorem Picsum et la convertit en objet Multer.File
+   */
+  private async downloadImageFromPicsum(
+    size: number = 200,
+  ): Promise<Express.Multer.File> {
+    const url = `https://picsum.photos/${size}`;
+
+    return new Promise((resolve, reject) => {
+      https
+        .get(url, (response) => {
+          const chunks: Buffer[] = [];
+
+          response.on('data', (chunk) => {
+            chunks.push(chunk);
+          });
+
+          response.on('end', () => {
+            const buffer = Buffer.concat(chunks);
+
+            // Créer un objet Multer.File à partir du buffer
+            const multerFile: Express.Multer.File = {
+              fieldname: 'file',
+              originalname: `picsum-${size}x${size}.jpg`,
+              encoding: '7bit',
+              mimetype: 'image/jpeg',
+              buffer: buffer,
+              size: buffer.length,
+              destination: '',
+              filename: '',
+              path: '',
+              stream: null,
+            };
+
+            resolve(multerFile);
+          });
+
+          response.on('error', (error) => {
+            reject(error);
+          });
+        })
+        .on('error', (error) => {
+          reject(error);
+        });
+    });
   }
 }

@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AssociationApplication } from '../association-applications/entities/association-application.entity';
 import { Association } from '../associations/entities/association.entity';
 import { Event } from '../events/entities/event.entity';
+import { MediaModule } from '../media/media.module';
 import { Notification } from '../notifications/entities/notification.entity';
 import { Permission } from '../permissions/entities/permission.entity';
 import { Role } from '../roles/entities/role.entity';
@@ -22,7 +23,6 @@ import { RoleSeedService } from './seeders/role-seed.service';
 import { TypeAssociationsSeedService } from './seeders/type-association-seed.service';
 import { TypeEventsSeedService } from './seeders/type-event-seed.service';
 import { UserSeedService } from './seeders/user-seed.service';
-import { Media } from '@src/media/entities/media.entity';
 
 @Module({
   providers: [
@@ -52,9 +52,9 @@ import { Media } from '@src/media/entities/media.entity';
       AssociationApplication,
       Event,
       Notification,
-      Media,
     ]),
     UsersModule,
+    MediaModule,
   ],
 })
 export class SeedModule {}

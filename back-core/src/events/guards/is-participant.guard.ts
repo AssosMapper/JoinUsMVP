@@ -34,6 +34,8 @@ export class IsParticipantGuard implements CanActivate {
       where: { id: eventId },
     });
 
+    if (event.isPublic) return true;
+
     if (!event)
       throw new NotFoundException(`Événement avec l'ID ${eventId} non trouvé`);
 

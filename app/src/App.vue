@@ -1,11 +1,8 @@
 <script setup lang="ts">
-import Footer from "@/components/Footer.vue";
-import Navbar from "@/components/Navbar.vue";
 import NotificationBanner from "@/components/Notification/NotificationBanner.vue";
 import { useLayoutRefStore } from "@/store/layoutRefStore.ts";
-// import { useNotificationStore } from "@/store/notificationStore.ts";
+import Navbar from "./components/Navbar.vue";
 
-// const notificationStore = useNotificationStore();
 const layoutRefStore = useLayoutRefStore();
 </script>
 
@@ -14,15 +11,10 @@ const layoutRefStore = useLayoutRefStore();
     <Navbar />
     <main
       :ref="(el) => layoutRefStore.setMainRef(el as HTMLElement)"
-      class="w-full relative grid overflow-x-hidden overflow-y-auto max-w-full max-h-full lg:pb-0 pb-14"
+      class="w-full grid overflow-x-hidden overflow-y-auto max-w-full h-full lg:pb-0"
     >
       <NotificationBanner />
       <router-view />
-
-      <Footer
-        v-if="false"
-        class="footer absolute lg:bottom-0 bottom-14 shadow-[0_-4px_6px_-2px_rgba(0,0,0,0.1)] z-10"
-      />
     </main>
   </div>
 </template>
@@ -36,9 +28,16 @@ const layoutRefStore = useLayoutRefStore();
   color: #2c3e50;
 }
 
-.footer {
-  left: 0;
-  right: 0;
-  bottom: 4.5rem;
+/* Custom Scrollbar with primary color*/
+::-webkit-scrollbar {
+  @apply w-2;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-primary/10 rounded-full;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-primary rounded-full;
 }
 </style>

@@ -1,17 +1,18 @@
 <script setup lang="ts">
-import {onMounted, ref, watch, nextTick} from 'vue';
-import {useRoute} from 'vue-router';
-import eventService from '@/services/eventService';
-import {loadGoogleMapsApi} from '@/utils/loadGoogleMapsApi';
-import ProgressSpinner from 'primevue/progressspinner';
-import mediaService from '@/services/mediaService';
-import JnsBadge from '@/components/JnsBadge.vue';
-import Tabs from 'primevue/tabs';
-import TabPanel from 'primevue/tabpanel';
-import TabPanels from 'primevue/tabpanels';
-import TabList from 'primevue/tablist';
-import Tab from 'primevue/tab';
-import Loader from '@/components/Loader.vue';
+import ParticipantEventList from "@/components/Events/ParticipantEventList.vue";
+import JnsImage from "@/components/ui/JnsImage.vue";
+import eventService from "@/services/eventService";
+import mediaService from "@/services/mediaService";
+import { loadGoogleMapsApi } from "@/utils/loadGoogleMapsApi";
+import { EventParticipantResponseDto } from "@shared/dto/event-participation.dto";
+import ProgressSpinner from "primevue/progressspinner";
+import Tab from "primevue/tab";
+import TabList from "primevue/tablist";
+import TabPanel from "primevue/tabpanel";
+import TabPanels from "primevue/tabpanels";
+import Tabs from "primevue/tabs";
+import { nextTick, onMounted, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 
 const route = useRoute();
 const event = ref(null);
@@ -20,12 +21,29 @@ const marker = ref<google.maps.Marker | null>(null);
 const activeTab = ref("0");
 const loader = ref(true);
 const mapInitialized = ref(false);
+const participants = ref<EventParticipantResponseDto[]>([]);
+const participantsLoading = ref(false);
 
 const fetchEventDetails = async () => {
   try {
     event.value = await eventService.getEventById(route.params.id as string);
   } catch (error) {
-    console.error('Error fetching event details:', error);
+    console.error("Error fetching event details:", error);
+  }
+};
+
+const fetchParticipants = async () => {
+  if (!event.value) return;
+
+  participantsLoading.value = true;
+  try {
+    participants.value = await eventService.getEventParticipants(
+      event.value.id
+    );
+  } catch (error) {
+    console.error("Error fetching participants:", error);
+  } finally {
+    participantsLoading.value = false;
   }
 };
 
@@ -38,45 +56,53 @@ const initMap = async () => {
     if (!mapElement) return;
 
     const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ address: event.value.localisation }, (results, status) => {
-      if (status === "OK" && results && results[0]) {
-        const latLng = results[0].geometry.location;
-        const location: google.maps.LatLngLiteral = {
-          lat: Number(latLng.lat()),
-          lng: Number(latLng.lng())
-        };
-        map.value = new google.maps.Map(mapElement, {
-          center: location,
-          zoom: 15,
-        });
+    geocoder.geocode(
+      { address: event.value.localisation },
+      (results, status) => {
+        if (status === "OK" && results && results[0]) {
+          const latLng = results[0].geometry.location;
+          const location: google.maps.LatLngLiteral = {
+            lat: Number(latLng.lat()),
+            lng: Number(latLng.lng()),
+          };
+          map.value = new google.maps.Map(mapElement, {
+            center: location,
+            zoom: 15,
+          });
 
-        const icon = {
-          url: "/assets/events-images/default.png",
-          scaledSize: new google.maps.Size(50, 50),
-          origin: { x: 0, y: 0 },
-          anchor: { x: 25, y: 25 }
-        };
+          const icon = {
+            url: "/assets/events-images/default.png",
+            scaledSize: new google.maps.Size(50, 50),
+            origin: { x: 0, y: 0 },
+            anchor: { x: 25, y: 25 },
+          };
 
-        marker.value = new google.maps.Marker({
-          map: map.value,
-          position: { lat: location.lat, lng: location.lng },
-          title: event.value.titre,
-          icon: icon
-        });
-        mapInitialized.value = true;
+          marker.value = new google.maps.Marker({
+            map: map.value,
+            position: { lat: location.lat, lng: location.lng },
+            title: event.value.titre,
+            icon: icon,
+          });
+          mapInitialized.value = true;
+        }
       }
-    });
+    );
   } catch (error) {
-    console.error('Error loading Google Maps API:', error);
+    console.error("Error loading Google Maps API:", error);
   }
 };
 
-watch(() => activeTab.value, async (newValue) => {
-  if (newValue === "1") {
-    await nextTick();
-    initMap();
+watch(
+  () => activeTab.value,
+  async (newValue) => {
+    if (newValue === "1") {
+      await nextTick();
+      initMap();
+    } else if (newValue === "2") {
+      await fetchParticipants();
+    }
   }
-});
+);
 
 onMounted(() => {
   fetchEventDetails();
@@ -92,14 +118,20 @@ onMounted(() => {
         <div class="flex-shrink-0">
           <JnsImage
             :name="event.titre"
-            :src="event.image ? mediaService.getMediaUrl(event.image) : '/default-event.jpg'"
+            :src="
+              event.image
+                ? mediaService.getMediaUrl(event.image)
+                : '/default-event.jpg'
+            "
             size="lg"
           />
         </div>
-        
+
         <div>
           <div class="flex items-center gap-2">
-            <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm mb-2">
+            <span
+              class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm mb-2"
+            >
               {{ event.typeEvent.name }}
             </span>
           </div>
@@ -112,7 +144,12 @@ onMounted(() => {
             <div class="flex items-center gap-2">
               <i class="pi pi-calendar"></i>
               {{ new Date(event.date).toLocaleDateString() }}
-              {{ new Date(event.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) }}
+              {{
+                new Date(event.date).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              }}
             </div>
             <div class="flex items-center gap-2">
               <i class="pi pi-map-marker"></i>
@@ -142,8 +179,14 @@ onMounted(() => {
 
                   <div>
                     <div class="flex items-center gap-2 text-gray-600">
-                      <i :class="event.isPublic ? 'pi pi-lock-open' : 'pi pi-lock'"></i>
-                      {{ event.isPublic ? 'Événement public' : 'Événement privé' }}
+                      <i
+                        :class="
+                          event.isPublic ? 'pi pi-lock-open' : 'pi pi-lock'
+                        "
+                      ></i>
+                      {{
+                        event.isPublic ? "Événement public" : "Événement privé"
+                      }}
                     </div>
                   </div>
                 </div>
@@ -159,7 +202,10 @@ onMounted(() => {
             <TabPanel value="2">
               <div class="bg-white rounded-lg shadow p-6">
                 <h2 class="text-lg font-semibold mb-4">Participants</h2>
-                <p class="text-gray-600">Liste des participants à venir...</p>
+                <ParticipantEventList
+                  :participants="participants"
+                  :loading="participantsLoading"
+                />
               </div>
             </TabPanel>
 

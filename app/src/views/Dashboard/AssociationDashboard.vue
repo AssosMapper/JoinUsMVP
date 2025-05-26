@@ -19,11 +19,12 @@ import TabPanel from "primevue/tabpanel";
 import TabPanels from "primevue/tabpanels";
 import Tabs from "primevue/tabs";
 import { computed, onMounted, ref } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 const route = useRoute();
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
+const router = useRouter();
 
 const association = ref<PublicAssociationDto | null>(null);
 const events = ref([]);
@@ -99,7 +100,7 @@ onMounted(async () => {
           <TabList>
             <Tab value="0">Informations</Tab>
             <Tab value="1">Membres</Tab>
-            <Tab value="2">Événements</Tab>
+            <Tab value="2">Évènements</Tab>
             <Tab v-if="canManageApplications" value="3">
               Gérer les candidatures
             </Tab>
@@ -123,15 +124,16 @@ onMounted(async () => {
             <TabPanel value="2">
               <div class="bg-white rounded-lg shadow p-6">
                 <h2 class="text-2xl font-bold mb-6">
-                  Événements de l'association
+                  Évènements de l'association
                 </h2>
                 <div
                   class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 >
                   <div
+                    @click="router.push(`/displayEvent/${event.id}`)"
                     v-for="event in events"
                     :key="event.id"
-                    class="bg-white border border-gray-200 rounded-lg shadow hover:shadow-lg transition-all duration-300"
+                    class="bg-white border cursor-pointer border-gray-200 rounded-lg shadow hover:shadow-lg transition-all duration-300"
                   >
                     <JnsImage
                       :name="event.titre"

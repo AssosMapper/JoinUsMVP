@@ -75,16 +75,14 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
   <div
     class="lg:hidden fixed bottom-0 left-0 right-0 h-14 bg-white shadow-[0_-2px_10px_rgba(0,0,0,0.1)] z-[90]"
   >
-    <div
-      class="mobileNavbar flex justify-around items-center h-full px-2 bg-primary"
-    >
+    <div class="flex justify-around items-center h-full px-2">
       <Button
         icon="pi pi-bars"
         @click="mobileSidebarVisible = true"
         class="p-button-text !bg-transparent"
         aria-label="Menu"
       >
-        <i class="pi pi-bars text-black text-xl"></i>
+        <i class="pi pi-bars text-primary text-xl"></i>
       </Button>
 
       <Button
@@ -92,10 +90,10 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
         @click="router.push('/')"
         :class="[
           'p-button-text !bg-transparent',
-          isActiveRoute('/') ? 'text-black' : 'text-black',
+          isActiveRoute('/') ? 'text-primary' : 'text-gray-500',
         ]"
       >
-        <i class="pi pi-home text-xl text-black"></i>
+        <i class="pi pi-home text-xl"></i>
       </Button>
 
       <Button
@@ -104,10 +102,10 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
         @click="router.push('/updateProfile')"
         :class="[
           'p-button-text !bg-transparent',
-          isActiveRoute('/updateProfile') ? 'text-black' : 'text-black',
+          isActiveRoute('/updateProfile') ? 'text-primary' : 'text-gray-500',
         ]"
       >
-        <i class="pi pi-user text-xl text-black"></i>
+        <i class="pi pi-user text-xl"></i>
       </Button>
 
       <Button
@@ -116,7 +114,7 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
         @click="router.push('/login')"
         class="p-button-text !bg-transparent"
       >
-        <i class="pi pi-sign-in text-xl text-black"></i>
+        <i class="pi pi-sign-in text-xl text-gray-500"></i>
       </Button>
     </div>
   </div>
@@ -124,7 +122,7 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
   <!-- Unified Sidebar -->
   <div
     :class="[
-      'bg-white transition-transform duration-300 h-screen shadow-[4px_0_15px_-3px_rgba(0,0,0,0.2)]',
+      'bg-white shadow-lg z-[91] transition-transform duration-300 h-screen',
       'lg:w-64 w-[80vw]',
       'lg:relative fixed',
       'lg:translate-x-0',
@@ -132,13 +130,8 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
     ]"
   >
     <!-- En-tête du sidebar -->
-    <div
-      class="logo-container flex items-center justify-around shadow-[0_4px_15px_-3px_rgba(0,0,0,0.2)] w-full"
-    >
-      <div class="font-bold text-xl">
-        <span class="text-primary">Horizon</span><br />
-        <span class="text-danger">Commun</span>
-      </div>
+    <div class="p-4 border-b flex items-center justify-between">
+      <span class="font-bold text-xl text-primary">Join Us</span>
       <div class="flex items-center gap-2">
         <!-- Bouton notification toujours visible si authentifié -->
         <NotificationButton
@@ -156,7 +149,7 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
     </div>
 
     <!-- Menu items -->
-    <div class="flex-1 overflow-y-auto py-4 bg-primary-hover">
+    <div class="flex-1 overflow-y-auto py-4">
       <div class="flex flex-col gap-1">
         <template v-for="item in menuItems" :key="item.label">
           <Button
@@ -189,7 +182,7 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
     </div>
 
     <!-- Footer du sidebar -->
-    <div class="p-4 h-full bg-primary-hover">
+    <div class="border-t p-4">
       <div v-if="isAuthenticated" class="flex flex-col gap-3">
         <button
           class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200 w-full"
@@ -216,15 +209,15 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
       </div>
       <div v-else class="flex flex-col gap-2">
         <Button
-          label="Connexion"
+          label="Se connecter"
           icon="pi pi-sign-in"
-          class="w-full bg-primary text-white"
+          class="w-full"
           @click="router.push('/login')"
         />
         <Button
           label="S'inscrire"
           icon="pi pi-user-plus"
-          class="w-full p-button-outlined bg-primary text-white"
+          class="w-full p-button-outlined"
           @click="router.push('/register')"
         />
       </div>
@@ -239,7 +232,7 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
   />
 </template>
 
-<style lang="postcss" scoped>
+<style scoped>
 :deep(.p-sidebar) {
   @apply h-full;
 }
@@ -257,13 +250,5 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
 /* Ajout de l'animation pour l'overlay */
 .backdrop-blur-sm {
   @apply transition-opacity duration-300;
-}
-
-.mobileNavbar {
-  height: 3.5rem;
-}
-
-.logo-container {
-  height: 4.5rem;
 }
 </style>

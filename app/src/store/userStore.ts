@@ -1,3 +1,4 @@
+import router from "@/router";
 import authService from "@/services/authService.ts";
 import { ICredentials, IRegister } from "@/types/security.types.ts";
 import { Association } from "@shared/types/association";
@@ -84,6 +85,9 @@ export const useUserStore = defineStore("user", {
     },
     logout() {
       this.$reset();
+      this.initialized = true;
+      this.loader = false;
+      router.push("/login");
     },
     async refetchUser() {
       this.loader = true;
