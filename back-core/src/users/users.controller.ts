@@ -1,10 +1,28 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, Req } from '@nestjs/common';
-import { UsersService } from './users.service';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { User } from './entities/user.entity';
-import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Put,
+  Req,
+} from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import {
+  CreateUserDto,
+  UpdateUserDto,
+  UserProfileDto,
+} from '@shared/dto/user.dto';
+import {
+  createUserSchema,
+  updateUserSchema,
+} from '@shared/validations/user.validation';
+import { CurrentUserId } from '@src/utils/decorators/current-user-id.decorator';
+import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
+import { YupValidationPipe } from '../utils/pipes/yup-validation.pipe';
+import { User } from './entities/user.entity';
+import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
@@ -30,15 +48,20 @@ export class UsersController {
   @Post()
   @BearAuthToken()
   @ApiBearerAuth()
-  create(@Body() createUserDto: CreateUserDto): Promise<User> {
+  create(
+    @Body(new YupValidationPipe(createUserSchema)) createUserDto: CreateUserDto,
+  ): Promise<UserProfileDto> {
     return this.usersService.create(createUserDto);
   }
 
-  @Put(':id')
+  @Put('me')
   @BearAuthToken()
   @ApiBearerAuth()
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto): Promise<User> {
-    return this.usersService.update(id, updateUserDto);
+  async update(
+    @CurrentUserId() id: string,
+    @Body(new YupValidationPipe(updateUserSchema)) updateUserDto: UpdateUserDto,
+  ): Promise<void> {
+    await this.usersService.update(id, updateUserDto);
   }
 
   @Delete(':id')

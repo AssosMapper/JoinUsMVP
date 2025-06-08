@@ -4,14 +4,17 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
-import { Repository } from 'typeorm';
+import {
+  CreateUserDto,
+  UpdateUserDto,
+  UserProfileDto,
+} from '@shared/dto/user.dto';
+import { plainToInstance } from 'class-transformer';
+import { Not, Repository } from 'typeorm';
 import { Association } from '../associations/entities/association.entity';
 import { RegisterDto } from '../auth/dto/register.dto';
 import { Role } from '../roles/entities/role.entity';
 import { hashPassword } from '../utils/functions';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 
 @Injectable()
@@ -44,40 +47,50 @@ export class UsersService {
     return user;
   }
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async checkEmailExists(
+    email: string,
+    excludeUserId?: string,
+  ): Promise<boolean> {
+    const whereCondition: any = { email };
+
+    if (excludeUserId) whereCondition.id = Not(excludeUserId);
+
+    const existingUser = await this.usersRepository.findOne({
+      where: whereCondition,
+    });
+
+    return !!existingUser;
+  }
+
+  async create(createUserDto: CreateUserDto): Promise<UserProfileDto> {
+    // Vérifier si l'email existe déjà
+    const emailExists = await this.checkEmailExists(createUserDto.email);
+    if (emailExists) {
+      throw new ConflictException(
+        `Un utilisateur avec l'email ${createUserDto.email} existe déjà`,
+      );
+    }
+
     const hashedPassword = await hashPassword(createUserDto.password);
 
-    const role = await this.rolesRepository.findOne({
-      where: { id: createUserDto.roleId },
-    });
-    console.log(role);
-    if (!role) {
-      throw new NotFoundException(
-        `Role with ID ${createUserDto.roleId} not found`,
-      );
-    }
-
-    const association = await this.associationsRepository.findOne({
-      where: {
-        id: createUserDto.associationId,
-      },
-    });
-    if (!association) {
-      throw new NotFoundException(
-        `Association with ID ${createUserDto.associationId} not found`,
-      );
-    }
     const newUser = new User();
     newUser.password = hashedPassword;
-    newUser.roles = [role];
-    newUser.associations = [association];
     newUser.email = createUserDto.email;
-    newUser.first_name = createUserDto.firstName;
-    newUser.last_name = createUserDto.lastName;
+    newUser.first_name = createUserDto.first_name;
+    newUser.last_name = createUserDto.last_name;
     newUser.phone = createUserDto.phone;
-    newUser.localisation = createUserDto.localisation;
-    //newUser.image = createUserDto.image;
-    return this.usersRepository.save(newUser);
+
+    const savedUser = await this.usersRepository.save(newUser);
+
+    // Récupérer l'utilisateur avec ses relations pour le DTO
+    const userWithRelations = await this.usersRepository.findOne({
+      where: { id: savedUser.id },
+      relations: ['localisation'],
+    });
+
+    return plainToInstance(UserProfileDto, userWithRelations, {
+      excludeExtraneousValues: true,
+    });
   }
 
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
@@ -85,27 +98,25 @@ export class UsersService {
       where: { id },
       relations: ['roles', 'associations'],
     });
-    if (!existingUser) {
+    if (!existingUser)
       throw new NotFoundException(`User with ID ${id} not found`);
-    }
 
-    if (updateUserDto.password) {
-      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
-    }
-
-    if (updateUserDto.roleId) {
-      const role = await this.rolesRepository.findOne({
-        where: { id: updateUserDto.roleId },
-      });
-      if (!role) {
-        throw new NotFoundException(
-          `Role with ID ${updateUserDto.roleId} not found`,
+    if (updateUserDto.email) {
+      const emailExists = await this.checkEmailExists(updateUserDto.email, id);
+      if (emailExists) {
+        throw new ConflictException(
+          `Un utilisateur avec l'email ${updateUserDto.email} existe déjà`,
         );
       }
     }
 
+    if (updateUserDto.password)
+      updateUserDto.password = await hashPassword(updateUserDto.password);
+
     Object.assign(existingUser, updateUserDto);
-    return await this.usersRepository.save(existingUser);
+    const savedUser = await this.usersRepository.save(existingUser);
+    console.log(savedUser);
+    return savedUser;
   }
 
   async findByEmail(email: string): Promise<User | undefined> {
