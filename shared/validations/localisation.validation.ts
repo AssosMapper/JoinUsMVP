@@ -1,5 +1,8 @@
 import * as yup from "yup";
-import { CreateLocalisationDto } from "../dto/localisation.dto";
+import {
+  CreateLocalisationDto,
+  SaveLocalisationDto,
+} from "../dto/localisation.dto";
 
 export const createLocalisationSchema = yup.object().shape({
   street_number: yup.string().required("Le numéro de rue est requis"),
@@ -8,3 +11,8 @@ export const createLocalisationSchema = yup.object().shape({
   city: yup.string().required("La ville est requise"),
   country: yup.string().required("Le pays est requis"),
 }) satisfies yup.ObjectSchema<CreateLocalisationDto>;
+
+export const saveLocalisationSchema =
+  createLocalisationSchema satisfies yup.ObjectSchema<
+    Omit<SaveLocalisationDto, "id">
+  >;

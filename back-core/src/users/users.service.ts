@@ -4,6 +4,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { SaveLocalisationDto } from '@shared/dto/localisation.dto';
 import {
   CreateUserDto,
   UpdateUserDto,
@@ -13,6 +14,7 @@ import { plainToInstance } from 'class-transformer';
 import { Not, Repository } from 'typeorm';
 import { Association } from '../associations/entities/association.entity';
 import { RegisterDto } from '../auth/dto/register.dto';
+import { LocalisationService } from '../localisation/localisation.service';
 import { Role } from '../roles/entities/role.entity';
 import { hashPassword } from '../utils/functions';
 import { User } from './entities/user.entity';
@@ -26,6 +28,7 @@ export class UsersService {
     private readonly rolesRepository: Repository<Role>,
     @Inject('ASSOCIATION_REPOSITORY')
     private readonly associationsRepository: Repository<Association>,
+    private readonly localisationService: LocalisationService,
   ) {}
 
   findAll(): Promise<User[]> {
@@ -117,6 +120,36 @@ export class UsersService {
     const savedUser = await this.usersRepository.save(existingUser);
     console.log(savedUser);
     return savedUser;
+  }
+
+  async updateProfile(
+    id: string,
+    updateUserDto?: UpdateUserDto,
+    saveLocalisationDto?: SaveLocalisationDto,
+  ): Promise<User> {
+    const existingUser = await this.usersRepository.findOne({
+      where: { id },
+      relations: ['roles', 'associations', 'localisation'],
+    });
+
+    if (!existingUser)
+      throw new NotFoundException(`User with ID ${id} not found`);
+
+    if (updateUserDto) await this.update(id, updateUserDto);
+
+    if (saveLocalisationDto) {
+      const savedLocalisation =
+        await this.localisationService.save(saveLocalisationDto);
+
+      if (!existingUser.localisation) {
+        existingUser.localisation = savedLocalisation;
+        await this.usersRepository.save(existingUser);
+      }
+    }
+    return this.usersRepository.findOne({
+      where: { id },
+      relations: ['roles', 'associations', 'localisation'],
+    });
   }
 
   async findByEmail(email: string): Promise<User | undefined> {

@@ -9,18 +9,23 @@ import {
   Req,
 } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { SaveLocalisationDto } from '@shared/dto/localisation.dto';
 import {
   CreateUserDto,
   UpdateUserDto,
   UserProfileDto,
 } from '@shared/dto/user.dto';
+import { saveLocalisationSchema } from '@shared/validations/localisation.validation';
 import {
   createUserSchema,
   updateUserSchema,
 } from '@shared/validations/user.validation';
 import { CurrentUserId } from '@src/utils/decorators/current-user-id.decorator';
 import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
-import { YupValidationPipe } from '../utils/pipes/yup-validation.pipe';
+import {
+  OptionalYupValidationPipe,
+  YupValidationPipe,
+} from '../utils/pipes/yup-validation.pipe';
 import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 
@@ -59,9 +64,16 @@ export class UsersController {
   @ApiBearerAuth()
   async update(
     @CurrentUserId() id: string,
-    @Body(new YupValidationPipe(updateUserSchema)) updateUserDto: UpdateUserDto,
+    @Body('user', new OptionalYupValidationPipe(updateUserSchema))
+    updateUserDto?: UpdateUserDto,
+    @Body('localisation', new OptionalYupValidationPipe(saveLocalisationSchema))
+    saveLocalisationDto?: SaveLocalisationDto,
   ): Promise<void> {
-    await this.usersService.update(id, updateUserDto);
+    await this.usersService.updateProfile(
+      id,
+      updateUserDto,
+      saveLocalisationDto,
+    );
   }
 
   @Delete(':id')

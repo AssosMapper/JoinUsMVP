@@ -1,5 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CreateLocalisationDto } from '@shared/dto/localisation.dto';
+import {
+  CreateLocalisationDto,
+  SaveLocalisationDto,
+} from '@shared/dto/localisation.dto';
 import { Repository } from 'typeorm';
 import { Localisation } from './entities/localisation.entity';
 
@@ -14,6 +17,11 @@ export class LocalisationService {
     createLocalisationDto: CreateLocalisationDto,
   ): Promise<Localisation> {
     const localisation = await this.repository.create(createLocalisationDto);
+    return localisation;
+  }
+
+  async save(saveLocalisationDto: SaveLocalisationDto): Promise<Localisation> {
+    const localisation = await this.repository.save(saveLocalisationDto);
     return localisation;
   }
 }

@@ -14,3 +14,7 @@ export class CreateLocalisationDto {
   city: string;
   country: string;
 }
+
+export class SaveLocalisationDto extends CreateLocalisationDto {
+  id?: string;
+}
