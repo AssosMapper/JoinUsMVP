@@ -15,6 +15,7 @@ import { Not, Repository } from 'typeorm';
 import { Association } from '../associations/entities/association.entity';
 import { RegisterDto } from '../auth/dto/register.dto';
 import { LocalisationService } from '../localisation/localisation.service';
+import { MediaService } from '../media/media.service';
 import { Role } from '../roles/entities/role.entity';
 import { hashPassword } from '../utils/functions';
 import { User } from './entities/user.entity';
@@ -29,6 +30,7 @@ export class UsersService {
     @Inject('ASSOCIATION_REPOSITORY')
     private readonly associationsRepository: Repository<Association>,
     private readonly localisationService: LocalisationService,
+    private readonly mediaService: MediaService,
   ) {}
 
   findAll(): Promise<User[]> {
@@ -50,6 +52,13 @@ export class UsersService {
     return user;
   }
 
+  async getProfile(id: string): Promise<UserProfileDto> {
+    const user = await this.usersRepository.findOne({
+      where: { id },
+      relations: ['roles.permissions', 'localisation', 'image'],
+    });
+    return user;
+  }
   async checkEmailExists(
     email: string,
     excludeUserId?: string,
@@ -99,7 +108,7 @@ export class UsersService {
   async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
     const existingUser = await this.usersRepository.findOne({
       where: { id },
-      relations: ['roles', 'associations'],
+      relations: ['roles', 'associations', 'image'],
     });
     if (!existingUser)
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -116,9 +125,18 @@ export class UsersService {
     if (updateUserDto.password)
       updateUserDto.password = await hashPassword(updateUserDto.password);
 
+    if (updateUserDto.imageId) {
+      const media = await this.mediaService.findOne(updateUserDto.imageId);
+      if (!media) {
+        throw new NotFoundException(
+          `Une erreur est survenue lors de l'upload de l'image`,
+        );
+      }
+      delete updateUserDto.imageId;
+      existingUser.image = media;
+    }
     Object.assign(existingUser, updateUserDto);
     const savedUser = await this.usersRepository.save(existingUser);
-    console.log(savedUser);
     return savedUser;
   }
 

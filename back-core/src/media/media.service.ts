@@ -27,8 +27,8 @@ export class MediaService {
    * @param createMediaDto
    * @param file
    */
-  async create(createMediaDto: CreateMediaDto, file: Express.Multer.File) {
-    const fileData = await this.uploadFile(file);
+  async create(createMediaDto: CreateMediaDto) {
+    const fileData = await this.uploadFile(createMediaDto.file);
 
     if (createMediaDto.title) {
       const existingMedia = await this.findByTitle(createMediaDto.title);
@@ -149,20 +149,19 @@ export class MediaService {
    * @param file
    */
   uploadFile(file: Express.Multer.File): Promise<any> {
-    const uploadDir = path.resolve(__dirname, '../../uploads');
-    console.log(path.resolve(__dirname, '../../uploads'));
+    const uploadDir = process.cwd() + '/uploads';
     if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
     const fileExtension = path.extname(file.originalname);
     const filename = uuidv4() + fileExtension;
-    const filepath = path.resolve(__dirname, '../../uploads', filename);
+    const filepath = '/uploads/' + filename;
     const filesize = file.size;
 
     // Crée un stream de lecture à partir du buffer du fichier téléchargé
     const readStream = this.bufferToStream(file.buffer);
 
     // Crée un stream d'écriture pour le nouveau fichier
-    const writeStream = fs.createWriteStream(filepath);
+    const writeStream = fs.createWriteStream(uploadDir + '/' + filename);
 
     // Pipe le stream de lecture vers le stream d'écriture
     readStream.pipe(writeStream);

@@ -1,7 +1,11 @@
 import { useApi } from "@/composables/useApi";
 import { useApiStore } from "@/store/apiUrls.store";
+import { ResponseError } from "@/types/http.types";
+import { SaveLocalisationDto } from "@shared/dto/localisation.dto";
+import { UpdateUserDto, UserProfileDto } from "@shared/dto/user.dto";
 import { User } from "@shared/types/user";
 import axios from "axios";
+
 const API_URL = import.meta.env.VUE_APP_BACKEND_URL;
 
 const createUser = async (user: User) => {
@@ -39,19 +43,31 @@ const deleteUser = async (id: number, token: string) => {
   return response.data;
 };
 
-export const getProfile = async (token: string) => {
-  const urls = useApiStore();
-  const { data, error } = await useApi(urls.security.auth.profile, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  })
+export const getProfile = async (): Promise<UserProfileDto> => {
+  const apiStore = useApiStore();
+  const { data, error } = await useApi(apiStore.security.auth.profile)
     .get()
-    .json();
-  if (error.value) {
-    throw new Error(error.value);
-  }
+    .json<UserProfileDto>();
+
+  if (error.value) throw error.value as ResponseError;
   return data.value;
+};
+
+export const updateProfile = async (
+  updateUserDto?: UpdateUserDto,
+  saveLocalisationDto?: SaveLocalisationDto
+): Promise<void> => {
+  const apiStore = useApiStore();
+  const payload: any = {};
+
+  if (updateUserDto) payload.user = updateUserDto;
+  if (saveLocalisationDto) payload.localisation = saveLocalisationDto;
+
+  const { error } = await useApi(apiStore.security.auth.profile)
+    .put(payload)
+    .json();
+
+  if (error.value) throw error.value as ResponseError;
 };
 
 export default {
@@ -61,4 +77,5 @@ export default {
   updateUser,
   deleteUser,
   getProfile,
+  updateProfile,
 };

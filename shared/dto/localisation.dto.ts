@@ -1,20 +1,21 @@
+import { Expose } from "class-transformer";
 export class LocalisationDto {
-  id: string;
-  street_number: string;
-  street_name: string;
-  zip: string;
-  city: string;
-  country: string;
+  @Expose() id: string;
+  @Expose() street_number: string;
+  @Expose() street_name: string;
+  @Expose() zip: string;
+  @Expose() city: string;
+  @Expose() country: string;
 }
 
 export class CreateLocalisationDto {
-  street_number: string;
-  street_name: string;
-  zip: string;
-  city: string;
-  country: string;
+  @Expose() street_number: string;
+  @Expose() street_name: string;
+  @Expose() zip: string;
+  @Expose() city: string;
+  @Expose() country: string;
 }
 
 export class SaveLocalisationDto extends CreateLocalisationDto {
-  id?: string;
+  @Expose() id?: string;
 }

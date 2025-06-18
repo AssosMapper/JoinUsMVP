@@ -6,7 +6,6 @@ import {
   Param,
   Post,
   Put,
-  Req,
 } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { SaveLocalisationDto } from '@shared/dto/localisation.dto';
@@ -21,6 +20,7 @@ import {
   updateUserSchema,
 } from '@shared/validations/user.validation';
 import { CurrentUserId } from '@src/utils/decorators/current-user-id.decorator';
+import { plainToInstance } from 'class-transformer';
 import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
 import {
   OptionalYupValidationPipe,
@@ -41,8 +41,12 @@ export class UsersController {
   @Get('me')
   @BearAuthToken()
   @ApiBearerAuth()
-  async getProfile(@Req() req: any): Promise<User> {
-    return this.usersService.findOne(req.user.userId);
+  async getProfile(@CurrentUserId() id: string): Promise<UserProfileDto> {
+    const user = await this.usersService.getProfile(id);
+    return plainToInstance(UserProfileDto, user, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Get(':id')

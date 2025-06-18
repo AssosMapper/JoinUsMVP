@@ -11,9 +11,18 @@ export class PublicUserDto {
   @Expose() image: PublicMediaDto;
 }
 
-export class UserProfileDto extends PublicUserDto {
+export class UserDto {
+  @Expose() id: string;
+  @Expose() createdAt: Date;
+  @Expose() updatedAt: Date;
+  @Expose() first_name: string;
+  @Expose() last_name: string;
+  @Expose() email: string;
+  @Expose() phone?: string;
+  @Expose() image?: PublicMediaDto;
   @Expose() localisation?: LocalisationDto;
 }
+export class UserProfileDto extends UserDto {}
 
 export class CreateUserDto {
   first_name: string;
@@ -25,10 +34,11 @@ export class CreateUserDto {
 }
 
 export class UpdateUserDto {
-  first_name?: string;
-  last_name?: string;
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
-  phone?: string;
+  @Expose() first_name?: string;
+  @Expose() last_name?: string;
+  @Expose() email?: string;
+  @Expose() password?: string;
+  @Expose() confirmPassword?: string;
+  @Expose() phone?: string;
+  @Expose() imageId?: string;
 }

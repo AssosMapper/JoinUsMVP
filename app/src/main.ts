@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import "@/assets/styles/variables.css";
 import router from "@/router";
 import "@shared/validations/config";
@@ -9,6 +10,7 @@ import ToastService from "primevue/toastservice";
 import { createApp } from "vue";
 import App from "./App.vue";
 import "./index.css";
+
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 

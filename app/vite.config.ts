@@ -11,12 +11,16 @@ export default defineConfig({
       resolvers: [PrimeVueResolver()],
     }),
   ],
+  optimizeDeps: {
+    include: ["reflect-metadata", "class-transformer"],
+  },
   server: {
     host: true,
     watch: {
-      usePolling: true
-    }
+      usePolling: true,
+    },
   },
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

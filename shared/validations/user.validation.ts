@@ -63,12 +63,20 @@ export const updateUserSchema = yup.object().shape({
   first_name: baseUserSchema.first_name.optional(),
   last_name: baseUserSchema.last_name.optional(),
   email: baseUserSchema.email.optional(),
-  password: baseUserSchema.password.optional(),
-  confirmPassword: baseUserSchema.confirmPassword.when("password", {
-    is: (password: string) => password && password.length > 0,
-    then: (schema) =>
-      schema.required("La confirmation du mot de passe est requise"),
-    otherwise: (schema) => schema.optional(),
-  }),
+  password: baseUserSchema.password
+    .optional()
+    .transform((value) => (value === "" ? undefined : value)),
+  confirmPassword: baseUserSchema.confirmPassword
+    .when("password", {
+      is: (password: string) => password && password.length > 0,
+      then: (schema) =>
+        schema.required("La confirmation du mot de passe est requise"),
+      otherwise: (schema) => schema.optional(),
+    })
+    .transform((value) => (value === "" ? undefined : value)),
   phone: baseUserSchema.phone.optional(),
+  imageId: yup
+    .string()
+    .uuid("L'ID de l'image doit être un UUID valide")
+    .optional(),
 }) satisfies yup.ObjectSchema<UpdateUserDto>;

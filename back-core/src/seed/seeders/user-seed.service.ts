@@ -65,10 +65,7 @@ export class UserSeedService {
         "Avatar téléchargé depuis Lorem Picsum pour le gestionnaire d'association",
       file: imageFile,
     };
-    const uploadedImage = await this.mediaService.create(
-      createMediaDto,
-      imageFile,
-    );
+    const uploadedImage = await this.mediaService.create(createMediaDto);
     console.log('Image uploaded successfully:', uploadedImage.filename);
 
     user = new User();

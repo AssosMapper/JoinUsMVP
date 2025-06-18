@@ -8,7 +8,7 @@ export class CreateMediaDto {
   })
   @IsString()
   @IsOptional()
-  title: string;
+  title?: string;
 
   @ApiProperty({
     description: 'Description of the media',
@@ -16,7 +16,7 @@ export class CreateMediaDto {
   })
   @IsString()
   @IsOptional()
-  description: string;
+  description?: string;
 
   @ApiProperty({
     type: 'string',

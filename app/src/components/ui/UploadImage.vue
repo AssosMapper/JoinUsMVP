@@ -2,6 +2,7 @@
 import Uploader from "@/components/ui/Uploader.vue";
 import { getMediaUrl } from "@/utils/media.util";
 import { PublicMediaDto } from "@shared/dto/media.dto";
+import { Media } from "@shared/types/media";
 import { ref, watch } from "vue";
 const props = defineProps<{
   modelValue?: PublicMediaDto | null;
@@ -17,7 +18,7 @@ const previewUrl = ref<string | null>(null);
 watch(
   () => props.modelValue,
   (newMedia) => {
-    if (newMedia) previewUrl.value = getMediaUrl(newMedia.filename);
+    if (newMedia) previewUrl.value = getMediaUrl(newMedia as Media);
     else previewUrl.value = null;
   },
   { immediate: true }

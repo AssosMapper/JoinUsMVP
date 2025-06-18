@@ -1,135 +1,284 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
-import { useUserStore } from '@/store';
-import userService from '@/services/usersService';
-import { useNotificationStore } from '@/store/notificationStore.ts';
+import "reflect-metadata";
+import GoogleAutoCompleteComponent from "@/components/GoogleAutoCompleteComponent.vue";
+import JnsField from "@/components/ui/JnsField.vue";
+import UploadImage from "@/components/ui/UploadImage.vue";
+import usersService from "@/services/usersService";
+import { useNotificationStore } from "@/store/notificationStore";
+import { PublicMediaDto } from "@shared/dto/media.dto";
+import { UpdateUserDto } from "@shared/dto/user.dto";
+import { updateUserSchema } from "@shared/validations/user.validation";
+import Button from "primevue/button";
+import Card from "primevue/card";
+import Divider from "primevue/divider";
+import FloatLabel from "primevue/floatlabel";
+import InputText from "primevue/inputtext";
+import { useForm } from "vee-validate";
+import { onMounted, ref } from "vue";
+import { plainToInstance } from "class-transformer";
+import { SaveLocalisationDto } from "@shared/dto/localisation.dto";
+import { useUserStore } from "@/store/userStore";
 
-const router = useRouter();
-const userStore = useUserStore();
 const notificationStore = useNotificationStore();
 
-const firstName = ref(userStore.first_name);
-const lastName = ref(userStore.last_name);
-const email = ref(userStore.email);
-const password = ref('');
-const confirmPassword = ref('');
-const roleId = ref(userStore.role?.id ?? null);
-const phone = ref(userStore.phone);
-const localisation = ref(userStore.localisation);
-const image = ref(userStore.image);
-const associationId = ref(userStore.associationId);
+// État du formulaire
+const isSubmitting = ref(false);
+const isLoading = ref(true);
+const profilePicture = ref<PublicMediaDto | null>(null);
+const localisation = ref<SaveLocalisationDto | null>(null);
+const userStore = useUserStore();
 
+// Configuration VeeValidate
+const { handleSubmit, resetForm, errors, defineField } = useForm<UpdateUserDto>(
+  {
+    validationSchema: updateUserSchema,
+  }
+);
+const [firstName, firstNameAttrs] = defineField("first_name");
+const [lastName, lastNameAttrs] = defineField("last_name");
+const [email, emailAttrs] = defineField("email");
+const [phone, phoneAttrs] = defineField("phone");
+const [password, passwordAttrs] = defineField("password");
+const [confirmPassword, confirmPasswordAttrs] = defineField("confirmPassword");
 
-const validatePhone = (phone: string) => {
-  const phoneRegex = /^0[1-9]\d{8}$/;
-  return phoneRegex.test(phone);
+const loadDataForm = async () => {
+  await userStore.refetchUser();
+  const userData = plainToInstance(UpdateUserDto, userStore.user, {
+    excludeExtraneousValues: true,
+    enableImplicitConversion: true,
+  });
+  if (userStore.user.image) {
+    profilePicture.value = plainToInstance(
+      PublicMediaDto,
+      userStore.user.image,
+      {
+        excludeExtraneousValues: true,
+        enableImplicitConversion: true,
+      }
+    );
+    userData.imageId = userStore.user.image.id;
+  }
+  if (userStore.user.localisation) {
+    localisation.value = plainToInstance(
+      SaveLocalisationDto,
+      userStore.user.localisation,
+      {
+        excludeExtraneousValues: true,
+        enableImplicitConversion: true,
+      }
+    );
+  }
+  resetForm({
+    values: { ...userData, password: undefined, confirmPassword: undefined },
+  });
+};
+onMounted(async () => {
+  try {
+    await loadDataForm();
+  } catch (error: any) {
+    notificationStore.showNotification(
+      error.message || "Erreur lors du chargement du profil",
+      "error"
+    );
+  } finally {
+    isLoading.value = false;
+  }
+});
+
+// Soumission du formulaire
+const onSubmit = handleSubmit(async (formValues: UpdateUserDto) => {
+  isSubmitting.value = true;
+  try {
+    await usersService.updateProfile(
+      formValues,
+      localisation.value || undefined
+    );
+    notificationStore.showNotification(
+      "Profil mis à jour avec succès",
+      "success"
+    );
+    await loadDataForm();
+  } catch (error: any) {
+    notificationStore.showNotification(
+      error.message || "Erreur lors de la mise à jour",
+      "error"
+    );
+  } finally {
+    isSubmitting.value = false;
+  }
+});
+
+// Gestion des événements
+const handleImageUpload = (newImage: PublicMediaDto) => {
+  profilePicture.value = plainToInstance(PublicMediaDto, newImage, {
+    excludeExtraneousValues: true,
+    enableImplicitConversion: true,
+  });
 };
 
-const handleSubmit = async () => {
-  if (!validatePhone(phone.value)) {
-    notificationStore.showNotification("Invalid phone number format. The phone number must be 0+(de 1 a 9) + 8 chiffres.", "error");
-    return;
-  }
-
-  if (roleId.value === null) {
-    notificationStore.showNotification("Role ID is required.", "error");
-    return;
-  }
-  
-  const user = {
-    first_name: firstName.value,
-    last_name: lastName.value,
-    email: email.value,
-    password: password.value,
-    confirmPassword: confirmPassword.value,
-    roleId: roleId.value, 
-    phone: phone.value,
-    localisation: localisation.value,
-    image: image.value,
-    dateCreated: userStore.dateCreated,
-    associationId: associationId.value
-  };
-
-  try {
-    await userService.updateUser(userStore.id as number, user, userStore.access_token);
-    await userStore.fetchUserDetails(); 
-    notificationStore.showNotification("Profil modifié avec succès !", "success");
-    router.push('/');
-  } catch (error) {
-    notificationStore.showNotification("Erreur lors de la modification du profil", "error");
-  }
+const handleLocalisationChange = (newLocalisation: any) => {
+  const localisationId = localisation.value?.id;
+  if (newLocalisation) {
+    localisation.value = plainToInstance(SaveLocalisationDto, newLocalisation, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
+    localisation.value.id = localisationId;
+  } else localisation.value = null;
 };
 </script>
 
 <template>
-  <div class="form-container w-4/5 flex justify-center text-center mx-auto my-10 py-8 border border-gray-300 rounded-lg">
-    <form class="w-full max-w-4xl" @submit.prevent="handleSubmit">
-      <div class="space-y-12">
-        <div class="border-b border-gray-900/10 pb-12">
-          <h2 class="text-base font-semibold leading-7 text-gray-900">Update Profile</h2>
+  <div class="container mx-auto p-6 max-w-4xl">
+    <Card>
+      <template #title>
+        <div class="flex items-center gap-3">
+          <i class="pi pi-user text-2xl text-primary"></i>
+          <span>Mon Profil</span>
+        </div>
+      </template>
 
-          <div class="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-            <div class="sm:col-span-3">
-              <label for="first-name" class="block text-sm font-medium leading-6 text-gray-900">First name</label>
-              <input type="text" id="first-name" v-model="firstName" required class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2" />
-            </div>
+      <template #content>
+        <div v-if="isLoading" class="text-center py-8">
+          <i class="pi pi-spin pi-spinner text-2xl"></i>
+          <p class="mt-2">Chargement du profil...</p>
+        </div>
 
-            <div class="sm:col-span-3">
-              <label for="last-name" class="block text-sm font-medium leading-6 text-gray-900">Last name</label>
-              <input type="text" id="last-name" v-model="lastName" required class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2" />
-            </div>
+        <form v-else @submit="onSubmit" class="space-y-6">
+          <!-- Photo de profil -->
+          <div class="text-center">
+            <h3 class="text-lg font-semibold mb-4">Photo de profil</h3>
+            <UploadImage
+              v-model="profilePicture"
+              :preview="true"
+              @update:modelValue="handleImageUpload"
+            />
+          </div>
 
-            <div class="sm:col-span-3">
-              <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email address</label>
-              <input type="email" id="email" v-model="email" required class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2" />
-            </div>
+          <Divider />
 
-            <div class="sm:col-span-3">
-              <label for="phone" class="block text-sm font-medium leading-6 text-gray-900">Phone</label>
-              <input type="text" id="phone" v-model="phone" class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2" />
-            </div>
+          <!-- Informations personnelles -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <JnsField :errorMessage="errors.first_name">
+              <FloatLabel variant="in" class="w-full">
+                <InputText
+                  id="first_name"
+                  v-model="firstName"
+                  v-bind="firstNameAttrs"
+                  class="w-full"
+                  :class="{ 'p-invalid': errors.first_name }"
+                />
+                <label for="first_name">Prénom *</label>
+              </FloatLabel>
+            </JnsField>
 
-            <div class="sm:col-span-3">
-              <label for="password" class="block text-sm font-medium leading-6 text-gray-900">Password</label>
-              <input type="password" id="password" v-model="password" class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2" />
-            </div>
+            <JnsField :errorMessage="errors.last_name">
+              <FloatLabel variant="in" class="w-full">
+                <InputText
+                  id="last_name"
+                  v-model="lastName"
+                  v-bind="lastNameAttrs"
+                  class="w-full"
+                  :class="{ 'p-invalid': errors.last_name }"
+                />
+                <label for="last_name">Nom *</label>
+              </FloatLabel>
+            </JnsField>
 
-            <div class="sm:col-span-3">
-              <label for="confirm-password" class="block text-sm font-medium leading-6 text-gray-900">Confirm Password</label>
-              <input type="password" id="confirm-password" v-model="confirmPassword" class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2" />
-            </div>
+            <JnsField :errorMessage="errors.email">
+              <FloatLabel variant="in" class="w-full">
+                <InputText
+                  id="email"
+                  v-model="email"
+                  v-bind="emailAttrs"
+                  type="email"
+                  class="w-full"
+                  :class="{ 'p-invalid': errors.email }"
+                />
+                <label for="email">Email *</label>
+              </FloatLabel>
+            </JnsField>
 
-            <div class="sm:col-span-2">
-              <label for="role-id" class="block text-sm font-medium leading-6 text-gray-900">Role ID</label>
-              <input type="number" id="role-id" v-model="roleId" required class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2" />
-            </div>
+            <JnsField :errorMessage="errors.phone">
+              <FloatLabel variant="in" class="w-full">
+                <InputText
+                  id="phone"
+                  v-model="phone"
+                  v-bind="phoneAttrs"
+                  type="tel"
+                  class="w-full"
+                  :class="{ 'p-invalid': errors.phone }"
+                />
+                <label for="phone">Téléphone</label>
+              </FloatLabel>
+            </JnsField>
+          </div>
 
-            <div class="sm:col-span-2">
-              <label for="address" class="block text-sm font-medium leading-6 text-gray-900">Localisation</label>
-              <GoogleAutoCompleteComponent
-                id="localisation"
-                v-model="localisation"
-                placeholder="Enter location"
-                class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2"
-              />
-            </div>
+          <Divider />
 
-            <div class="col-span-full">
-              <label for="image" class="block text-sm font-medium leading-6 text-gray-900">Image URL</label>
-              <input type="text" id="image" v-model="image" class="mt-2 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2" />
+          <!-- Localisation -->
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Localisation</h3>
+            <GoogleAutoCompleteComponent
+              :model-value="localisation"
+              input-id="address"
+              input-class="p-inputtext p-component w-full"
+              placeholder="Entrez votre adresse"
+              @update:modelValue="handleLocalisationChange"
+            />
+          </div>
+
+          <Divider />
+
+          <!-- Changer le mot de passe -->
+          <div>
+            <h3 class="text-lg font-semibold mb-4">Changer le mot de passe</h3>
+            <p class="text-sm text-gray-600 mb-4">
+              Laissez vide si vous ne souhaitez pas changer votre mot de passe
+            </p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <JnsField :errorMessage="errors.password">
+                <FloatLabel variant="in" class="w-full">
+                  <InputText
+                    id="password"
+                    v-model="password"
+                    v-bind="passwordAttrs"
+                    type="password"
+                    class="w-full"
+                    :class="{ 'p-invalid': errors.password }"
+                  />
+                  <label for="password">Nouveau mot de passe</label>
+                </FloatLabel>
+              </JnsField>
+
+              <JnsField :errorMessage="errors.confirmPassword">
+                <FloatLabel variant="in" class="w-full">
+                  <InputText
+                    id="confirmPassword"
+                    v-model="confirmPassword"
+                    v-bind="confirmPasswordAttrs"
+                    type="password"
+                    class="w-full"
+                    :class="{ 'p-invalid': errors.confirmPassword }"
+                  />
+                  <label for="confirmPassword">Confirmer le mot de passe</label>
+                </FloatLabel>
+              </JnsField>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div class="mt-6 flex items-center justify-end gap-x-6">
-        <button type="button" class="text-sm font-semibold leading-6 text-gray-900">Cancel</button>
-        <button type="submit" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Save</button>
-      </div>
-    </form>
+          <!-- Boutons d'action -->
+          <div class="flex justify-end gap-3 pt-4">
+            <Button
+              type="submit"
+              label="Sauvegarder"
+              :loading="isSubmitting"
+              icon="pi pi-save"
+            />
+          </div>
+        </form>
+      </template>
+    </Card>
   </div>
 </template>
-
-<style scoped>
-</style>

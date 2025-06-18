@@ -78,10 +78,12 @@ export class MediaController {
     @UploadedFile() file: Express.Multer.File,
     @Body() createMediaDto: CreateMediaDto,
   ): Promise<PublicMediaDto> {
-    const media = await this.mediaService.create(createMediaDto, file);
+    createMediaDto.file = file;
+    const media = await this.mediaService.create(createMediaDto);
     return {
       id: media.id,
       filename: media.filename,
+      filepath: media.filepath,
       mimetype: media.mimetype,
       size: media.size,
       createdAt: media.createdAt,

@@ -95,7 +95,6 @@ export class AssociationsController {
     @Param('id') id: string,
     @Body() updateAssociationDto: UpdateAssociationDto,
   ): Promise<PublicAssociationDto> {
-    console.log('Controller received update data:', updateAssociationDto);
     const association = await this.associationsService.update(
       id,
       updateAssociationDto,

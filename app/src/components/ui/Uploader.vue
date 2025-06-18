@@ -7,6 +7,7 @@ import { ref } from "vue";
 const props = defineProps<{
   accept?: string;
   maxSize?: number; // en MB
+  endpoint?: string; // Endpoint personnalisé
 }>();
 
 const emit = defineEmits<{
@@ -35,7 +36,9 @@ const handleFileSelect = async (event: Event) => {
   }
 
   try {
-    const result = await upload(file);
+    const result = await upload(file, {
+      endpoint: props.endpoint,
+    });
     emit("upload-success", result);
   } catch (error: any) {
     emit("upload-error", error);

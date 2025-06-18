@@ -80,7 +80,7 @@ onMounted(() => {
     <div v-if="!loading">
       <div
         v-if="events && events.length > 0"
-        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+        class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4"
       >
         <Card
           v-for="event in events"

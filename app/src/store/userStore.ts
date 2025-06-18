@@ -1,6 +1,9 @@
 import router from "@/router";
 import authService from "@/services/authService.ts";
+import usersService from "@/services/usersService.ts";
 import { ICredentials, IRegister } from "@/types/security.types.ts";
+import { LocalisationDto } from "@shared/dto/localisation.dto";
+import { PublicMediaDto } from "@shared/dto/media.dto";
 import { Association } from "@shared/types/association";
 import { Role } from "@shared/types/roles";
 import { defineStore } from "pinia";
@@ -10,6 +13,9 @@ interface UserState {
   first_name: string;
   last_name: string;
   email: string;
+  phone?: string;
+  image?: PublicMediaDto;
+  localisation?: LocalisationDto;
   roles: Role[];
   associations: Association[];
   associationId?: string;
@@ -92,8 +98,9 @@ export const useUserStore = defineStore("user", {
     async refetchUser() {
       this.loader = true;
       try {
-        const data = await authService.getProfile(this.token);
-        this.user = data;
+        const data = await usersService.getProfile();
+        this.user = { ...this.user, ...data };
+        console.log(this.user);
       } catch (e: unknown) {
         if (e instanceof Error) {
           throw new Error(e.message);

@@ -20,7 +20,7 @@ const mediaService = {
 
   getMediaUrl: (media?: Media | null) => {
     if (!media) return null;
-    return `${import.meta.env.VITE_API_BASE_URL}/uploads/${media.filename}`;
+    return `${import.meta.env.VITE_API_BASE_URL}/${media.filepath}`;
   },
 };
 
