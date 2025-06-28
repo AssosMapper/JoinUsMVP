@@ -6,8 +6,11 @@ import {
   Param,
   Post,
   Put,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { SaveLocalisationDto } from '@shared/dto/localisation.dto';
 import {
   CreateUserDto,
@@ -78,6 +81,25 @@ export class UsersController {
       updateUserDto,
       saveLocalisationDto,
     );
+  }
+
+  @Post('me/change-picture')
+  @BearAuthToken()
+  @ApiBearerAuth()
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
+  async changeProfilePicture(
+    @CurrentUserId() userId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ): Promise<void> {
+    await this.usersService.changeProfilePicture(userId, file);
+  }
+
+  @Delete('me/remove-picture')
+  @BearAuthToken()
+  @ApiBearerAuth()
+  async removeProfilePicture(@CurrentUserId() userId: string): Promise<void> {
+    await this.usersService.removeProfilePicture(userId);
   }
 
   @Delete(':id')

@@ -19,6 +19,8 @@ import { MediaService } from '../media/media.service';
 import { Role } from '../roles/entities/role.entity';
 import { hashPassword } from '../utils/functions';
 import { User } from './entities/user.entity';
+import { UploadMediaDto } from '@shared/dto/media.dto';
+import { PROFILE_PICTURE_PATH } from '../media/enums/media.enum';
 
 @Injectable()
 export class UsersService {
@@ -59,6 +61,7 @@ export class UsersService {
     });
     return user;
   }
+
   async checkEmailExists(
     email: string,
     excludeUserId?: string,
@@ -75,7 +78,6 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto): Promise<UserProfileDto> {
-    // Vérifier si l'email existe déjà
     const emailExists = await this.checkEmailExists(createUserDto.email);
     if (emailExists) {
       throw new ConflictException(
@@ -94,7 +96,6 @@ export class UsersService {
 
     const savedUser = await this.usersRepository.save(newUser);
 
-    // Récupérer l'utilisateur avec ses relations pour le DTO
     const userWithRelations = await this.usersRepository.findOne({
       where: { id: savedUser.id },
       relations: ['localisation'],
@@ -170,11 +171,44 @@ export class UsersService {
     });
   }
 
+  async changeProfilePicture(userId: string, file: Express.Multer.File) {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['image'],
+    });
+
+    if (!user) throw new NotFoundException(`Une erreur est survenue`);
+
+    const newMedia = await this.mediaService.save(
+      file,
+      plainToInstance(UploadMediaDto, {
+        id: user?.image?.id,
+        filepath: PROFILE_PICTURE_PATH,
+      }),
+    );
+    user.image = newMedia;
+    await this.usersRepository.save(user);
+
+    return newMedia;
+  }
+
   async findByEmail(email: string): Promise<User | undefined> {
     return this.usersRepository.findOne({
       where: { email },
       relations: ['roles', 'associations'],
     });
+  }
+
+  async removeProfilePicture(userId: string): Promise<void> {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
+      relations: ['image'],
+    });
+
+    if (!user) throw new NotFoundException(`Une erreur est survenue`);
+    user.image = null;
+    await this.usersRepository.save(user);
+    if (user.image) await this.mediaService.remove(user.image);
   }
 
   async remove(id: string): Promise<void> {
@@ -207,7 +241,6 @@ export class UsersService {
     newUser.last_name = registerDto.lastName;
     newUser.phone = registerDto.phone;
     newUser.localisation = registerDto.localisation;
-    //  newUser.image = registerDto.image;
     newUser.roles = [userRole];
 
     return this.usersRepository.save(newUser);

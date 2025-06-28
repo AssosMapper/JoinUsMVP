@@ -1,5 +1,4 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CreateMediaDto } from '@src/media/dto/create-media.dto';
 import * as https from 'https';
 import { Repository } from 'typeorm';
 import { Association } from '../../associations/entities/association.entity';
@@ -8,6 +7,7 @@ import { Role } from '../../roles/entities/role.entity';
 import { User } from '../../users/entities/user.entity';
 import { OnDev } from '../../utils/decorators/on-dev.decorator';
 import { hashPassword } from '../../utils/functions';
+import { PROFILE_PICTURE_PATH } from '../../media/enums/media.enum';
 
 @Injectable()
 export class UserSeedService {
@@ -56,16 +56,11 @@ export class UserSeedService {
       return;
     }
 
-    // Télécharger et uploader une image pour l'AssociationManager
-    console.log('Downloading image for AssociationManager...');
     const imageFile = await this.downloadImageFromPicsum(200);
-    const createMediaDto: CreateMediaDto = {
-      title: 'Photo de profil AssociationManager',
-      description:
-        "Avatar téléchargé depuis Lorem Picsum pour le gestionnaire d'association",
-      file: imageFile,
-    };
-    const uploadedImage = await this.mediaService.create(createMediaDto);
+
+    const uploadedImage = await this.mediaService.create(imageFile, {
+      filepath: PROFILE_PICTURE_PATH,
+    });
     console.log('Image uploaded successfully:', uploadedImage.filename);
 
     user = new User();

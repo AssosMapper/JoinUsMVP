@@ -17,7 +17,13 @@ export class AllExceptionsFilter implements ExceptionFilter {
       exception instanceof HttpException
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
-
+    console.error('Exception caught:', {
+      error: exception,
+      stack: exception instanceof Error ? exception.stack : 'No stack trace',
+      path: request.url,
+      method: request.method,
+      timestamp: new Date().toISOString(),
+    });
     response.status(status).json({
       statusCode: status,
       timestamp: new Date().toISOString(),

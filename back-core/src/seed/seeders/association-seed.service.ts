@@ -4,6 +4,7 @@ import { Association } from '../../associations/entities/association.entity';
 import { Media } from '../../media/entities/media.entity';
 import { TypeAssociations } from '../../type-associations/entities/type-associations.entity';
 import { OnDev } from '../../utils/decorators/on-dev.decorator';
+import { ASSOCIATION_PICTURE_PATH } from '@src/media/enums/media.enum';
 
 @Injectable()
 export class AssociationSeedService {
@@ -123,7 +124,7 @@ export class AssociationSeedService {
   async createDefaultMedia(filename: string): Promise<Media> {
     const media = new Media();
     media.filename = filename;
-    media.filepath = `/uploads/${filename}`;
+    media.filepath = ASSOCIATION_PICTURE_PATH + `/${filename}`;
     media.mimetype = 'image/png';
     media.size = 0; // Taille fictive pour le seed
     media.isPublic = true;

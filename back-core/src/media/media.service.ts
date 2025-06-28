@@ -1,19 +1,12 @@
-import {
-  ConflictException,
-  Inject,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { UploadMediaDto } from '@shared/dto/media.dto';
+import { Inject, Injectable } from '@nestjs/common';
 import * as fs from 'fs';
-import * as path from 'path';
 import { v4 as uuidv4 } from 'uuid';
-import { UpdateMediaDto } from './dto/update-media.dto';
 
 import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
-import { Duplex } from 'stream';
 import { Repository } from 'typeorm';
-import { CreateMediaDto } from './dto/create-media.dto';
 import { Media } from './entities/media.entity';
+import * as path from 'path';
 
 @Injectable()
 export class MediaService {
@@ -27,19 +20,13 @@ export class MediaService {
    * @param createMediaDto
    * @param file
    */
-  async create(createMediaDto: CreateMediaDto) {
-    const fileData = await this.uploadFile(createMediaDto.file);
+  async create(
+    file: Express.Multer.File,
+    uploadMediaDto: UploadMediaDto,
+  ): Promise<Media> {
+    const fileData = await this.uploadFile(file, uploadMediaDto.filepath);
 
-    if (createMediaDto.title) {
-      const existingMedia = await this.findByTitle(createMediaDto.title);
-      if (existingMedia) {
-        fs.unlinkSync(fileData.filepath);
-        throw new ConflictException('Media with this title already exists');
-      }
-    }
     const media = new Media();
-    media.title = createMediaDto.title;
-    media.description = createMediaDto.description;
     media.filename = fileData.filename;
     media.filepath = fileData.filepath;
     media.mimetype = fileData.mimetype;
@@ -90,103 +77,75 @@ export class MediaService {
     });
   }
 
-  async findOne(id: string): Promise<Media> {
+  async findOne(id: string): Promise<Media | null> {
     const media = await this.mediaRepository.findOne({
       where: {
         id,
       },
     });
-    if (!media) {
-      throw new NotFoundException('Media not found');
-    }
+
     return media;
   }
 
-  async update(
-    id: string,
-    updateMediaDto?: UpdateMediaDto,
-    file?: Express.Multer.File,
-  ) {
-    const media: Media = await this.findOne(id);
-    let updateDto = {};
-    if (file) {
-      const filedData = await this.uploadFile(file);
-      media.filename = filedData.filename;
-      media.filepath = filedData.filepath;
-      media.mimetype = filedData.mimetype;
-      media.size = filedData.size;
-      updateDto = {
-        filename: filedData.filename,
-        filepath: filedData.filepath,
-        mimetype: filedData.mimetype,
-        size: filedData.size,
-      };
-    }
-    if (updateMediaDto?.title) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      updateDto.title = updateMediaDto.title;
-    }
-    if (updateMediaDto?.description) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      updateDto.description = updateMediaDto.description;
-    }
-    return await this.mediaRepository.update(id, updateDto);
+  async update(uploadMediaDto: UploadMediaDto, file?: Express.Multer.File) {
+    const media: Media = await this.findOne(uploadMediaDto.id);
+    if (!media) return null;
+    await this.deleteFile(MediaService.getUploadFullPath(media.filepath));
+    const fileData = await this.uploadFile(file, uploadMediaDto.filepath);
+
+    Object.assign(media, fileData);
+    return await this.mediaRepository.save(media);
   }
 
-  async remove(id: string) {
-    const media = await this.findOne(id);
-    if (!media) {
-      throw new NotFoundException('Media not found');
-    }
-    fs.unlinkSync(media.filepath);
-    return await this.mediaRepository.delete(id);
+  async deleteFile(path: string) {
+    if (fs.existsSync(path)) fs.unlinkSync(path);
+  }
+  async remove(media: Media) {
+    this.deleteFile(MediaService.getUploadFullPath(media.filepath));
+    return await this.mediaRepository.delete(media.id);
+  }
+
+  async save(
+    file: Express.Multer.File,
+    uploadMediaDto: UploadMediaDto,
+  ): Promise<Media | null> {
+    const media = await this.findOne(uploadMediaDto.id);
+    if (media) return await this.update(uploadMediaDto, file);
+    else return await this.create(file, uploadMediaDto);
+  }
+  static getUploadFullPath(filepath: string) {
+    return process.cwd() + filepath;
   }
 
   /**
    * Upload a file and return the file data
    * @param file
+   * @param filePath : Il faut un chemin relatif comme /uploads
    */
-  uploadFile(file: Express.Multer.File): Promise<any> {
-    const uploadDir = process.cwd() + '/uploads';
-    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+  async uploadFile(file: Express.Multer.File, filePath: string): Promise<any> {
+    const uploadDir = filePath;
+    console.log(filePath);
+    const fullUploadPath = MediaService.getUploadFullPath(uploadDir);
+    console.log(fullUploadPath);
+    if (!fs.existsSync(fullUploadPath))
+      fs.mkdirSync(fullUploadPath, { recursive: true });
 
     const fileExtension = path.extname(file.originalname);
     const filename = uuidv4() + fileExtension;
-    const filepath = '/uploads/' + filename;
+    const filepath = uploadDir + '/' + filename;
     const filesize = file.size;
 
-    // Crée un stream de lecture à partir du buffer du fichier téléchargé
-    const readStream = this.bufferToStream(file.buffer);
+    await fs.promises.writeFile(
+      MediaService.getUploadFullPath(filepath),
+      file.buffer,
+    );
 
-    // Crée un stream d'écriture pour le nouveau fichier
-    const writeStream = fs.createWriteStream(uploadDir + '/' + filename);
-
-    // Pipe le stream de lecture vers le stream d'écriture
-    readStream.pipe(writeStream);
     const fileData = {
       filename,
       filepath,
       size: filesize,
       mimetype: file.mimetype,
     };
-
-    return new Promise((resolve, reject) => {
-      writeStream.on('finish', () => resolve(fileData));
-      writeStream.on('error', reject);
-    });
-  }
-
-  /**
-   * Convert a buffer to a stream
-   * @param buffer
-   * @private
-   */
-  private bufferToStream(buffer: Buffer) {
-    const stream = new Duplex();
-    stream.push(buffer);
-    stream.push(null); // Signale la fin du stream
-    return stream;
+    return fileData;
   }
 }

@@ -3,14 +3,15 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { UsersModule } from '../users/users.module';
 import { MediaController } from './media.controller';
 import { MediaService } from './media.service';
+import { UPLOADS_PATH } from './enums/media.enum';
 
 @Module({
   controllers: [MediaController],
   imports: [
     forwardRef(() => UsersModule),
     ServeStaticModule.forRoot({
-      rootPath: process.cwd() + '/uploads',
-      serveRoot: '/uploads',
+      rootPath: MediaService.getUploadFullPath(UPLOADS_PATH),
+      serveRoot: UPLOADS_PATH,
       serveStaticOptions: {
         index: false,
       },
