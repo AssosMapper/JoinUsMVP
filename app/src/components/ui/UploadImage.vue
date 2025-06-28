@@ -2,15 +2,17 @@
 import Uploader from "@/components/ui/Uploader.vue";
 import { getMediaUrl } from "@/utils/media.util";
 import { PublicMediaDto } from "@shared/dto/media.dto";
-import { Media } from "@shared/types/media";
 import { ref, watch } from "vue";
+
 const props = defineProps<{
   modelValue?: PublicMediaDto | null;
   preview?: boolean;
+  handleUpload: (file: File) => Promise<void>;
 }>();
 
 const emit = defineEmits<{
   "update:modelValue": [PublicMediaDto | null];
+  remove: [];
 }>();
 
 const previewUrl = ref<string | null>(null);
@@ -18,14 +20,18 @@ const previewUrl = ref<string | null>(null);
 watch(
   () => props.modelValue,
   (newMedia) => {
-    if (newMedia) previewUrl.value = getMediaUrl(newMedia as Media);
+    if (newMedia) previewUrl.value = getMediaUrl(newMedia.filepath);
     else previewUrl.value = null;
   },
   { immediate: true }
 );
 
-const handleUploadSuccess = (file: PublicMediaDto) => {
-  emit("update:modelValue", file);
+const handleUploadSuccess = () => {
+  emit("update:modelValue", null);
+};
+const handleRemove = () => {
+  previewUrl.value = null;
+  emit("remove");
 };
 </script>
 
@@ -44,6 +50,7 @@ const handleUploadSuccess = (file: PublicMediaDto) => {
       <Uploader
         accept="image/*"
         :max-size="5"
+        :handle-upload="handleUpload"
         @upload-success="handleUploadSuccess"
       >
         <template #default="{ triggerUpload, isUploading }">
@@ -60,11 +67,11 @@ const handleUploadSuccess = (file: PublicMediaDto) => {
       </Uploader>
 
       <Button
-        v-if="modelValue"
+        v-if="previewUrl"
         type="button"
         severity="danger"
         text
-        @click="emit('update:modelValue', null)"
+        @click="handleRemove"
       >
         <i class="pi pi-trash"></i>
       </Button>

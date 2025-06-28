@@ -5,6 +5,7 @@ import Button from "primevue/button";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import NotificationButton from "./Notification/NotificationButton.vue";
+import { getMediaUrl } from "@/utils/media.util";
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -189,9 +190,9 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
           @click="router.push('/updateProfile')"
         >
           <Avatar
-            :label="first_name?.charAt(0).toUpperCase()"
-            shape="circle"
-            class="bg-primary"
+            shape="square"
+            :image="getMediaUrl(userStore.user.image?.filepath)"
+            class="bg-primary min-w-20 min-h-20 rounded-xl &>img{rounded-xl}"
           />
           <div class="flex flex-col text-left">
             <span class="font-semibold text-gray-900">{{ first_name }}</span>

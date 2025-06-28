@@ -42,6 +42,14 @@ const deleteUser = async (id: number, token: string) => {
   });
   return response.data;
 };
+const removeProfilePicture = async (): Promise<void> => {
+  const apiStore = useApiStore();
+  const { error } = await useApi(apiStore.security.auth.removeProfilePicture)
+    .delete()
+    .json();
+
+  if (error.value) throw error.value as ResponseError;
+};
 
 export const getProfile = async (): Promise<UserProfileDto> => {
   const apiStore = useApiStore();
@@ -70,6 +78,18 @@ export const updateProfile = async (
   if (error.value) throw error.value as ResponseError;
 };
 
+export const changeProfilePicture = async (file: File): Promise<void> => {
+  const apiStore = useApiStore();
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const { error } = await useApi(apiStore.security.auth.changeProfilePicture)
+    .post(formData)
+    .json();
+
+  if (error.value) throw error.value as ResponseError;
+};
+
 export default {
   createUser,
   getAllUsers,
@@ -78,4 +98,6 @@ export default {
   deleteUser,
   getProfile,
   updateProfile,
+  changeProfilePicture,
+  removeProfilePicture,
 };

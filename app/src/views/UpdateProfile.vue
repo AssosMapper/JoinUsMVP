@@ -41,6 +41,19 @@ const [phone, phoneAttrs] = defineField("phone");
 const [password, passwordAttrs] = defineField("password");
 const [confirmPassword, confirmPasswordAttrs] = defineField("confirmPassword");
 
+const refreshProfilePicture = async () => {
+  await loadDataForm();
+};
+const removeProfilePicture = async () => {
+  try {
+    await usersService.removeProfilePicture();
+  } catch (error: any) {
+    notificationStore.showNotification(
+      "Erreur lors de la suppression de la photo de profil",
+      "error"
+    );
+  }
+};
 const loadDataForm = async () => {
   await userStore.refetchUser();
   const userData = plainToInstance(UpdateUserDto, userStore.user, {
@@ -109,11 +122,12 @@ const onSubmit = handleSubmit(async (formValues: UpdateUserDto) => {
 });
 
 // Gestion des événements
-const handleImageUpload = (newImage: PublicMediaDto) => {
-  profilePicture.value = plainToInstance(PublicMediaDto, newImage, {
-    excludeExtraneousValues: true,
-    enableImplicitConversion: true,
-  });
+const handleImageUpload = async (file: File) => {
+  await usersService.changeProfilePicture(file);
+  notificationStore.showNotification(
+    "Photo de profil mise à jour avec succès",
+    "success"
+  );
 };
 
 const handleLocalisationChange = (newLocalisation: any) => {
@@ -151,7 +165,9 @@ const handleLocalisationChange = (newLocalisation: any) => {
             <UploadImage
               v-model="profilePicture"
               :preview="true"
-              @update:modelValue="handleImageUpload"
+              @update:modelValue="refreshProfilePicture"
+              @remove="removeProfilePicture"
+              :handle-upload="handleImageUpload"
             />
           </div>
 

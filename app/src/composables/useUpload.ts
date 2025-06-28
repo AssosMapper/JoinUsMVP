@@ -11,6 +11,7 @@ export function useUpload() {
     options?: {
       title?: string;
       description?: string;
+      id?: string;
     }
   ): Promise<PublicMediaDto> => {
     const apiStore = useApiStore();
@@ -20,7 +21,7 @@ export function useUpload() {
     if (options?.title) formData.append("title", options.title);
     if (options?.description)
       formData.append("description", options.description);
-
+    if (options?.id) formData.append("id", options.id);
     isUploading.value = true;
 
     try {

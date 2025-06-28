@@ -1,24 +1,22 @@
 <script setup lang="ts">
-import { useUpload } from "@/composables/useUpload";
 import { useNotificationStore } from "@/store/notificationStore";
-import { PublicMediaDto } from "@shared/dto/media.dto";
 import { ref } from "vue";
 
 const props = defineProps<{
   accept?: string;
-  maxSize?: number; // en MB
-  endpoint?: string; // Endpoint personnalisé
+  maxSize?: number;
+  handleUpload: (file: File) => Promise<void>;
 }>();
 
 const emit = defineEmits<{
-  "upload-success": [PublicMediaDto];
+  "upload-success": [];
   "upload-error": [Error];
-  "upload-progress": [number];
+  "upload-start": [];
 }>();
 
-const { upload, isUploading } = useUpload();
 const notificationStore = useNotificationStore();
 const fileInput = ref<HTMLInputElement | null>(null);
+const isUploading = ref(false);
 
 const handleFileSelect = async (event: Event) => {
   const input = event.target as HTMLInputElement;
@@ -26,7 +24,6 @@ const handleFileSelect = async (event: Event) => {
 
   const file = input.files[0];
 
-  // Vérification de la taille si maxSize est défini
   if (props.maxSize && file.size > props.maxSize * 1024 * 1024) {
     notificationStore.showNotification(
       `Le fichier ne doit pas dépasser ${props.maxSize}MB`,
@@ -35,14 +32,18 @@ const handleFileSelect = async (event: Event) => {
     return;
   }
 
+  isUploading.value = true;
+  emit("upload-start");
+
   try {
-    const result = await upload(file, {
-      endpoint: props.endpoint,
-    });
-    emit("upload-success", result);
+    await props.handleUpload(file);
+    emit("upload-success");
+    input.value = "";
   } catch (error: any) {
     emit("upload-error", error);
     notificationStore.showNotification(error.message, "error");
+  } finally {
+    isUploading.value = false;
   }
 };
 
