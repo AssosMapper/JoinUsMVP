@@ -3,6 +3,7 @@ import { useApiStore } from "@/store/apiUrls.store";
 import { ResponseError } from "@/types/http.types";
 import { SaveLocalisationDto } from "@shared/dto/localisation.dto";
 import { UpdateUserDto, UserProfileDto } from "@shared/dto/user.dto";
+import { ForgotPasswordDto, ResetPasswordDto } from "@shared/dto/auth.dto";
 import { User } from "@shared/types/user";
 import axios from "axios";
 
@@ -90,6 +91,30 @@ export const changeProfilePicture = async (file: File): Promise<void> => {
   if (error.value) throw error.value as ResponseError;
 };
 
+export const forgotPassword = async (
+  forgotPasswordDto: ForgotPasswordDto
+): Promise<{ message: string }> => {
+  const apiStore = useApiStore();
+  const { data, error } = await useApi(apiStore.security.auth.forgotPassword)
+    .post(forgotPasswordDto)
+    .json<{ message: string }>();
+
+  if (error.value) throw error.value as ResponseError;
+  return data.value;
+};
+
+export const resetPassword = async (
+  resetPasswordDto: ResetPasswordDto
+): Promise<{ message: string }> => {
+  const apiStore = useApiStore();
+  const { data, error } = await useApi(apiStore.security.auth.resetPassword)
+    .post(resetPasswordDto)
+    .json<{ message: string }>();
+
+  if (error.value) throw error.value as ResponseError;
+  return data.value;
+};
+
 export default {
   createUser,
   getAllUsers,
@@ -100,4 +125,6 @@ export default {
   updateProfile,
   changeProfilePicture,
   removeProfilePicture,
+  forgotPassword,
+  resetPassword,
 };

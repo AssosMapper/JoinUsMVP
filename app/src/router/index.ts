@@ -16,6 +16,7 @@ const routes: Array<RouteRecordRaw> = [
     path: "/register",
     name: "Register",
     component: () => import("@/views/Register.vue"),
+    meta: { requiresGuest: true },
   },
   {
     path: "/updateProfile",
@@ -26,6 +27,19 @@ const routes: Array<RouteRecordRaw> = [
     path: "/login",
     name: "Login",
     component: () => import("@/views/Login.vue"),
+    meta: { requiresGuest: true },
+  },
+  {
+    path: "/forgot-password",
+    name: "ForgotPassword",
+    component: () => import("@/views/ForgotPassword.vue"),
+    meta: { requiresGuest: true },
+  },
+  {
+    path: "/reset-password",
+    name: "ResetPassword",
+    component: () => import("@/views/ResetPassword.vue"),
+    meta: { requiresGuest: true },
   },
   {
     path: "/contactUs",
@@ -42,7 +56,8 @@ const routes: Array<RouteRecordRaw> = [
     path: "/associationManagerInterface",
     name: "AssociationManagerInterface",
     meta: { requiresAssociationManager: true },
-    component: () => import("@/views/Dashboard/AssociationManagerDashboard.vue"),
+    component: () =>
+      import("@/views/Dashboard/AssociationManagerDashboard.vue"),
   },
   {
     path: "/displayEvents",
@@ -78,7 +93,7 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("@/views/MyAssociations.vue"),
     meta: {
       requiresAuth: true,
-    }
+    },
   },
   {
     path: "/associations/:id/dashboard",
@@ -89,13 +104,13 @@ const routes: Array<RouteRecordRaw> = [
     },
   },
   {
-    path: '/associations/:id',
-    name: 'DisplayAssociationDetails',
-    component: () => import('@/views/Display/DisplayAssociationDetails.vue'),
+    path: "/associations/:id",
+    name: "DisplayAssociationDetails",
+    component: () => import("@/views/Display/DisplayAssociationDetails.vue"),
     meta: {
-      requiresAuth: true
-    }
-  }
+      requiresAuth: true,
+    },
+  },
 ];
 
 const router = createRouter({
@@ -108,24 +123,35 @@ router.beforeEach(async (to, from, next) => {
 
   // Attendre que le store soit complètement initialisé
   while (!userStore.initialized || userStore.loader) {
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
   }
 
   const isAuthenticated = userStore.isAuthenticated;
   const isAdmin = userStore.isAdmin;
   const isAssociationManager = userStore.isAssociationManager;
 
-  console.log('User roles:', userStore.user?.roles);
-  console.log('Is authenticated:', isAuthenticated);
-  console.log('Is admin:', isAdmin);
-  console.log('Is association manager:', isAssociationManager);
+  console.log("User roles:", userStore.user?.roles);
+  console.log("Is authenticated:", isAuthenticated);
+  console.log("Is admin:", isAdmin);
+  console.log("Is association manager:", isAssociationManager);
 
-  if (to.meta.requiresAdmin && (!isAuthenticated || !isAdmin)) {
-    next('/login');
+  if (to.meta.requiresGuest && isAuthenticated) {
+    // Si l'utilisateur est connecté et tente d'accéder à une page d'invité
+    next("/");
+  } else if (to.meta.requiresAuth && !isAuthenticated) {
+    // Si l'utilisateur n'est pas connecté et tente d'accéder à une page protégée
+    next("/login");
+  } else if (to.meta.requiresAdmin && (!isAuthenticated || !isAdmin)) {
+    next("/login");
     alert("Vous devez être administrateur pour accéder à cette page.");
-  } else if (to.meta.requiresAssociationManager && (!isAuthenticated || (!isAssociationManager && !isAdmin))) {
-    next('/login');
-    alert("Vous devez être gestionnaire d'association pour accéder à cette page.");
+  } else if (
+    to.meta.requiresAssociationManager &&
+    (!isAuthenticated || (!isAssociationManager && !isAdmin))
+  ) {
+    next("/login");
+    alert(
+      "Vous devez être gestionnaire d'association pour accéder à cette page."
+    );
   } else {
     next();
   }

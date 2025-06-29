@@ -10,6 +10,8 @@ export const useApiStore = defineStore("api", {
           profile: "/users/me",
           changeProfilePicture: "/users/me/change-picture",
           removeProfilePicture: "/users/me/remove-picture",
+          forgotPassword: "/v1/auth/forgot-password",
+          resetPassword: "/v1/auth/reset-password",
         },
       },
       events: {
