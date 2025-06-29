@@ -1,6 +1,7 @@
-import { Expose } from "class-transformer";
+import { Expose, Type } from "class-transformer";
 import { LocalisationDto } from "./localisation.dto";
 import { PublicMediaDto } from "./media.dto";
+import { RoleDto } from "./roles.dto";
 
 export class PublicUserDto {
   @Expose() id: string;
@@ -20,6 +21,9 @@ export class UserDto {
   @Expose() email: string;
   @Expose() phone?: string;
   @Expose() image?: PublicMediaDto;
+  @Type(() => RoleDto)
+  @Expose()
+  roles: RoleDto[];
   @Expose() localisation?: LocalisationDto;
 }
 export class UserProfileDto extends UserDto {}

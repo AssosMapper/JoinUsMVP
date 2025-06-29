@@ -47,6 +47,7 @@ const refreshProfilePicture = async () => {
 const removeProfilePicture = async () => {
   try {
     await usersService.removeProfilePicture();
+    await userStore.refetchUser();
   } catch (error: any) {
     notificationStore.showNotification(
       "Erreur lors de la suppression de la photo de profil",

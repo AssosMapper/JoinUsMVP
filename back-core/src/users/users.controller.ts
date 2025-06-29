@@ -46,6 +46,7 @@ export class UsersController {
   @ApiBearerAuth()
   async getProfile(@CurrentUserId() id: string): Promise<UserProfileDto> {
     const user = await this.usersService.getProfile(id);
+
     return plainToInstance(UserProfileDto, user, {
       excludeExtraneousValues: true,
       enableImplicitConversion: true,
