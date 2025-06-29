@@ -1,42 +1,42 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
-import { useNotificationStore } from '@/store/notificationStore.ts';
+import { useRouter } from "vue-router";
+import { useNotificationStore } from "@/store/notificationStore.ts";
 import { useUserStore } from "@/store";
-import { useForm } from 'vee-validate';
-import { registerSchema } from "@/types/security.types.ts";
+import { useForm } from "vee-validate";
+import { registerSchema, IRegister } from "@/types/security.types.ts";
 
 const router = useRouter();
 const notificationStore = useNotificationStore();
 
-const { errors, defineField } = useForm<{
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-}>({
+const { errors, defineField } = useForm<IRegister>({
   validationSchema: registerSchema,
 });
 
-const [email, emailAttrs] = defineField('email');
-const [password, passwordAttrs] = defineField('password');
-const [firstName, firstNameAttrs] = defineField('firstName');
-const [lastName, lastNameAttrs] = defineField('lastName');
+const [email, emailAttrs] = defineField("email");
+const [password, passwordAttrs] = defineField("password");
+const [confirmPassword, confirmPasswordAttrs] = defineField("confirmPassword");
+const [firstName, firstNameAttrs] = defineField("firstName");
+const [lastName, lastNameAttrs] = defineField("lastName");
 
 const handleRegister = async () => {
-  const credentials = {
+  const credentials: IRegister = {
     email: email.value,
     password: password.value,
+    confirmPassword: confirmPassword.value,
     firstName: firstName.value,
     lastName: lastName.value,
   };
-  const userStore = useUserStore()
+  const userStore = useUserStore();
   try {
     await userStore.register(credentials);
-    await router.push('/');
+    await router.push("/");
     notificationStore.showNotification("Inscription réussie !", "success");
   } catch (error) {
     console.error(error);
-    notificationStore.showNotification("Une erreur est survenue lors de l'inscription", "error");
+    notificationStore.showNotification(
+      "Une erreur est survenue lors de l'inscription",
+      "error"
+    );
   }
 };
 </script>
@@ -44,49 +44,68 @@ const handleRegister = async () => {
 <template>
   <div>
     <!-- Header -->
-    <div class="title-container 
-                shadow-[0_4px_6px_-2px_rgba(0,0,0,0.1)]
-                relative z-10 flex justify-center items-center">
+    <div
+      class="title-container shadow-[0_4px_6px_-2px_rgba(0,0,0,0.1)] relative z-10 flex justify-center items-center"
+    >
       <div class="px-10">
-        <h1 class="text-3xl font-bold text-primary italic">
-          Inscription
-        </h1>
+        <h1 class="text-3xl font-bold text-primary italic">Inscription</h1>
       </div>
     </div>
 
     <!-- Formulaire -->
     <div class="container mx-auto px-4 py-8">
-      <div class="bg-white rounded-xl border-primary shadow-[2px_2px_8px_-1px_rgba(0,0,0,0.1),4px_4px_12px_-2px_rgba(0,0,0,0.15)] p-6 max-w-2xl mx-auto">
+      <div
+        class="bg-white rounded-xl border-primary shadow-[2px_2px_8px_-1px_rgba(0,0,0,0.1),4px_4px_12px_-2px_rgba(0,0,0,0.15)] p-6 max-w-2xl mx-auto"
+      >
         <form @submit.prevent="handleRegister">
           <div class="space-y-4">
-            <div>
-              <label class="block text-gray-700 font-medium mb-2 text-left" for="firstName">Prénom</label>
-              <input
-                type="text"
-                placeholder="Prénom"
-                v-model="firstName"
-                v-bind="firstNameAttrs"
-                required
-                class="w-full px-4 py-2 bg-primary-hover border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              <span v-if="errors.firstName" class="text-red-500 text-sm">{{ errors.firstName }}</span>
+            <!-- Prénom et Nom sur la même ligne -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label
+                  class="block text-gray-700 font-medium mb-2 text-left"
+                  for="firstName"
+                  >Prénom</label
+                >
+                <input
+                  type="text"
+                  placeholder="Prénom"
+                  v-model="firstName"
+                  v-bind="firstNameAttrs"
+                  required
+                  class="w-full px-4 py-2 bg-primary-hover border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                <span v-if="errors.firstName" class="text-red-500 text-sm">{{
+                  errors.firstName
+                }}</span>
+              </div>
+
+              <div>
+                <label
+                  class="block text-gray-700 font-medium mb-2 text-left"
+                  for="lastName"
+                  >Nom</label
+                >
+                <input
+                  type="text"
+                  placeholder="Nom"
+                  v-model="lastName"
+                  v-bind="lastNameAttrs"
+                  required
+                  class="w-full px-4 py-2 bg-primary-hover border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                <span v-if="errors.lastName" class="text-red-500 text-sm">{{
+                  errors.lastName
+                }}</span>
+              </div>
             </div>
 
             <div>
-              <label class="block text-gray-700 font-medium mb-2 text-left" for="lastName">Nom</label>
-              <input
-                type="text"
-                placeholder="Nom"
-                v-model="lastName"
-                v-bind="lastNameAttrs"
-                required
-                class="w-full px-4 py-2 bg-primary-hover border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-              />
-              <span v-if="errors.lastName" class="text-red-500 text-sm">{{ errors.lastName }}</span>
-            </div>
-
-            <div>
-              <label class="block text-gray-700 font-medium mb-2 text-left" for="email">Email</label>
+              <label
+                class="block text-gray-700 font-medium mb-2 text-left"
+                for="email"
+                >Email</label
+              >
               <input
                 type="text"
                 placeholder="Email"
@@ -95,11 +114,15 @@ const handleRegister = async () => {
                 required
                 class="w-full px-4 py-2 bg-primary-hover border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               />
-              <span v-if="errors.email" class="text-red-500 text-sm">{{ errors.email }}</span>
+              <span v-if="errors.email" class="text-red-500 text-sm">{{
+                errors.email
+              }}</span>
             </div>
 
             <div>
-              <label class="block text-gray-700 font-medium mb-2 text-left">Mot de passe</label>
+              <label class="block text-gray-700 font-medium mb-2 text-left"
+                >Mot de passe</label
+              >
               <input
                 type="password"
                 placeholder="Mot de passe"
@@ -108,7 +131,39 @@ const handleRegister = async () => {
                 required
                 class="w-full px-4 py-2 bg-primary-hover border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               />
-              <span v-if="errors.password" class="text-red-500 text-sm">{{ errors.password }}</span>
+              <span v-if="errors.password" class="text-red-500 text-sm">{{
+                errors.password
+              }}</span>
+            </div>
+
+            <div>
+              <label class="block text-gray-700 font-medium mb-2 text-left"
+                >Confirmer le mot de passe</label
+              >
+              <input
+                type="password"
+                placeholder="Confirmer le mot de passe"
+                v-model="confirmPassword"
+                v-bind="confirmPasswordAttrs"
+                required
+                class="w-full px-4 py-2 bg-primary-hover border-none rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+              <span
+                v-if="errors.confirmPassword"
+                class="text-red-500 text-sm"
+                >{{ errors.confirmPassword }}</span
+              >
+            </div>
+
+            <div class="text-xs text-gray-500 bg-gray-50 p-3 rounded">
+              <p class="font-medium mb-1">Le mot de passe doit contenir :</p>
+              <ul class="list-disc list-inside space-y-1">
+                <li>Au moins 8 caractères</li>
+                <li>Une lettre majuscule</li>
+                <li>Une lettre minuscule</li>
+                <li>Un chiffre</li>
+                <li>Un caractère spécial (@$!%*?&)</li>
+              </ul>
             </div>
 
             <div class="flex flex-col space-y-4">
@@ -117,7 +172,7 @@ const handleRegister = async () => {
                 class="w-full px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors"
                 :disabled="useUserStore().loader"
               >
-                {{ useUserStore().loader ? 'Inscription...' : "S'inscrire" }}
+                {{ useUserStore().loader ? "Inscription..." : "S'inscrire" }}
               </button>
 
               <!-- Lien retour connexion -->
@@ -125,9 +180,9 @@ const handleRegister = async () => {
                 <div class="text-gray-600">
                   Déjà un compte ?
                   <router-link to="/login">
-                    <button 
-                      class="p-button p-component bg-primary text-white" 
-                      type="button" 
+                    <button
+                      class="p-button p-component bg-primary text-white"
+                      type="button"
                       data-pc-name="button"
                       data-pc-section="root"
                     >
@@ -157,7 +212,7 @@ input:-webkit-autofill:focus {
   transition: background-color 5000s ease-in-out 0s;
 }
 
-.container{
+.container {
   height: 900px;
 }
 </style>

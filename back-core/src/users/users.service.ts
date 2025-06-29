@@ -10,10 +10,10 @@ import {
   UpdateUserDto,
   UserProfileDto,
 } from '@shared/dto/user.dto';
+import { RegisterDto } from '@shared/dto/auth.dto';
 import { plainToInstance } from 'class-transformer';
 import { Not, Repository } from 'typeorm';
 import { Association } from '../associations/entities/association.entity';
-import { RegisterDto } from '../auth/dto/register.dto';
 import { LocalisationService } from '../localisation/localisation.service';
 import { MediaService } from '../media/media.service';
 import { Role } from '../roles/entities/role.entity';
@@ -240,7 +240,6 @@ export class UsersService {
     newUser.first_name = registerDto.firstName;
     newUser.last_name = registerDto.lastName;
     newUser.phone = registerDto.phone;
-    newUser.localisation = registerDto.localisation;
     newUser.roles = [userRole];
 
     return this.usersRepository.save(newUser);

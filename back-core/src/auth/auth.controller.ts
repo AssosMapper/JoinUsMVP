@@ -1,14 +1,18 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { ForgotPasswordDto, ResetPasswordDto } from '@shared/dto/auth.dto';
+import {
+  ForgotPasswordDto,
+  ResetPasswordDto,
+  RegisterDto,
+} from '@shared/dto/auth.dto';
 import {
   forgotPasswordSchema,
   resetPasswordSchema,
+  registerSchema,
 } from '@shared/validations/auth.validation';
 import { YupValidationPipe } from '../utils/pipes/yup-validation.pipe';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
 
 @ApiTags('Authentification')
 @Controller({
@@ -40,7 +44,9 @@ export class AuthController {
   @ApiResponse({ status: 201, description: 'Compte créé avec succès' })
   @ApiResponse({ status: 400, description: 'Données invalides' })
   @ApiResponse({ status: 409, description: 'Email déjà utilisé' })
-  async register(@Body() registerDto: RegisterDto) {
+  async register(
+    @Body(new YupValidationPipe(registerSchema)) registerDto: RegisterDto,
+  ) {
     return await this.authService.register(registerDto);
   }
 

@@ -8,7 +8,11 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { ForgotPasswordDto, ResetPasswordDto } from '@shared/dto/auth.dto';
+import {
+  ForgotPasswordDto,
+  ResetPasswordDto,
+  RegisterDto,
+} from '@shared/dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { Repository } from 'typeorm';
@@ -17,7 +21,6 @@ import { User } from '../users/entities/user.entity';
 import { UsersService } from '../users/users.service';
 import { comparePassword, hashPassword } from '../utils/functions';
 import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
 
 @Injectable()
 export class AuthService {
