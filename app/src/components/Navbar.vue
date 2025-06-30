@@ -32,11 +32,13 @@ const menuItems = [
     label: "Événements",
     icon: "pi pi-calendar",
     route: "/displayEvents",
+    auth: true,
   },
   {
     label: "Associations",
     icon: "pi pi-users",
     route: "/displayAssociations",
+    auth: true,
   },
   {
     label: "Mes Associations",

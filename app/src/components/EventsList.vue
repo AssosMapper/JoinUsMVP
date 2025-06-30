@@ -73,6 +73,10 @@ const goToEventDetails = (id: string) => {
 onMounted(() => {
   fetchUserParticipations();
 });
+
+const isEventPast = (eventDate: Date) => {
+  return eventDate < new Date();
+};
 </script>
 
 <template>
@@ -138,6 +142,7 @@ onMounted(() => {
                 </div>
                 <div class="mt-auto pt-3 flex justify-center gap-3">
                   <ParticipateEventButton
+                    v-if="!isEventPast(new Date(event.date))"
                     :event-id="event.id"
                     :participation="getParticipationForEvent(event.id)"
                     @click.stop

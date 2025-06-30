@@ -310,6 +310,14 @@ export class EventsService {
         'Vous participez déjà à cet événement',
       );
     }
+
+    //si la date de l'événement est dans le passé, on ne peut pas participer
+    if (event.date < new Date()) {
+      throw new InternalServerErrorException(
+        'Vous ne pouvez pas participer à un événement passé',
+      );
+    }
+
     const participation = new EventParticipation();
     participation.user = user;
     participation.event = event;
