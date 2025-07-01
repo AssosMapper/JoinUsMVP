@@ -1,12 +1,14 @@
 <script setup lang="ts">
+import AssociationApplicationFormModal from "@/components/AssociationApplication/AssociationApplicationFormModal.vue";
 import EventList from "@/components/EventsList.vue";
+import EventMap from "@/components/EventMap.vue";
 import JnsImage from "@/components/ui/JnsImage.vue";
 import Loader from "@/components/ui/Loader.vue";
 import associationApplicationService from "@/services/associationApplicationService";
 import associationService from "@/services/associationService";
 import eventService from "@/services/eventService";
 import { useUserStore } from "@/store";
-import { loadGoogleMapsApi } from "@/utils/loadGoogleMapsApi";
+import type { EventMapType } from "@/types/map.types";
 import { AssociationApplication } from "@shared/types/association-applications";
 import type { Event } from "@shared/types/event";
 import Tab from "primevue/tab";
@@ -14,21 +16,56 @@ import TabList from "primevue/tablist";
 import TabPanel from "primevue/tabpanel";
 import TabPanels from "primevue/tabpanels";
 import Tabs from "primevue/tabs";
-import { nextTick, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 
 const route = useRoute();
 const userStore = useUserStore();
 const association = ref<any>(null);
-const map = ref<google.maps.Map | null>(null);
-const marker = ref<google.maps.Marker | null>(null);
 const pastEvents = ref<Event[]>([]);
 const todayEvents = ref<Event[]>([]);
 const upcomingEvents = ref<Event[]>([]);
 const loader = ref(false);
 const associationApplication = ref<AssociationApplication | null>(null);
 const activeTab = ref("0");
-const mapInitialized = ref(false);
+
+// Computed pour convertir les événements au format EventMapType
+const eventsForMap = computed<EventMapType[]>(() => {
+  const allEvents = [
+    ...pastEvents.value,
+    ...todayEvents.value,
+    ...upcomingEvents.value,
+  ];
+  return allEvents.map((event) => ({
+    id: event.id,
+    titre: event.titre,
+    description: event.description,
+    localisation: event.localisation,
+    date:
+      typeof event.date === "string" ? event.date : event.date.toISOString(),
+    association: event.association
+      ? {
+          id: event.association.id,
+          name: event.association.name,
+          image:
+            typeof event.association.image === "string"
+              ? event.association.image
+              : event.association.image?.filename,
+        }
+      : undefined,
+    typeEvent: event.typeEvent
+      ? {
+          name: event.typeEvent.name,
+        }
+      : undefined,
+  }));
+});
+
+// Centre de la carte basé sur la localisation de l'association
+const mapCenter = computed(() => {
+  // Paris par défaut, sera mis à jour par géocodage si nécessaire
+  return { lat: 48.8566, lng: 2.3522 };
+});
 
 const fetchAssociationDetails = async () => {
   try {
@@ -78,56 +115,6 @@ const getImageSrc = (associationName: string) => {
   return `/assets/associations-images/${sanitizedAssociationName}.png`;
 };
 
-const initMap = async () => {
-  if (
-    !association.value ||
-    !association.value.localisation ||
-    mapInitialized.value
-  )
-    return;
-
-  try {
-    await loadGoogleMapsApi(import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY);
-    const mapElement = document.getElementById("map") as HTMLElement;
-
-    if (!mapElement) return;
-
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode(
-      { address: association.value.localisation },
-      (results, status) => {
-        if (status === "OK" && results && results[0]) {
-          const location = {
-            lat: results[0].geometry.location.lat(),
-            lng: results[0].geometry.location.lng(),
-          };
-          map.value = new google.maps.Map(mapElement, {
-            center: location,
-            zoom: 15,
-          });
-
-          const icon = {
-            url: "/assets/associations-images/default.png",
-            scaledSize: new google.maps.Size(50, 50),
-            origin: { x: 0, y: 0 },
-            anchor: { x: 25, y: 25 },
-          };
-
-          marker.value = new google.maps.Marker({
-            map: map.value,
-            position: location,
-            title: association.value.name,
-            icon: icon,
-          });
-          mapInitialized.value = true;
-        }
-      }
-    );
-  } catch (error) {
-    console.error("Error loading Google Maps API:", error);
-  }
-};
-
 const fetchAssociationApplication = async () => {
   if (!association.value?.id) return;
 
@@ -142,15 +129,9 @@ const fetchAssociationApplication = async () => {
   }
 };
 
-watch(
-  () => activeTab.value,
-  async (newValue) => {
-    if (newValue === "1") {
-      await nextTick();
-      initMap();
-    }
-  }
-);
+const onEventClick = (event: EventMapType) => {
+  console.log("Event clicked:", event);
+};
 
 onMounted(async () => {
   loader.value = true;
@@ -228,7 +209,12 @@ onMounted(async () => {
 
             <TabPanel value="1">
               <div class="bg-white rounded-lg shadow p-6">
-                <div id="map" class="w-full h-[600px] rounded-lg"></div>
+                <EventMap
+                  :events="eventsForMap"
+                  :center="mapCenter"
+                  height="600px"
+                  @event-click="onEventClick"
+                />
               </div>
             </TabPanel>
 

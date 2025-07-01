@@ -9,6 +9,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     AssociationApplicationFormModal: typeof import('./src/components/AssociationApplication/AssociationApplicationFormModal.vue')['default']
     AssociationForm: typeof import('./src/components/AssociationDashboard/AssociationForm.vue')['default']
+    AssociationMap: typeof import('./src/components/AssociationMap.vue')['default']
     AssociationMembers: typeof import('./src/components/AssociationDashboard/AssociationMembers.vue')['default']
     Bck_EventsList: typeof import('./src/components/Events/bck_EventsList.vue')['default']
     Button: typeof import('primevue/button')['default']
@@ -20,6 +21,7 @@ declare module 'vue' {
     DateSwitchComponent: typeof import('./src/components/ui/DateSwitchComponent.vue')['default']
     Dialog: typeof import('primevue/dialog')['default']
     DisplayEventsMap: typeof import('./src/components/DisplayEventsMap.vue')['default']
+    EventMap: typeof import('./src/components/EventMap.vue')['default']
     EventsList: typeof import('./src/components/EventsList.vue')['default']
     Footer: typeof import('./src/components/Footer.vue')['default']
     GoogleAutoCompleteComponent: typeof import('./src/components/GoogleAutoCompleteComponent.vue')['default']

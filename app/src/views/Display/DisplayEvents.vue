@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import EventsList from "@/components/EventsList.vue";
-import Map from "@/components/Map.vue";
+import EventMap from "@/components/EventMap.vue";
 import eventService from "@/services/eventService";
 import typeEventService from "@/services/typeEventService";
+import type { EventMapType } from "@/types/map.types";
 import type { Event } from "@shared/types/event";
 import type { TypeEvents } from "@shared/types/type-events";
 import { useDebounce } from "@vueuse/core";
@@ -11,7 +12,14 @@ import IconField from "primevue/iconfield";
 import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
 import Tab from "primevue/tab";
-import { defineAsyncComponent, onMounted, ref, shallowRef, watch } from "vue";
+import {
+  computed,
+  defineAsyncComponent,
+  onMounted,
+  ref,
+  shallowRef,
+  watch,
+} from "vue";
 
 const events = ref<Array<Event>>([]);
 const typeEvents = ref<Array<TypeEvents>>([]);
@@ -22,6 +30,37 @@ const currentDate = ref(new Date());
 const selectedType = ref<TypeEvents | null>(null);
 
 const debouncedSearch = useDebounce(search, 300);
+
+// Computed pour convertir les événements au format EventMapType
+const eventsForMap = computed<EventMapType[] | null>(() => {
+  return events.value
+    .filter((event) => event.id && event.titre && event.localisation) // Filtrer les événements valides
+    .map((event) => ({
+      id: event.id!,
+      titre: event.titre!,
+      description: event.description,
+      localisation: event.localisation!,
+      date:
+        typeof event.date === "string"
+          ? event.date
+          : event.date?.toISOString() || new Date().toISOString(),
+      association: event.association
+        ? {
+            id: event.association.id,
+            name: event.association.name,
+            image:
+              typeof event.association.image === "string"
+                ? event.association.image
+                : event.association.image?.filename,
+          }
+        : undefined,
+      typeEvent: event.typeEvent
+        ? {
+            name: event.typeEvent.name,
+          }
+        : undefined,
+    }));
+});
 
 const components = {
   CreateEvent: defineAsyncComponent(
@@ -57,11 +96,17 @@ const fetchEvents = async () => {
       selectedType.value?.id
     );
     events.value = response;
+    console.log(events.value);
   } catch (error) {
     console.error("Erreur lors de la récupération des événements :", error);
   } finally {
     loading.value = false;
   }
+};
+
+const onEventClick = (event: EventMapType) => {
+  console.log("Event clicked:", event);
+  // Navigation vers les détails sera gérée par EventMap
 };
 
 onMounted(async () => {
@@ -231,6 +276,8 @@ watch([debouncedSearch, selectedType], fetchEvents);
                       year: 'numeric',
                     })
                   "
+                  :fetch-more="async () => {}"
+                  :has-more="false"
                 />
               </TabPanel>
 
@@ -240,9 +287,10 @@ watch([debouncedSearch, selectedType], fetchEvents);
 
               <TabPanel value="2">
                 <div class="h-[calc(100vh-12rem)] w-full">
-                  <Map
-                    :events="events"
+                  <EventMap
+                    :events="eventsForMap"
                     :center="{ lat: 48.8566, lng: 2.3522 }"
+                    @event-click="onEventClick"
                   />
                 </div>
               </TabPanel>
