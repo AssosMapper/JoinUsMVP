@@ -31,7 +31,14 @@ export class AssociationManagerGuard implements CanActivate {
     // SuperAdmin peut tout faire
     if (checkRole(user, RoleEnum.SUPER_ADMIN)) return true;
 
-    // Vérifie si l'utilisateur est manager et membre de l'association
+    // Pour la création d'association (POST sans associationId), vérifier seulement le rôle
+    if (!associationId && request.method === 'POST') {
+      if (checkRole(user, RoleEnum.ASSOCIATION_MANAGER)) {
+        return true;
+      }
+    }
+
+    // Pour les autres opérations, vérifier que l'utilisateur est manager et membre de l'association
     const isAssociationManager =
       checkRole(user, RoleEnum.ASSOCIATION_MANAGER) &&
       (user.associations.some((assoc) => assoc.id === associationId) ||

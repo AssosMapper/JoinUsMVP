@@ -3,7 +3,7 @@ import { computed, ref } from "vue";
 
 interface Props {
   name: string;
-  src: string;
+  src?: string | null;
   size?: "sm" | "md" | "lg";
   rounded?: boolean;
 }
@@ -11,9 +11,10 @@ interface Props {
 const props = withDefaults(defineProps<Props>(), {
   size: "md",
   rounded: true,
+  src: null,
 });
 
-const hasError = ref(false);
+const imageLoadError = ref(false);
 
 const sizeClasses = computed(
   () =>
@@ -43,18 +44,22 @@ const backgroundColor = computed(() => {
   return colors[index];
 });
 
-const handleError = () => {
-  hasError.value = true;
+const shouldShowImage = computed(() => {
+  return props.src && props.src.trim() !== "" && !imageLoadError.value;
+});
+
+const handleImageError = () => {
+  imageLoadError.value = true;
 };
 </script>
 
 <template>
   <div :class="[sizeClasses, roundedClass]">
     <img
-      v-if="!hasError"
-      :src="src"
+      v-if="shouldShowImage"
+      :src="props.src!"
       :alt="name"
-      @error="handleError"
+      @error="handleImageError"
       :class="['w-full h-full object-contain', roundedClass]"
     />
     <div

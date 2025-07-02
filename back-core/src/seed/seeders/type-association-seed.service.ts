@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
 import { Association } from '../../associations/entities/association.entity';
 import { TypeAssociations } from '../../type-associations/entities/type-associations.entity';
+import { Localisation } from '../../localisation/entities/localisation.entity';
 
 @Injectable()
 export class TypeAssociationsSeedService {
@@ -12,6 +13,8 @@ export class TypeAssociationsSeedService {
     private readonly associationRepository: Repository<Association>,
     @Inject('DATA_SOURCE')
     private readonly datasource: DataSource,
+    @Inject('LOCALISATION_REPOSITORY')
+    private localisationRepository: Repository<Localisation>,
   ) {}
 
   async seed() {
@@ -52,15 +55,22 @@ export class TypeAssociationsSeedService {
 
     const createdTypes = await this.typeAssociationsRepository.find();
 
-    const associationsToCreate = createdTypes.map((type) => {
+    const associationsToCreate = [];
+
+    for (let i = 0; i < createdTypes.length; i++) {
+      const type = createdTypes[i];
       const association = new Association();
       association.name = `Join-us-${type.name.toLowerCase()}`;
-      association.localisation = 'Default Location';
+
+      if (i % 3 === 0) {
+        association.localisation = await this.createDefaultLocalisation();
+      }
+
       association.description = `Association pour ${type.name.toLowerCase()}`;
       association.image = null;
       association.types = [type];
-      return association;
-    });
+      associationsToCreate.push(association);
+    }
 
     console.log('Seeding associations...', associationsToCreate);
     await this.associationRepository.save(associationsToCreate);
@@ -86,5 +96,15 @@ export class TypeAssociationsSeedService {
     } finally {
       await queryRunner.release();
     }
+  }
+
+  async createDefaultLocalisation(): Promise<Localisation> {
+    const localisation = new Localisation();
+    localisation.street_number = '1';
+    localisation.street_name = 'Rue par Défaut';
+    localisation.zip = '75001';
+    localisation.city = 'Paris';
+    localisation.country = 'France';
+    return this.localisationRepository.save(localisation);
   }
 }

@@ -3,6 +3,7 @@ import { DataSource, Repository } from 'typeorm';
 import { Association } from '../../associations/entities/association.entity';
 import { Media } from '../../media/entities/media.entity';
 import { TypeAssociations } from '../../type-associations/entities/type-associations.entity';
+import { Localisation } from '../../localisation/entities/localisation.entity';
 import { OnDev } from '../../utils/decorators/on-dev.decorator';
 import { ASSOCIATION_PICTURE_PATH } from '@src/media/enums/media.enum';
 
@@ -17,6 +18,8 @@ export class AssociationSeedService {
     private readonly datasource: DataSource,
     @Inject('MEDIA_REPOSITORY')
     private mediaRepository: Repository<Media>,
+    @Inject('LOCALISATION_REPOSITORY')
+    private localisationRepository: Repository<Localisation>,
   ) {
     console.log('AssociationSeedService initialized');
   }
@@ -36,57 +39,63 @@ export class AssociationSeedService {
         'Quel est le mot de passe et par qui il est donné ?',
       ];
 
-      // Créer d'abord tous les médias
       const baseAssociations = [
         {
           name: 'Urgence Palestine',
-          localisation: '11 boulevard Voltaire, 75004 Paris, France',
+          localisation: {
+            street_number: '11',
+            street_name: 'boulevard Voltaire',
+            zip: '75004',
+            city: 'Paris',
+            country: 'France',
+          },
           description: 'From River to the Sea, Palestine will be free',
           imageFilename: 'freepalestine.png',
           types: [],
         },
-        // ... autres associations de base
       ];
 
-      // Créer les médias pour toutes les associations
       const mediaMap = new Map<string, Media>();
 
-      // Créer les médias pour les associations de base
       for (const baseAssoc of baseAssociations) {
         const media = await this.createDefaultMedia(baseAssoc.imageFilename);
         mediaMap.set(baseAssoc.imageFilename, media);
       }
 
-      // Créer les médias pour les associations générées
-      for (const type of types) {
-        const mediaFilename = `${type.name.toLowerCase()}.png`;
-        const media = await this.createDefaultMedia(mediaFilename);
-        mediaMap.set(mediaFilename, media);
-      }
+      const associationsToCreate = [];
 
-      // Créer les associations avec les médias correspondants
-      const associationsToCreate = types.map((type) => {
+      for (let i = 0; i < types.length; i++) {
+        const type = types[i];
         const association = new Association();
         association.name = `join-us-${type.name.toLowerCase()}`;
-        association.localisation = 'Localisation par défaut';
+
+        if (i % 2 === 0) {
+          association.localisation = await this.createDefaultLocalisation();
+        }
+
+        const media = await this.createDefaultMedia(association.name);
         association.description = `Association pour ${type.name.toLowerCase()}`;
-        const mediaFilename = `${type.name.toLowerCase()}.png`;
-        association.image = mediaMap.get(mediaFilename)!;
+        association.image = media;
         association.types = [type];
         association.applicationQuestion =
           questions[Math.floor(Math.random() * questions.length)];
-        return association;
-      });
+        associationsToCreate.push(association);
+      }
 
-      baseAssociations.forEach((baseAssoc) => {
+      for (const baseAssoc of baseAssociations) {
         const association = new Association();
         association.name = baseAssoc.name;
-        association.localisation = baseAssoc.localisation;
+
+        const localisation = await this.localisationRepository.save(
+          baseAssoc.localisation,
+        );
+        association.localisation = localisation;
+
         association.description = baseAssoc.description;
         association.image = mediaMap.get(baseAssoc.imageFilename)!;
         association.types = baseAssoc.types;
         associationsToCreate.push(association);
-      });
+      }
 
       if (associationsToCreate.length > 0) {
         console.log('Seeding associations...');
@@ -126,8 +135,18 @@ export class AssociationSeedService {
     media.filename = filename;
     media.filepath = ASSOCIATION_PICTURE_PATH + `/${filename}`;
     media.mimetype = 'image/png';
-    media.size = 0; // Taille fictive pour le seed
+    media.size = 0;
     media.isPublic = true;
     return this.mediaRepository.save(media);
+  }
+
+  async createDefaultLocalisation(): Promise<Localisation> {
+    const localisation = new Localisation();
+    localisation.street_number = '1';
+    localisation.street_name = 'Rue de la République';
+    localisation.zip = '75001';
+    localisation.city = 'Paris';
+    localisation.country = 'France';
+    return this.localisationRepository.save(localisation);
   }
 }

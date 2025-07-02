@@ -24,7 +24,7 @@ import { RoleSeedService } from './seeders/role-seed.service';
 import { TypeAssociationsSeedService } from './seeders/type-association-seed.service';
 import { TypeEventsSeedService } from './seeders/type-event-seed.service';
 import { UserSeedService } from './seeders/user-seed.service';
-// ... autres imports de seeders
+import { Localisation } from '@src/localisation/entities/localisation.entity';
 
 @Module({
   providers: [
@@ -51,6 +51,7 @@ import { UserSeedService } from './seeders/user-seed.service';
       AssociationApplication,
       Notification,
       Permission,
+      Localisation,
     ]),
     ConfigModule.forRoot({
       isGlobal: true,

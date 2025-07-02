@@ -6,23 +6,27 @@ import {
   Param,
   Post,
   Put,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import {
   MyAssociationsDto,
   PublicAssociationDto,
+  CreateAssociationDto,
+  UpdateAssociationDto,
 } from '@shared/dto/associations.dto';
 import { PublicUserDto } from '@shared/dto/user.dto';
 import { plainToInstance } from 'class-transformer';
-import { User } from '../users/entities/user.entity';
 import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
 import { CurrentUserId } from '../utils/decorators/current-user-id.decorator';
 import { AssociationsService } from './associations.service';
-import { CreateAssociationDto } from './dto/create-association.dto';
-import { UpdateAssociationDto } from './dto/update-association.dto';
 import { AssociationManagerGuard } from './guards/association-manager.guard';
 import { AssociationMemberGuard } from './guards/association-member.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { createAssociationSchema } from '@shared/validations/associations.validation';
+import { YupValidationPipe } from '../utils/pipes/yup-validation.pipe';
 
 @ApiTags('associations')
 @Controller('associations')
@@ -72,19 +76,21 @@ export class AssociationsController {
 
   @Post()
   @ApiBearerAuth()
+  @UseGuards(AssociationManagerGuard)
   @BearAuthToken()
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
   async create(
-    @CurrentUserId() user: User,
-    @Body() createAssociationDto: CreateAssociationDto,
+    @CurrentUserId() userId: string,
+    @Body(new YupValidationPipe(createAssociationSchema))
+    createAssociationDto: CreateAssociationDto,
+    @UploadedFile() file?: Express.Multer.File,
   ): Promise<PublicAssociationDto> {
-    const association = await this.associationsService.create(
-      user,
+    return await this.associationsService.create(
+      userId,
       createAssociationDto,
+      file,
     );
-    return plainToInstance(PublicAssociationDto, association, {
-      excludeExtraneousValues: true,
-      enableImplicitConversion: true,
-    });
   }
 
   @Put(':id')

@@ -1,4 +1,4 @@
-import { Expose, Type } from "class-transformer";
+import { Expose } from "class-transformer";
 import * as yup from "yup";
 import { PublicAssociationDto } from "./associations.dto";
 import { PublicMediaDto } from "./media.dto";

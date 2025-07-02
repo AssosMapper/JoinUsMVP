@@ -2,6 +2,8 @@ import { Expose, Type } from "class-transformer";
 import { PublicMediaDto } from "./media.dto";
 import { TypeAssociationsDto } from "./type-associations.dto";
 import { PublicUserDto } from "./user.dto";
+import { CreateLocalisationDto, LocalisationDto } from "./localisation.dto";
+
 export class RemoveMemberDto {
   userId: string;
 }
@@ -13,15 +15,23 @@ export class MemberDto {
   image?: string;
 }
 
-export interface CreateAssociationDto {
+export class CreateAssociationDto {
   name: string;
+  description: string;
   isPublic: boolean;
   applicationQuestion?: string;
   typeIds: string[];
-  image?: string;
+  localisation: CreateLocalisationDto;
 }
 
-export interface UpdateAssociationDto extends Partial<CreateAssociationDto> {}
+export class UpdateAssociationDto {
+  name?: string;
+  description?: string;
+  isPublic?: boolean;
+  applicationQuestion?: string;
+  typeIds?: string[];
+  localisation?: CreateLocalisationDto;
+}
 
 export class PublicAssociationDto {
   @Expose() id: string;
@@ -29,22 +39,25 @@ export class PublicAssociationDto {
   @Expose() isPublic: boolean;
   @Expose() applicationQuestion: string;
 
-  @Expose()
   @Type(() => PublicMediaDto)
-  image: PublicMediaDto;
-
   @Expose()
+  image?: PublicMediaDto;
+
   @Type(() => TypeAssociationsDto)
+  @Expose()
   types: TypeAssociationsDto[];
 
-  @Expose() localisation: string;
+  @Type(() => LocalisationDto)
+  @Expose()
+  localisation?: LocalisationDto;
+
   @Expose() description: string;
   @Expose() createdAt: Date;
   @Expose() updatedAt: Date;
 }
 
 export class MyAssociationsDto extends PublicAssociationDto {
-  @Expose()
   @Type(() => PublicUserDto)
+  @Expose()
   users: PublicUserDto[];
 }

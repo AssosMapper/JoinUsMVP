@@ -6,6 +6,7 @@ import {
   ManyToMany,
   OneToOne,
 } from 'typeorm';
+import { Localisation } from '../../localisation/entities/localisation.entity';
 import { Media } from '../../media/entities/media.entity';
 import { TypeAssociations } from '../../type-associations/entities/type-associations.entity';
 import { User } from '../../users/entities/user.entity';
@@ -16,15 +17,16 @@ export class Association extends EntityStructure {
   @Column()
   name: string;
 
-  @Column({ nullable: true })
-  localisation: string;
+  @OneToOne(() => Localisation, { nullable: true, onDelete: 'SET NULL' })
+  @JoinColumn()
+  localisation?: Localisation;
 
   @Column('text')
   description: string;
 
-  @OneToOne(() => Media, { nullable: true })
+  @OneToOne(() => Media, { nullable: true, onDelete: 'SET NULL' })
   @JoinColumn()
-  image: Media;
+  image?: Media;
 
   @ManyToMany(() => User, (user) => user.associations)
   users: Array<User>;

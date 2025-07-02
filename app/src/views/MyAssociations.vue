@@ -6,6 +6,7 @@ import typeAssociationService from "@/services/typeAssociationService";
 import { useNotificationStore } from "@/store/notificationStore";
 import type { Association } from "@shared/types/association.ts";
 import type { TypeAssociation } from "@shared/types/type-association";
+import { formatInlineAddress } from "@shared/utils/address.util";
 import { useDebounce } from "@vueuse/core";
 import Dropdown from "primevue/dropdown";
 import IconField from "primevue/iconfield";
@@ -14,6 +15,8 @@ import InputText from "primevue/inputtext";
 import { onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import Button from "primevue/button";
+import { getMediaUrl } from "@/utils/media.util";
+import { Localisation } from "@shared/types/localisation";
 
 const notificationStore = useNotificationStore();
 const associations = ref<Association[]>([]);
@@ -23,14 +26,6 @@ const isLoading = ref(true);
 const router = useRouter();
 
 const debouncedSearch = useDebounce(search, 300);
-
-const getImageSrc = (associationName: string | undefined) => {
-  if (!associationName) return "/assets/associations-images/default.png";
-  const sanitizedAssociationName = associationName
-    .replace(/\s+/g, "")
-    .toLowerCase();
-  return `/assets/associations-images/${sanitizedAssociationName}.png`;
-};
 
 const fetchAssociations = async () => {
   try {
@@ -51,7 +46,10 @@ const fetchTypeAssociations = async () => {
     const data = await typeAssociationService.getAllTypeAssociations();
     typeAssociations.value = data;
   } catch (error) {
-    console.error("Erreur lors de la récupération des types d'associations:", error);
+    console.error(
+      "Erreur lors de la récupération des types d'associations:",
+      error
+    );
   }
 };
 
@@ -63,16 +61,16 @@ onMounted(() => {
 
 <template>
   <div class="overflow-x-hidden">
-    <div class="title-container 
-                shadow-[0_4px_15px_-3px_rgba(0,0,0,0.2)]
-                relative z-10 flex justify-center items-center">
-      <div class="px-10 ">
+    <div
+      class="title-container shadow-[0_4px_15px_-3px_rgba(0,0,0,0.2)] relative z-10 flex justify-center items-center"
+    >
+      <div class="px-10">
         <h1 class="text-3xl font-bold text-primary italic">Mes Associations</h1>
       </div>
     </div>
 
     <!-- Barre de recherche et filtres -->
-    <div class="px-10 py-4 ">
+    <div class="px-10 py-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
           <Dropdown
@@ -82,12 +80,15 @@ onMounted(() => {
             placeholder="Type d'association"
             :class="[
               'font-semibold',
-              selectedType ? 'text-[#168003]' : 'text-gray-600'
+              selectedType ? 'text-[#168003]' : 'text-gray-600',
             ]"
             :showClear="true"
           />
           <IconField class="w-[400px]">
-            <InputIcon class="pi pi-search" :class="search ? 'text-[#168003]' : 'text-gray-600'" />
+            <InputIcon
+              class="pi pi-search"
+              :class="search ? 'text-[#168003]' : 'text-gray-600'"
+            />
             <InputText
               v-model="search"
               placeholder="Rechercher une association..."
@@ -112,24 +113,19 @@ onMounted(() => {
     <div v-else class="pt-4 px-10">
       <div
         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto pb-20 pt-2"
-        style="max-height: calc(100vh - 12rem);"
+        style="max-height: calc(100vh - 12rem)"
       >
         <div
           v-for="association in associations"
           :key="association.id"
-          class="flex flex-col bg-white rounded-xl border-primary 
-                 shadow-[2px_2px_8px_-1px_rgba(0,0,0,0.1),4px_4px_12px_-2px_rgba(0,0,0,0.15)]
-                 transform transition-all duration-200 ease-in-out
-                 hover:shadow-[4px_4px_16px_-1px_rgba(0,0,0,0.15),8px_8px_20px_-4px_rgba(0,0,0,0.2)]
-                 hover:-translate-y-1 hover:bg-primary-hover/5
-                 cursor-pointer"
+          class="flex flex-col bg-white rounded-xl border-primary shadow-[2px_2px_8px_-1px_rgba(0,0,0,0.1),4px_4px_12px_-2px_rgba(0,0,0,0.15)] transform transition-all duration-200 ease-in-out hover:shadow-[4px_4px_16px_-1px_rgba(0,0,0,0.15),8px_8px_20px_-4px_rgba(0,0,0,0.2)] hover:-translate-y-1 hover:bg-primary-hover/5 cursor-pointer"
           @click="navigateToDashboard(association.id!)"
         >
           <div class="flex items-center p-4 gap-4 border-b-primary">
             <div class="flex-shrink-0">
               <JnsImage
                 :name="association.name"
-                :src="getImageSrc(association.name)"
+                :src="getMediaUrl(association.image?.filepath)"
                 size="md"
               />
             </div>
@@ -137,9 +133,15 @@ onMounted(() => {
               <h5 class="text-lg font-semibold text-gray-900 w-full">
                 {{ association.name }}
               </h5>
-              <p class="text-sm text-gray-600 mt-1">
+              <p
+                v-if="association.localisation"
+                class="text-sm text-gray-600 mt-1 w-full"
+                :title="formatInlineAddress(association.localisation as Localisation)"
+              >
                 <i class="pi pi-map-marker mr-1"></i>
-                {{ association.localisation }}
+                {{
+                  formatInlineAddress(association.localisation as Localisation)
+                }}
               </p>
             </div>
           </div>
@@ -157,8 +159,13 @@ onMounted(() => {
                 {{ type.name }}
               </span>
             </div>
-            <div class="mt-auto p-4 flex justify-center gap-3 border-t-primary w-full">
-              <Button @click="navigateToDashboard(association.id!)">
+            <div
+              class="mt-auto p-4 flex justify-center gap-3 border-t-primary w-full"
+            >
+              <Button
+                class="bg-primary text-white"
+                @click="navigateToDashboard(association.id!)"
+              >
                 Accéder au tableau de bord
               </Button>
             </div>

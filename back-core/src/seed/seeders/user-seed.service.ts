@@ -70,7 +70,6 @@ export class UserSeedService {
     user.password = await hashPassword('Password123!');
     user.roles = [associationManagerRole];
     user.isActive = true;
-    user.image = uploadedImage;
     users.push(user);
 
     // Create EventsManager user

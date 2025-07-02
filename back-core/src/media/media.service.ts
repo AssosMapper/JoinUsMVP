@@ -109,7 +109,9 @@ export class MediaService {
     file: Express.Multer.File,
     uploadMediaDto: UploadMediaDto,
   ): Promise<Media | null> {
-    const media = await this.findOne(uploadMediaDto.id);
+    const media = uploadMediaDto.id
+      ? await this.findOne(uploadMediaDto.id)
+      : null;
     if (media) return await this.update(uploadMediaDto, file);
     else return await this.create(file, uploadMediaDto);
   }
@@ -124,9 +126,7 @@ export class MediaService {
    */
   async uploadFile(file: Express.Multer.File, filePath: string): Promise<any> {
     const uploadDir = filePath;
-    console.log(filePath);
     const fullUploadPath = MediaService.getUploadFullPath(uploadDir);
-    console.log(fullUploadPath);
     if (!fs.existsSync(fullUploadPath))
       fs.mkdirSync(fullUploadPath, { recursive: true });
 

@@ -176,7 +176,6 @@ export class UsersService {
       where: { id: userId },
       relations: ['image'],
     });
-
     if (!user) throw new NotFoundException(`Une erreur est survenue`);
 
     const newMedia = await this.mediaService.save(

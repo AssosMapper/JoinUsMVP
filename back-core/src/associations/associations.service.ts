@@ -1,20 +1,28 @@
 import {
+  ConflictException,
   Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import {
+  PublicAssociationDto,
+  CreateAssociationDto,
+  UpdateAssociationDto,
+} from '@shared/dto/associations.dto';
 import { PublicUserDto } from '@shared/dto/user.dto';
 import { RoleEnum } from '@shared/types/roles';
 import { In, Repository } from 'typeorm';
 import { Media } from '../media/entities/media.entity';
+import { MediaService } from '../media/media.service';
+import { LocalisationService } from '../localisation/localisation.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { TypeAssociations } from '../type-associations/entities/type-associations.entity';
 import { User } from '../users/entities/user.entity';
 import { checkRole } from '../utils/functions/check-role';
-import { CreateAssociationDto } from './dto/create-association.dto';
-import { UpdateAssociationDto } from './dto/update-association.dto';
 import { Association } from './entities/association.entity';
+import { plainToInstance } from 'class-transformer';
+
 @Injectable()
 export class AssociationsService {
   constructor(
@@ -27,16 +35,20 @@ export class AssociationsService {
     private notificationsService: NotificationsService,
     @Inject('MEDIA_REPOSITORY')
     private mediaRepository: Repository<Media>,
+    private mediaService: MediaService,
+    private localisationService: LocalisationService,
   ) {}
 
   findAll(): Promise<Association[]> {
-    return this.associationsRepository.find({ relations: ['users', 'types'] });
+    return this.associationsRepository.find({
+      relations: ['users', 'types', 'localisation'],
+    });
   }
 
   async findOne(id: string): Promise<Association> {
     const association = await this.associationsRepository.findOne({
       where: { id },
-      relations: ['users', 'types', 'image'],
+      relations: ['users', 'types', 'image', 'localisation'],
     });
     if (!association) {
       throw new NotFoundException(`Association with ID ${id} not found`);
@@ -47,7 +59,7 @@ export class AssociationsService {
   async findByName(name: string): Promise<Association> {
     const association = await this.associationsRepository.findOne({
       where: { name },
-      relations: ['types'],
+      relations: ['types', 'localisation'],
     });
     if (!association) {
       throw new NotFoundException(`Association with name ${name} not found`);
@@ -56,27 +68,80 @@ export class AssociationsService {
   }
 
   async create(
-    user: User,
+    userId: string,
     createAssociationDto: CreateAssociationDto,
-  ): Promise<Association> {
-    const types = await this.typeAssociationsRepository.findBy({
-      id: In(createAssociationDto.typeIds),
+    file?: Express.Multer.File,
+  ): Promise<PublicAssociationDto> {
+    const user = await this.usersRepository.findOne({
+      where: { id: userId },
     });
 
-    const association = new Association();
-    association.name = createAssociationDto.name;
-    association.description = createAssociationDto.description;
-    if (createAssociationDto.image) {
-      const media = await this.mediaRepository.findOne({
-        where: { id: createAssociationDto.image },
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
+    }
+
+    const association = await this.save(createAssociationDto, file);
+
+    // Ajouter l'utilisateur créateur à l'association
+    association.users = [user];
+    await this.associationsRepository.save(association);
+
+    return plainToInstance(PublicAssociationDto, association, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
+  }
+
+  async save(
+    associationData: CreateAssociationDto | UpdateAssociationDto,
+    file?: Express.Multer.File,
+    existingAssociation?: Association,
+  ): Promise<Association> {
+    if (associationData.name) {
+      const nameExists = await this.associationsRepository.findOne({
+        where: { name: associationData.name },
       });
-      if (media) {
-        association.image = media;
+
+      if (
+        nameExists &&
+        (!existingAssociation || nameExists.id !== existingAssociation.id)
+      ) {
+        throw new ConflictException({
+          message: `Une association avec le nom "${associationData.name}" existe déjà`,
+        });
       }
     }
-    association.localisation = createAssociationDto.localisation;
-    association.users = [user];
-    association.types = types;
+
+    const association = existingAssociation || new Association();
+
+    if (associationData.localisation) {
+      const localisation = await this.localisationService.save(
+        associationData.localisation,
+      );
+      association.localisation = localisation;
+    }
+
+    if (associationData.typeIds) {
+      const types = await this.typeAssociationsRepository.findBy({
+        id: In(associationData.typeIds),
+      });
+      association.types = types;
+    }
+
+    if (file) {
+      const uploadedMedia = await this.mediaService.create(file, {
+        filepath: '/uploads/associations',
+      });
+      association.image = uploadedMedia;
+    }
+
+    Object.assign(association, {
+      name: associationData.name,
+      description: associationData.description,
+      isPublic: associationData.isPublic,
+      applicationQuestion: associationData.applicationQuestion,
+    });
+
     return this.associationsRepository.save(association);
   }
 
@@ -90,24 +155,11 @@ export class AssociationsService {
       throw new NotFoundException(`Association with ID ${id} not found`);
     }
 
-    if (Array.isArray(updateAssociationDto.typeIds)) {
-      existingAssociation.types = await this.typeAssociationsRepository.findBy({
-        id: In(updateAssociationDto.typeIds),
-      });
-    }
-
-    if (updateAssociationDto.image) {
-      const media = await this.mediaRepository.findOne({
-        where: { id: updateAssociationDto.image },
-      });
-      if (media) existingAssociation.image = media;
-    }
-
-    console.log('Existing association before update:', existingAssociation);
-    Object.assign(existingAssociation, updateAssociationDto);
-    console.log('Association after merge:', existingAssociation);
-
-    return await this.associationsRepository.save(existingAssociation);
+    return await this.save(
+      updateAssociationDto,
+      undefined,
+      existingAssociation,
+    );
   }
 
   async remove(id: string): Promise<void> {
@@ -120,16 +172,24 @@ export class AssociationsService {
       relations: ['roles'],
     });
 
-    if (checkRole(user, RoleEnum.SUPER_ADMIN)) return await this.findAll();
+    const relations = ['users', 'types', 'localisation', 'image'];
+    console.log(
+      await this.associationsRepository.find({
+        relations,
+      }),
+    );
+    if (checkRole(user, RoleEnum.SUPER_ADMIN))
+      return await this.associationsRepository.find({
+        relations,
+      });
 
-    // Sinon, retourner uniquement les associations de l'utilisateur
     return await this.associationsRepository.find({
       where: {
         users: {
           id: userId,
         },
       },
-      relations: ['users', 'types'],
+      relations,
     });
   }
 
