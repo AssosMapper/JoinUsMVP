@@ -72,7 +72,7 @@ export const useUserStore = defineStore("user", {
       try {
         const data = await authService.login(credentials);
         this.token = data?.access_token;
-        this.user = data?.user;
+        await this.refetchUser();
         this.isAuth = true;
       } catch (e: unknown) {
         if (e instanceof Error) {

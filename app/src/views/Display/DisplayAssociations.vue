@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import AssociationApplicationFormModal from "@/components/AssociationApplication/AssociationApplicationFormModal.vue";
 import JnsImage from "@/components/ui/JnsImage.vue";
 import Loader from "@/components/ui/Loader.vue";
 import associationApplicationService from "@/services/associationApplicationService.ts";
@@ -219,26 +218,6 @@ watch([debouncedSearch, selectedType], fetchAssociations);
             >
               En savoir plus
             </Button>
-
-            <template v-if="!userStore.getAssociation(association.id)">
-              <Button
-                v-if="association.isPublic"
-                @click="joinAssociation(association.id)"
-                :loading="joiningAssociation === association.id"
-                class="bg-primary text-white"
-              >
-                Rejoindre
-              </Button>
-
-              <AssociationApplicationFormModal
-                v-else
-                :applicationQuestion="association.applicationQuestion"
-                :associationId="association.id"
-                :associationApplication="
-                  getApplicationForAssociation(association.id)
-                "
-              />
-            </template>
           </div>
         </div>
       </div>

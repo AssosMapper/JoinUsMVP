@@ -314,6 +314,8 @@ const handleLocalisationChange = (
             <Button
               type="submit"
               label="Créer l'association"
+              severity="primary"
+              class="bg-primary text-white"
               :loading="isSubmitting"
               icon="pi pi-save"
             />
