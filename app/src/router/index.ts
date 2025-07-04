@@ -1,3 +1,4 @@
+import CreateAssociation from "@/components/Create/CreateAssociation.vue";
 import { useUserStore } from "@/store";
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 
@@ -93,6 +94,14 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("@/views/MyAssociations.vue"),
     meta: {
       requiresAuth: true,
+    },
+  },
+  {
+    path: "/create-association",
+    name: "CreateAssociation",
+    component: CreateAssociation,
+    meta: {
+      requiresAssociationManager: true,
     },
   },
   {

@@ -41,9 +41,6 @@ const [phone, phoneAttrs] = defineField("phone");
 const [password, passwordAttrs] = defineField("password");
 const [confirmPassword, confirmPasswordAttrs] = defineField("confirmPassword");
 
-const refreshProfilePicture = async () => {
-  await loadDataForm();
-};
 const removeProfilePicture = async () => {
   try {
     await usersService.removeProfilePicture();
@@ -125,6 +122,8 @@ const onSubmit = handleSubmit(async (formValues: UpdateUserDto) => {
 // Gestion des événements
 const handleImageUpload = async (file: File) => {
   await usersService.changeProfilePicture(file);
+
+  await userStore.refetchUser();
   notificationStore.showNotification(
     "Photo de profil mise à jour avec succès",
     "success"
@@ -166,7 +165,6 @@ const handleLocalisationChange = (newLocalisation: any) => {
             <UploadImage
               v-model="profilePicture"
               :preview="true"
-              @update:modelValue="refreshProfilePicture"
               @remove="removeProfilePicture"
               :handle-upload="handleImageUpload"
             />
@@ -292,6 +290,7 @@ const handleLocalisationChange = (newLocalisation: any) => {
               label="Sauvegarder"
               :loading="isSubmitting"
               icon="pi pi-save"
+              class="bg-primary text-white"
             />
           </div>
         </form>

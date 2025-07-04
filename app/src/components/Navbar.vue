@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { useUserStore } from "@/store";
-import Avatar from "primevue/avatar";
 import Button from "primevue/button";
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import NotificationButton from "./Notification/NotificationButton.vue";
 import { getMediaUrl } from "@/utils/media.util";
+import JnsImage from "./ui/JnsImage.vue";
 
 const userStore = useUserStore();
 const router = useRouter();
@@ -191,10 +191,11 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
           class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors duration-200 w-full"
           @click="router.push('/updateProfile')"
         >
-          <Avatar
-            shape="square"
-            :image="getMediaUrl(userStore.user.image?.filepath)"
-            class="bg-primary min-w-20 min-h-20 rounded-xl &>img{rounded-xl}"
+          <JnsImage
+            :src="getMediaUrl(userStore.user.image?.filepath)"
+            class="bg-primary aspect-square scale-90"
+            size="md"
+            :name="userStore.user.first_name"
           />
           <div class="flex flex-col text-left">
             <span class="font-semibold text-gray-900">{{ first_name }}</span>

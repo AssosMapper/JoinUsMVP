@@ -17,6 +17,7 @@ import {
   CreateAssociationDto,
   UpdateAssociationDto,
 } from '@shared/dto/associations.dto';
+import { SaveLocalisationDto } from '@shared/dto/localisation.dto';
 import { PublicUserDto } from '@shared/dto/user.dto';
 import { plainToInstance } from 'class-transformer';
 import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
@@ -26,7 +27,11 @@ import { AssociationManagerGuard } from './guards/association-manager.guard';
 import { AssociationMemberGuard } from './guards/association-member.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { createAssociationSchema } from '@shared/validations/associations.validation';
-import { YupValidationPipe } from '../utils/pipes/yup-validation.pipe';
+import { saveLocalisationSchema } from '@shared/validations/localisation.validation';
+import {
+  OptionalYupValidationPipe,
+  YupValidationPipe,
+} from '../utils/pipes/yup-validation.pipe';
 
 @ApiTags('associations')
 @Controller('associations')
@@ -82,13 +87,16 @@ export class AssociationsController {
   @ApiConsumes('multipart/form-data')
   async create(
     @CurrentUserId() userId: string,
-    @Body(new YupValidationPipe(createAssociationSchema))
+    @Body('association', new YupValidationPipe(createAssociationSchema))
     createAssociationDto: CreateAssociationDto,
+    @Body('localisation', new OptionalYupValidationPipe(saveLocalisationSchema))
+    saveLocalisationDto?: SaveLocalisationDto,
     @UploadedFile() file?: Express.Multer.File,
   ): Promise<PublicAssociationDto> {
     return await this.associationsService.create(
       userId,
       createAssociationDto,
+      saveLocalisationDto,
       file,
     );
   }

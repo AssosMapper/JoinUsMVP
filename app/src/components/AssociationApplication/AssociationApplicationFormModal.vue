@@ -112,10 +112,14 @@ const showButtonText = computed(() => {
 
   <Dialog v-model:visible="visible" modal header="Votre candidature">
     <template #header>
-      <span class="text-2xl font-semibold">Votre candidature</span>
+      <span class="text-2xl font-semibold text-surface-950"
+        >Votre candidature</span
+      >
     </template>
     <form @submit="onSubmit" class="flex flex-col gap-4">
-      <span>{{ applicationQuestion }}</span>
+      <span class="text-surface-500 font-medium">{{
+        applicationQuestion
+      }}</span>
 
       <JnsField :errorMessage="errors.applicationAnswer">
         <FloatLabel variant="in" class="w-full">
@@ -149,6 +153,7 @@ const showButtonText = computed(() => {
         <Button
           :label="sendButtonText"
           severity="primary"
+          class="bg-primary text-white"
           :loading="isSubmitting"
           type="submit"
         />

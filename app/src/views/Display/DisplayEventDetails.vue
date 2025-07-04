@@ -4,8 +4,10 @@ import ParticipantEventList from "@/components/Events/ParticipantEventList.vue";
 import JnsImage from "@/components/ui/JnsImage.vue";
 import eventService from "@/services/eventService";
 import mediaService from "@/services/mediaService";
-import type { EventMapType } from "@/types/map.types";
+import { EventMapType } from "@/types/map.types";
 import { EventParticipantResponseDto } from "@shared/dto/event-participation.dto";
+import { plainToInstance } from "class-transformer";
+import console from "console";
 import ProgressSpinner from "primevue/progressspinner";
 import Tab from "primevue/tab";
 import TabList from "primevue/tablist";
@@ -27,34 +29,11 @@ const eventForMap = computed<EventMapType[]>(() => {
   if (!event.value) return [];
 
   return [
-    {
-      id: event.value.id,
-      titre: event.value.titre,
-      description: event.value.description,
-      localisation: event.value.localisation,
-      date:
-        typeof event.value.date === "string"
-          ? event.value.date
-          : event.value.date.toISOString(),
-      association: event.value.association
-        ? {
-            id: event.value.association.id,
-            name: event.value.association.name,
-            image:
-              typeof event.value.association.image === "string"
-                ? event.value.association.image
-                : event.value.association.image?.filename,
-          }
-        : undefined,
-      typeEvent: event.value.typeEvent
-        ? {
-            name: event.value.typeEvent.name,
-          }
-        : undefined,
-    },
+    plainToInstance(EventMapType, event.value, {
+      enableImplicitConversion: true,
+    }),
   ];
 });
-
 // Centre de la carte basé sur la localisation de l'événement
 const mapCenter = computed(() => {
   // Paris par défaut, sera mis à jour par géocodage dans EventMap

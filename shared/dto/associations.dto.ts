@@ -21,7 +21,6 @@ export class CreateAssociationDto {
   isPublic: boolean;
   applicationQuestion?: string;
   typeIds: string[];
-  localisation: CreateLocalisationDto;
 }
 
 export class UpdateAssociationDto {

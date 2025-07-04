@@ -10,6 +10,7 @@ import { useNotificationStore } from "@/store/notificationStore";
 import { Association } from "@shared/types/association";
 import { AssociationApplication } from "@shared/types/association-applications";
 import { TypeAssociation } from "@shared/types/type-association";
+import { formatFullAddress } from "@shared/utils/address.util";
 import { useDebounce } from "@vueuse/core";
 import Dropdown from "primevue/dropdown";
 import IconField from "primevue/iconfield";
@@ -184,9 +185,12 @@ watch([debouncedSearch, selectedType], fetchAssociations);
               <h5 class="text-lg font-semibold text-gray-900 w-full">
                 {{ association.name }}
               </h5>
-              <p class="text-sm text-gray-600 mt-1">
+              <p
+                v-if="association.localisation"
+                class="text-sm text-gray-600 mt-1"
+              >
                 <i class="pi pi-map-marker mr-1"></i>
-                {{ association.localisation }}
+                {{ formatFullAddress(association.localisation) }}
               </p>
             </div>
           </div>

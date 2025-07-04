@@ -10,6 +10,7 @@ import {
   CreateAssociationDto,
   UpdateAssociationDto,
 } from '@shared/dto/associations.dto';
+import { SaveLocalisationDto } from '@shared/dto/localisation.dto';
 import { PublicUserDto } from '@shared/dto/user.dto';
 import { RoleEnum } from '@shared/types/roles';
 import { In, Repository } from 'typeorm';
@@ -70,6 +71,7 @@ export class AssociationsService {
   async create(
     userId: string,
     createAssociationDto: CreateAssociationDto,
+    saveLocalisationDto?: SaveLocalisationDto,
     file?: Express.Multer.File,
   ): Promise<PublicAssociationDto> {
     const user = await this.usersRepository.findOne({
@@ -80,7 +82,11 @@ export class AssociationsService {
       throw new NotFoundException('Utilisateur non trouvé');
     }
 
-    const association = await this.save(createAssociationDto, file);
+    const association = await this.save(
+      createAssociationDto,
+      saveLocalisationDto,
+      file,
+    );
 
     // Ajouter l'utilisateur créateur à l'association
     association.users = [user];
@@ -94,6 +100,7 @@ export class AssociationsService {
 
   async save(
     associationData: CreateAssociationDto | UpdateAssociationDto,
+    saveLocalisationDto?: SaveLocalisationDto,
     file?: Express.Multer.File,
     existingAssociation?: Association,
   ): Promise<Association> {
@@ -114,10 +121,9 @@ export class AssociationsService {
 
     const association = existingAssociation || new Association();
 
-    if (associationData.localisation) {
-      const localisation = await this.localisationService.save(
-        associationData.localisation,
-      );
+    if (saveLocalisationDto) {
+      const localisation =
+        await this.localisationService.save(saveLocalisationDto);
       association.localisation = localisation;
     }
 
@@ -157,6 +163,7 @@ export class AssociationsService {
 
     return await this.save(
       updateAssociationDto,
+      undefined,
       undefined,
       existingAssociation,
     );

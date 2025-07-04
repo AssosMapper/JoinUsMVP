@@ -1,12 +1,10 @@
-import { Permission } from "./permission";
 import { User } from "./user";
 
 export interface Role {
   id?: string;
   name: string;
   description?: string;
-  permissions: Permission[];
-  users: User[];
+  users?: User[];
 }
 
 // Gardons l'enum UserRole existant

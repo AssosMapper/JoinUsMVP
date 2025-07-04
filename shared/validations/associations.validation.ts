@@ -20,9 +20,6 @@ export const createAssociationSchema = yup.object().shape({
     .of(yup.string().uuid())
     .min(1, "Au moins un type est requis")
     .required("Les types sont requis"),
-  localisation: createLocalisationSchema.required(
-    "La localisation est requise"
-  ),
 });
 
 export const updateAssociationSchema = yup.object().shape({

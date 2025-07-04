@@ -39,6 +39,7 @@ declare module 'vue' {
     ParticipantEventList: typeof import('./src/components/Events/ParticipantEventList.vue')['default']
     ParticipateEventButton: typeof import('./src/components/Events/ParticipateEventButton.vue')['default']
     ProfilePictureUpload: typeof import('./src/components/ui/ProfilePictureUpload.vue')['default']
+    ProgressSpinner: typeof import('primevue/progressspinner')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     TabPanel: typeof import('primevue/tabpanel')['default']

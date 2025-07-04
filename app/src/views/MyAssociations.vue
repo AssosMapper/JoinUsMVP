@@ -6,7 +6,7 @@ import typeAssociationService from "@/services/typeAssociationService";
 import { useNotificationStore } from "@/store/notificationStore";
 import type { Association } from "@shared/types/association.ts";
 import type { TypeAssociation } from "@shared/types/type-association";
-import { formatInlineAddress } from "@shared/utils/address.util";
+import { formatFullAddress } from "@shared/utils/address.util";
 import { useDebounce } from "@vueuse/core";
 import Dropdown from "primevue/dropdown";
 import IconField from "primevue/iconfield";
@@ -136,11 +136,11 @@ onMounted(() => {
               <p
                 v-if="association.localisation"
                 class="text-sm text-gray-600 mt-1 w-full"
-                :title="formatInlineAddress(association.localisation as Localisation)"
+                :title="formatFullAddress(association.localisation as Localisation)"
               >
                 <i class="pi pi-map-marker mr-1"></i>
                 {{
-                  formatInlineAddress(association.localisation as Localisation)
+                  formatFullAddress(association.localisation as Localisation)
                 }}
               </p>
             </div>

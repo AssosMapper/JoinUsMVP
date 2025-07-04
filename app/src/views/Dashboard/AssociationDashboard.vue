@@ -20,7 +20,8 @@ import TabPanels from "primevue/tabpanels";
 import Tabs from "primevue/tabs";
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-
+import { formatFullAddress } from "@shared/utils/address.util";
+import { Localisation } from "@shared/types/localisation";
 const route = useRoute();
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
@@ -87,9 +88,9 @@ onMounted(async () => {
           <h1 class="text-3xl font-bold text-gray-900">
             {{ association.name }}
           </h1>
-          <p class="text-gray-600 mt-2">
+          <p v-if="association.localisation" class="text-gray-600 mt-2">
             <i class="pi pi-map-marker mr-1"></i>
-            {{ association.localisation }}
+            {{ formatFullAddress(association.localisation as Localisation) }}
           </p>
         </div>
       </div>

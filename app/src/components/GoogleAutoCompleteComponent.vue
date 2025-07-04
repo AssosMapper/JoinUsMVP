@@ -377,6 +377,7 @@ onUnmounted(() => {
       :class="inputClass"
       :placeholder="inputState.placeholder"
       :disabled="inputState.disabled"
+      autocomplete="off"
       class="w-full"
       @input="handleInputChange"
     />

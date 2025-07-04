@@ -60,7 +60,7 @@ const handleImageError = () => {
       :src="props.src!"
       :alt="name"
       @error="handleImageError"
-      :class="['w-full h-full object-contain', roundedClass]"
+      :class="['w-full h-full object-cover', roundedClass]"
     />
     <div
       v-else

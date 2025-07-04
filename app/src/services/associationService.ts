@@ -6,16 +6,54 @@ import {
   PublicAssociationDto,
   UpdateAssociationDto,
 } from "@shared/dto/associations.dto";
+import { CreateLocalisationDto } from "@shared/dto/localisation.dto";
 
-const createAssociation = async (association: CreateAssociationDto) => {
+const createAssociation = async (
+  association: CreateAssociationDto,
+  localisation?: CreateLocalisationDto,
+  file?: File
+): Promise<PublicAssociationDto> => {
   const apiStore = useApiStore();
-  const { data, error, response } = await useApi(apiStore.associations.create)
-    .post(association)
-    .json();
-  if (error.value) {
-    throw new Error(error.value);
+
+  // Créer un FormData pour gérer l'upload de fichier
+  const formData = new FormData();
+
+  // Ajouter les données de l'association
+  Object.keys(association).forEach((key) => {
+    const value = association[key as keyof CreateAssociationDto];
+    if (value !== undefined && value !== null) {
+      if (key === "typeIds" && Array.isArray(value)) {
+        // Gérer le tableau des typeIds
+        value.forEach((id, index) => {
+          formData.append(`association[typeIds][${index}]`, id);
+        });
+      } else {
+        formData.append(`association[${key}]`, value.toString());
+      }
+    }
+  });
+
+  // Ajouter les données de localisation si présentes
+  if (localisation) {
+    Object.keys(localisation).forEach((key) => {
+      const value = localisation[key as keyof CreateLocalisationDto];
+      if (value !== undefined && value !== null) {
+        formData.append(`localisation[${key}]`, String(value));
+      }
+    });
   }
-  return { data: data.value, response: response.value };
+
+  // Ajouter le fichier s'il existe
+  if (file) {
+    formData.append("file", file);
+  }
+
+  const { data, error } = await useApi(apiStore.associations.create)
+    .post(formData)
+    .json();
+
+  if (error.value) throw error.value as ResponseError;
+  return data.value;
 };
 
 const getAllAssociations = async () => {

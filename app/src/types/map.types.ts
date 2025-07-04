@@ -7,7 +7,7 @@ export interface MapType {
   height?: string;
 }
 
-export interface EventMapType {
+export class EventMapType {
   id: string;
   titre: string;
   description: string;

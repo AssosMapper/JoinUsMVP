@@ -8,7 +8,7 @@ import associationApplicationService from "@/services/associationApplicationServ
 import associationService from "@/services/associationService";
 import eventService from "@/services/eventService";
 import { useUserStore } from "@/store";
-import type { EventMapType } from "@/types/map.types";
+import { EventMapType } from "@/types/map.types";
 import { AssociationApplication } from "@shared/types/association-applications";
 import type { Event } from "@shared/types/event";
 import Tab from "primevue/tab";
@@ -18,7 +18,9 @@ import TabPanels from "primevue/tabpanels";
 import Tabs from "primevue/tabs";
 import { computed, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
-
+import { plainToInstance } from "class-transformer";
+import { formatFullAddress } from "@shared/utils/address.util";
+import { Localisation } from "@shared/types/localisation";
 const route = useRoute();
 const userStore = useUserStore();
 const association = ref<any>(null);
@@ -36,29 +38,11 @@ const eventsForMap = computed<EventMapType[]>(() => {
     ...todayEvents.value,
     ...upcomingEvents.value,
   ];
-  return allEvents.map((event) => ({
-    id: event.id,
-    titre: event.titre,
-    description: event.description,
-    localisation: event.localisation,
-    date:
-      typeof event.date === "string" ? event.date : event.date.toISOString(),
-    association: event.association
-      ? {
-          id: event.association.id,
-          name: event.association.name,
-          image:
-            typeof event.association.image === "string"
-              ? event.association.image
-              : event.association.image?.filename,
-        }
-      : undefined,
-    typeEvent: event.typeEvent
-      ? {
-          name: event.typeEvent.name,
-        }
-      : undefined,
-  }));
+  return allEvents.map((event) =>
+    plainToInstance(EventMapType, event, {
+      enableImplicitConversion: true,
+    })
+  );
 });
 
 // Centre de la carte basé sur la localisation de l'association
@@ -167,9 +151,12 @@ onMounted(async () => {
           <h1 class="text-3xl font-bold text-gray-900">
             {{ association.name }}
           </h1>
-          <div class="text-gray-600 flex items-center mt-2 ml-[2px]">
+          <div
+            v-if="association.localisation"
+            class="text-gray-600 flex items-center mt-2 ml-[2px]"
+          >
             <i class="pi pi-map-marker mr-1"></i>
-            {{ association.localisation }}
+            {{ formatFullAddress(association.localisation as Localisation) }}
           </div>
         </div>
       </div>

@@ -6,19 +6,20 @@ import { LocalisationDto } from "@shared/dto/localisation.dto";
 import { PublicMediaDto } from "@shared/dto/media.dto";
 import { Association } from "@shared/types/association";
 import { Role } from "@shared/types/roles";
+import { Expose, plainToInstance } from "class-transformer";
 import { defineStore } from "pinia";
 
-interface UserState {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  phone?: string;
-  image?: PublicMediaDto;
-  localisation?: LocalisationDto;
-  roles: Role[];
-  associations: Association[];
-  associationId?: string;
+class UserState {
+  @Expose() id: string;
+  @Expose() first_name: string;
+  @Expose() last_name: string;
+  @Expose() email: string;
+  @Expose() phone?: string;
+  @Expose() image?: PublicMediaDto;
+  @Expose() localisation?: LocalisationDto;
+  @Expose() roles: Role[];
+  @Expose() associations: Association[];
+  @Expose() associationId?: string;
 }
 
 export const useUserStore = defineStore("user", {
@@ -98,9 +99,11 @@ export const useUserStore = defineStore("user", {
     async refetchUser() {
       this.loader = true;
       try {
-        const data = await usersService.getProfile();
-        this.user = { ...this.user, ...data };
-        console.log(this.user);
+        let data = await usersService.getProfile();
+        this.user = plainToInstance(UserState, data, {
+          excludeExtraneousValues: true,
+          enableImplicitConversion: true,
+        });
       } catch (e: unknown) {
         if (e instanceof Error) {
           throw new Error(e.message);

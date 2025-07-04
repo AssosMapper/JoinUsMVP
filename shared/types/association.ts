@@ -1,11 +1,12 @@
 import { Media } from "@shared/types/media";
 import { TypeAssociations } from "./type-associations";
 import { PublicUser, User } from "./user";
+import { Localisation } from "./localisation";
 
 export interface Association {
   id?: string;
   name: string;
-  localisation?: string;
+  localisation?: Localisation;
   description: string;
   image?: Media;
   users: User[];

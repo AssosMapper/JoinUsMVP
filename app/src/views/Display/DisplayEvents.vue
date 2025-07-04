@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import EventsList from "@/components/EventsList.vue";
 import EventMap from "@/components/EventMap.vue";
+import { EventMapType } from "@/types/map.types";
 import eventService from "@/services/eventService";
 import typeEventService from "@/services/typeEventService";
-import type { EventMapType } from "@/types/map.types";
 import type { Event } from "@shared/types/event";
 import type { TypeEvents } from "@shared/types/type-events";
 import { useDebounce } from "@vueuse/core";
@@ -20,6 +20,7 @@ import {
   shallowRef,
   watch,
 } from "vue";
+import { plainToInstance } from "class-transformer";
 
 const events = ref<Array<Event>>([]);
 const typeEvents = ref<Array<TypeEvents>>([]);
@@ -35,31 +36,11 @@ const debouncedSearch = useDebounce(search, 300);
 const eventsForMap = computed<EventMapType[] | null>(() => {
   return events.value
     .filter((event) => event.id && event.titre && event.localisation) // Filtrer les événements valides
-    .map((event) => ({
-      id: event.id!,
-      titre: event.titre!,
-      description: event.description,
-      localisation: event.localisation!,
-      date:
-        typeof event.date === "string"
-          ? event.date
-          : event.date?.toISOString() || new Date().toISOString(),
-      association: event.association
-        ? {
-            id: event.association.id,
-            name: event.association.name,
-            image:
-              typeof event.association.image === "string"
-                ? event.association.image
-                : event.association.image?.filename,
-          }
-        : undefined,
-      typeEvent: event.typeEvent
-        ? {
-            name: event.typeEvent.name,
-          }
-        : undefined,
-    }));
+    .map((event) =>
+      plainToInstance(EventMapType, event, {
+        enableImplicitConversion: true,
+      })
+    );
 });
 
 const components = {
