@@ -6,7 +6,6 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import {
-  PublicAssociationDto,
   CreateAssociationDto,
   UpdateAssociationDto,
 } from '@shared/dto/associations.dto';
@@ -22,7 +21,6 @@ import { TypeAssociations } from '../type-associations/entities/type-association
 import { User } from '../users/entities/user.entity';
 import { checkRole } from '../utils/functions/check-role';
 import { Association } from './entities/association.entity';
-import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class AssociationsService {
@@ -73,7 +71,7 @@ export class AssociationsService {
     createAssociationDto: CreateAssociationDto,
     saveLocalisationDto?: SaveLocalisationDto,
     file?: Express.Multer.File,
-  ): Promise<PublicAssociationDto> {
+  ): Promise<Association> {
     const user = await this.usersRepository.findOne({
       where: { id: userId },
     });
@@ -92,10 +90,8 @@ export class AssociationsService {
     association.users = [user];
     await this.associationsRepository.save(association);
 
-    return plainToInstance(PublicAssociationDto, association, {
-      excludeExtraneousValues: true,
-      enableImplicitConversion: true,
-    });
+    // Recharger l'association avec toutes les relations
+    return association;
   }
 
   async save(

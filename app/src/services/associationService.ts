@@ -18,30 +18,8 @@ const createAssociation = async (
   // Créer un FormData pour gérer l'upload de fichier
   const formData = new FormData();
 
-  // Ajouter les données de l'association
-  Object.keys(association).forEach((key) => {
-    const value = association[key as keyof CreateAssociationDto];
-    if (value !== undefined && value !== null) {
-      if (key === "typeIds" && Array.isArray(value)) {
-        // Gérer le tableau des typeIds
-        value.forEach((id, index) => {
-          formData.append(`association[typeIds][${index}]`, id);
-        });
-      } else {
-        formData.append(`association[${key}]`, value.toString());
-      }
-    }
-  });
-
-  // Ajouter les données de localisation si présentes
-  if (localisation) {
-    Object.keys(localisation).forEach((key) => {
-      const value = localisation[key as keyof CreateLocalisationDto];
-      if (value !== undefined && value !== null) {
-        formData.append(`localisation[${key}]`, String(value));
-      }
-    });
-  }
+  formData.append("association", JSON.stringify(association));
+  formData.append("localisation", JSON.stringify(localisation));
 
   // Ajouter le fichier s'il existe
   if (file) {

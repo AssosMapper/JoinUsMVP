@@ -93,12 +93,16 @@ export class AssociationsController {
     saveLocalisationDto?: SaveLocalisationDto,
     @UploadedFile() file?: Express.Multer.File,
   ): Promise<PublicAssociationDto> {
-    return await this.associationsService.create(
+    const association = await this.associationsService.create(
       userId,
       createAssociationDto,
       saveLocalisationDto,
       file,
     );
+    return plainToInstance(PublicAssociationDto, association, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 
   @Put(':id')

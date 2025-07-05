@@ -13,6 +13,17 @@ export class YupValidationPipe implements PipeTransform {
     ) {
       return undefined;
     }
+
+    // Parser les chaînes JSON automatiquement pour les données multipart
+    if (typeof value === 'string') {
+      try {
+        value = JSON.parse(value);
+      } catch (error) {
+        // Si ce n'est pas du JSON valide, garder la valeur originale
+        // Cela permet de gérer les chaînes simples qui ne sont pas du JSON
+      }
+    }
+
     return this.schema.validateSync(value);
   }
 }
@@ -25,6 +36,17 @@ export class OptionalYupValidationPipe implements PipeTransform {
     if (value === undefined || value === null) {
       return undefined;
     }
+
+    // Parser les chaînes JSON automatiquement pour les données multipart
+    if (typeof value === 'string') {
+      try {
+        value = JSON.parse(value);
+      } catch (error) {
+        // Si ce n'est pas du JSON valide, garder la valeur originale
+        // Cela permet de gérer les chaînes simples qui ne sont pas du JSON
+      }
+    }
+
     return this.schema.validateSync(value);
   }
 }
