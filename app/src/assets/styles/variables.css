@@ -5,12 +5,12 @@
   --white-color: #ffffff;
   --black-color: #000000;
   /* Variantes de primary */
-  --primary-dark: #0d4702;  /* Plus foncé que primary */
+  --primary-dark: #0d4702; /* Plus foncé que primary */
   --primary-hover: #d8e6d5c9; /* Légèrement plus clair pour hover */
   --primary-disabled: rgba(20, 113, 4, 0.6); /* Version avec opacité */
   /* Variantes de danger */
-  --danger-dark: #8f0104;   /* Plus foncé que danger */
-  --danger-hover: #eb787b;  /* Légèrement plus clair pour hover */
+  --danger-dark: #8f0104; /* Plus foncé que danger */
+  --danger-hover: #eb787b; /* Légèrement plus clair pour hover */
   --danger-disabled: rgba(190, 1, 6, 0.6); /* Version avec opacité */
 }
 
@@ -56,8 +56,8 @@
   background-color: rgba(172, 0, 25, 0.1);
 }
 .bg-black {
-    background-color: var(--black-color);
-  }
+  background-color: var(--black-color);
+}
 
 /* Classes de bordure */
 .border-primary {
@@ -66,12 +66,12 @@
 }
 
 .border-b-primary {
-    border-bottom: 0.5px solid var(--primary-color);
-  } 
-  
+  border-bottom: 0.5px solid var(--primary-color);
+}
+
 .border-t-primary {
-    border-top: 0.5px solid var(--primary-color);
-} 
+  border-top: 0.5px solid var(--primary-color);
+}
 
 .border-danger {
   border-color: var(--danger-color);
@@ -79,20 +79,20 @@
 }
 .border-b-danger {
   border-bottom: 0.5px solid var(--danger-color);
-} 
+}
 
 .border-t-danger {
-    border-top: 0.5px solid var(--danger-color);
-  } 
+  border-top: 0.5px solid var(--danger-color);
+}
 
 /* Classes de display */
 .d-flex {
   display: flex;
-} 
+}
 
 /* Classes de padding */
 .pb-30 {
-    padding-bottom: 7.5rem;
+  padding-bottom: 7.5rem;
 }
 
 .pb-40 {

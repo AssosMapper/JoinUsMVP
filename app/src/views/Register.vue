@@ -180,14 +180,16 @@ const handleRegister = async () => {
                 <div class="text-gray-600">
                   Déjà un compte ?
                   <router-link to="/login">
-                    <button
-                      class="p-button p-component bg-primary text-white"
+                    <Button
+                      class="text-primary"
                       type="button"
+                      severity="primary"
+                      variant="outlined"
                       data-pc-name="button"
                       data-pc-section="root"
                     >
                       Se connecter
-                    </button>
+                    </Button>
                   </router-link>
                 </div>
               </div>

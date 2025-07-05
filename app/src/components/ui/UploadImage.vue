@@ -140,7 +140,9 @@ defineExpose({
         <template #default="{ triggerUpload, isUploading }">
           <Button
             type="button"
-            class="bg-primary-500 text-white"
+            severity="primary"
+            variant="outlined"
+            raised
             :loading="isUploading"
             @click="triggerUpload"
           >

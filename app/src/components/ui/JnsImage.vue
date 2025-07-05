@@ -65,7 +65,7 @@ const handleImageError = () => {
     <div
       v-else
       :class="[
-        'w-full h-full flex items-center justify-center text-white',
+        'w-full h-full flex items-center justify-center text-white jns-placeholder',
         backgroundColor,
         roundedClass,
       ]"

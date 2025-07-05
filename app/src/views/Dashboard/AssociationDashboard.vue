@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AssociationMembers from "@/components/AssociationDashboard/AssociationMembers.vue";
 import ManageAssociationApplications from "@/components/AssociationDashboard/ManageAssociationApplications.vue";
+import EventCard from "@/components/Events/EventCard.vue";
 import JnsImage from "@/components/ui/JnsImage.vue";
 import Loader from "@/components/ui/Loader.vue";
 import associationService from "@/services/associationService";
@@ -9,6 +10,7 @@ import mediaService from "@/services/mediaService";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useUserStore } from "@/store/userStore";
 import { canManageAssociation } from "@/utils/check-role";
+import { EventCard as EventCardType } from "@/types/event.types";
 import type { PublicAssociationDto } from "@shared/dto/associations.dto";
 import { User } from "@shared/types";
 import type { Media } from "@shared/types/media";
@@ -32,9 +34,16 @@ const events = ref([]);
 const isLoading = ref(true);
 const activeTab = ref("0");
 
+const associationId = computed(() => route.params.id as string);
 const canManageApplications = computed(() =>
-  canManageAssociation(userStore.user as User, route.params.id as string)
+  canManageAssociation(
+    userStore.user as unknown as User,
+    route.params.id as string
+  )
 );
+
+// Transformer les événements en EventCard
+const eventCards = computed(() => EventCardType.fromEvents(events.value));
 
 const loadAssociation = async () => {
   try {
@@ -117,7 +126,7 @@ onMounted(async () => {
 
             <TabPanel value="1">
               <AssociationMembers
-                :associationId="route.params.id as string"
+                :associationId="associationId"
                 :canManageApplications="canManageApplications"
               />
             </TabPanel>
@@ -130,43 +139,11 @@ onMounted(async () => {
                 <div
                   class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
                 >
-                  <div
-                    @click="router.push(`/displayEvent/${event.id}`)"
-                    v-for="event in events"
+                  <EventCard
+                    v-for="event in eventCards"
                     :key="event.id"
-                    class="bg-white border cursor-pointer border-gray-200 rounded-lg shadow hover:shadow-lg transition-all duration-300"
-                  >
-                    <JnsImage
-                      :name="event.titre"
-                      :src="event.image || '/default-event.jpg'"
-                      size="lg"
-                      :rounded="false"
-                      class="w-full h-48"
-                    />
-                    <div class="p-5">
-                      <div class="flex justify-between items-start mb-4">
-                        <h3
-                          class="text-xl font-bold tracking-tight text-gray-900"
-                        >
-                          {{ event.titre }}
-                        </h3>
-                        <span class="text-sm text-gray-500">{{
-                          event.type
-                        }}</span>
-                      </div>
-                      <p class="mb-3 font-normal text-gray-700">
-                        {{ event.description }}
-                      </p>
-                      <div class="flex items-center text-sm text-gray-500">
-                        <i class="pi pi-calendar mr-2"></i>
-                        <time>{{
-                          new Date(event.date).toLocaleDateString()
-                        }}</time>
-                        <i class="pi pi-map-marker ml-4 mr-2"></i>
-                        <span>{{ event.location }}</span>
-                      </div>
-                    </div>
-                  </div>
+                    :event="event"
+                  />
                 </div>
               </div>
             </TabPanel>

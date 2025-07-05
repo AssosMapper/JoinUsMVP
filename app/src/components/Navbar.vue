@@ -215,13 +215,17 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
         <Button
           label="Se connecter"
           icon="pi pi-sign-in"
+          severity="primary"
+          variant="outlined"
           class="w-full"
           @click="router.push('/login')"
         />
         <Button
           label="S'inscrire"
           icon="pi pi-user-plus"
-          class="w-full p-button-outlined"
+          class="w-full"
+          severity="primary"
+          variant="outlined"
           @click="router.push('/register')"
         />
       </div>
