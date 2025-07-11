@@ -1,6 +1,6 @@
-import { Association } from './association';
+import { Association } from "./association";
 
-export interface TypeAssociations {
+export interface TypeAssociation {
   id?: string;
   name: string;
   description?: string;

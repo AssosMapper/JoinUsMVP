@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import "reflect-metadata";
-import GoogleAutoCompleteComponent from "@/components/GoogleAutoCompleteComponent.vue";
 import JnsField from "@/components/ui/JnsField.vue";
 import UploadImage from "@/components/ui/UploadImage.vue";
+import GoogleAutoCompleteComponent from "@/components/GoogleAutoCompleteComponent.vue";
 import associationService from "@/services/associationService";
 import typeAssociationService from "@/services/typeAssociationService";
 import { useNotificationStore } from "@/store/notificationStore";
@@ -82,17 +82,13 @@ const loadTypeAssociations = async () => {
   }
 };
 
-onMounted(() => {
-  loadTypeAssociations();
-});
-
 // Soumission du formulaire
 const onSubmit = handleSubmit(async (formValues: CreateAssociationDto) => {
   isSubmitting.value = true;
   try {
     const createdAssociation = await associationService.createAssociation(
       formValues,
-      localisation.value,
+      localisation.value.street_name ? localisation.value : undefined,
       selectedImageFile.value || undefined
     );
 
@@ -113,7 +109,7 @@ const onSubmit = handleSubmit(async (formValues: CreateAssociationDto) => {
   }
 });
 
-// Gestion de la sélection d'image (optimistic UI géré par UploadImage)
+// Gestion de la sélection d'image
 const handleImageFileSelected = (file: File) => {
   selectedImageFile.value = file;
 };
@@ -128,8 +124,6 @@ const handleImageRemove = () => {
 const handleLocalisationChange = (
   newLocalisation: CreateLocalisationDto | null
 ) => {
-  console.log(newLocalisation);
-
   if (newLocalisation) {
     localisation.value = plainToInstance(
       CreateLocalisationDto,
@@ -149,6 +143,15 @@ const handleLocalisationChange = (
     };
   }
 };
+
+// Gestion de l'annulation
+const handleCancel = () => {
+  router.back();
+};
+
+onMounted(() => {
+  loadTypeAssociations();
+});
 </script>
 
 <template>
@@ -167,7 +170,7 @@ const handleLocalisationChange = (
           <p class="mt-2">Chargement...</p>
         </div>
 
-        <form v-else @submit="onSubmit" class="space-y-6">
+        <form v-else @submit.prevent="onSubmit" class="space-y-6">
           <!-- Image de l'association -->
           <div class="text-center">
             <h3 class="text-lg font-semibold mb-4">Image de l'association</h3>
@@ -297,7 +300,7 @@ const handleLocalisationChange = (
                 :model-value="localisation"
                 input-id="address"
                 input-class="p-inputtext p-component w-full"
-                placeholder="Entrez l'adresse de l'association *"
+                placeholder="Entrez l'adresse de l'association (optionnel)"
                 @update:modelValue="handleLocalisationChange"
               />
             </JnsField>
@@ -309,7 +312,7 @@ const handleLocalisationChange = (
               type="button"
               label="Annuler"
               severity="secondary"
-              @click="router.back()"
+              @click="handleCancel"
             />
             <Button
               type="submit"

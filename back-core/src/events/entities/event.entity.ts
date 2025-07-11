@@ -12,6 +12,7 @@ import { TypeEvents } from '../../type-events/entities/type-events.entity';
 import { User } from '../../users/entities/user.entity';
 import { EntityStructure } from '../../utils/structures/entity.structure';
 import { EventParticipation } from './event-participation.entity';
+import { Localisation } from '../../localisation/entities/localisation.entity';
 
 @Entity()
 export class Event extends EntityStructure {
@@ -28,8 +29,9 @@ export class Event extends EntityStructure {
   @Column()
   date: Date;
 
-  @Column()
-  localisation: string;
+  @OneToOne(() => Localisation, { nullable: true })
+  @JoinColumn()
+  localisation: Localisation;
 
   @ManyToOne(() => Association)
   @JoinColumn()
@@ -46,7 +48,7 @@ export class Event extends EntityStructure {
   @Column()
   isPublic: boolean;
 
-  @Column({ default: false })
+  @Column({ default: true })
   isValid: boolean;
 
   @OneToMany(() => EventParticipation, (participation) => participation.event, {

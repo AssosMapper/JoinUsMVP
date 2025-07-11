@@ -1,4 +1,5 @@
 import { Association } from "./association";
+import { Localisation } from "./localisation";
 import { Media } from "./media";
 import { TypeEvents } from "./type-events";
 import { User } from "./user";
@@ -9,7 +10,7 @@ export interface Event {
   description: string;
   image?: Media;
   date: Date;
-  localisation: string;
+  localisation?: Localisation;
   association: Association;
   user: User;
   typeEvent: TypeEvents;

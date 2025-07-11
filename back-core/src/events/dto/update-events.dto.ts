@@ -1,4 +1,3 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateEventDto } from './create-events.dto';
+import { UpdateEventDto as SharedUpdateEventDto } from '@shared/dto/events.dto';
 
-export class UpdateEventDto extends PartialType(CreateEventDto) {}
+export class UpdateEventDto extends SharedUpdateEventDto {}

@@ -124,7 +124,7 @@ defineExpose({
     <!-- Prévisualisation -->
     <div
       v-if="preview && previewUrl"
-      class="w-32 h-32 rounded-lg overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300"
+      class="w-32 h-32 img-container rounded-lg overflow-hidden bg-gray-100 border-2 border-dashed border-gray-300"
     >
       <img :src="previewUrl" alt="Preview" class="w-full h-full object-cover" />
     </div>

@@ -43,16 +43,35 @@ const getAllAssociations = async () => {
   return data.value;
 };
 
-const updateAssociation = async (id: string, data: UpdateAssociationDto) => {
+const updateAssociation = async (
+  id: string,
+  association: UpdateAssociationDto,
+  localisation?: CreateLocalisationDto,
+  file?: File
+): Promise<PublicAssociationDto> => {
   const apiStore = useApiStore();
-  const { data: response, error } = await useApi(
+
+  // Créer un FormData pour gérer l'upload de fichier
+  const formData = new FormData();
+
+  formData.append("association", JSON.stringify(association));
+  if (localisation) {
+    formData.append("localisation", JSON.stringify(localisation));
+  }
+
+  // Ajouter le fichier s'il existe
+  if (file) {
+    formData.append("file", file);
+  }
+
+  const { data, error } = await useApi(
     apiStore.resolveUrl(apiStore.associations.detail, { id })
   )
-    .put(data)
+    .put(formData)
     .json();
 
-  if (error.value) throw error.value;
-  return response.value;
+  if (error.value) throw error.value as ResponseError;
+  return data.value;
 };
 
 const getAssociationById = async (id: string) => {

@@ -3,6 +3,7 @@ import JnsImage from "@/components/ui/JnsImage.vue";
 import ParticipateEventButton from "@/components/Events/ParticipateEventButton.vue";
 import mediaService from "@/services/mediaService";
 import { EventCard, EventParticipation } from "@/types/event.types";
+import { formatFullAddress } from "@shared/utils/address.util";
 import { friendlyDate } from "@shared/utils/date";
 import Button from "primevue/button";
 import Card from "primevue/card";
@@ -87,9 +88,9 @@ const goToEventDetails = () => {
               <i class="pi pi-calendar"></i>
               {{ friendlyDate(event.date) }}
             </div>
-            <div class="flex items-center gap-2 text-gray-500">
+            <div v-if="event.localisation" class="flex items-center gap-2 text-gray-500">
               <i class="pi pi-map-marker"></i>
-              {{ event.localisation }}
+              {{ formatFullAddress(event.localisation) }}
             </div>
           </div>
 

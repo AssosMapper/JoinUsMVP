@@ -1,6 +1,7 @@
 import { Expose } from "class-transformer";
 import * as yup from "yup";
 import { PublicAssociationDto } from "./associations.dto";
+import { LocalisationDto } from "./localisation.dto";
 import { PublicMediaDto } from "./media.dto";
 import { TypeEventsDto } from "./type-events.dto";
 import { PublicUserDto } from "./user.dto";
@@ -41,10 +42,10 @@ export class EventDto {
   date: Date;
 
   @Expose()
-  localisation?: string;
+  localisation?: LocalisationDto;
 
   @Expose()
-  association: PublicAssociationDto;
+  association?: PublicAssociationDto;
 
   @Expose()
   user: PublicUserDto;
@@ -57,4 +58,55 @@ export class EventDto {
 
   @Expose()
   isValid: boolean;
+}
+
+export class BaseEventDto {
+  @Expose()
+  titre: string;
+
+  @Expose()
+  description: string;
+
+  @Expose()
+  date: Date;
+
+  @Expose()
+  associationId?: string;
+
+  @Expose()
+  typeEventId: string;
+
+  @Expose()
+  isPublic: boolean;
+
+  @Expose()
+  isValid?: boolean;
+}
+
+export class CreateEventDto extends BaseEventDto {}
+
+export class UpdateEventDto {
+  @Expose()
+  id: string;
+
+  @Expose()
+  titre?: string;
+
+  @Expose()
+  description?: string;
+
+  @Expose()
+  date?: Date;
+
+  @Expose()
+  associationId?: string;
+
+  @Expose()
+  typeEventId?: string;
+
+  @Expose()
+  isPublic?: boolean;
+
+  @Expose()
+  isValid?: boolean;
 }

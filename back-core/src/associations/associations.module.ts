@@ -23,6 +23,10 @@ import { AssociationMemberGuard } from './guards/association-member.guard';
     AssociationMemberGuard,
   ],
   controllers: [AssociationsController],
-  exports: [AssociationManagerGuard, AssociationMemberGuard],
+  exports: [
+    AssociationManagerGuard,
+    AssociationMemberGuard,
+    AssociationsService,
+  ],
 })
 export class AssociationsModule {}

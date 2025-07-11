@@ -8,7 +8,7 @@ import { useUserStore } from "@/store";
 import { useNotificationStore } from "@/store/notificationStore";
 import { Association } from "@shared/types/association";
 import { AssociationApplication } from "@shared/types/association-applications";
-import { TypeAssociation } from "@shared/types/type-association";
+import { TypeAssociation } from "@shared/types/type-associations";
 import { formatFullAddress } from "@shared/utils/address.util";
 import { useDebounce } from "@vueuse/core";
 import Dropdown from "primevue/dropdown";
@@ -17,7 +17,7 @@ import InputIcon from "primevue/inputicon";
 import InputText from "primevue/inputtext";
 import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
-
+import { getMediaUrl } from "@/utils/media.util";
 const router = useRouter();
 const notificationStore = useNotificationStore();
 const associations = ref<Association[]>([]);
@@ -36,7 +36,7 @@ const fetchTypeAssociations = async () => {
     const data = await typeAssociationService.getAllTypeAssociations();
     typeAssociations.value = data;
   } catch (error) {
-    console.error(
+    console.log(
       "Erreur lors de la récupération des types d'associations:",
       error
     );
@@ -49,7 +49,7 @@ const fetchAssociations = async () => {
     const response = await associationService.getAllAssociations();
     associations.value = response;
   } catch (error) {
-    console.error("Erreur lors de la récupération des associations:", error);
+    console.log("Erreur lors de la récupération des associations:", error);
   } finally {
     loader.value = false;
   }
@@ -176,7 +176,7 @@ watch([debouncedSearch, selectedType], fetchAssociations);
             <div class="flex-shrink-0">
               <JnsImage
                 :name="association.name || ''"
-                :src="getImageSrc(association.name)"
+                :src="getMediaUrl(association.image?.filepath)"
                 size="md"
               />
             </div>

@@ -1,36 +1,44 @@
 import { useApi } from "@/composables/useApi.ts";
-import { useUserStore } from "@/store";
 import { useApiStore } from "@/store/apiUrls.store.ts";
-import { IEvent } from "@/types/event.types.ts";
 import { ResponseError } from "@/types/http.types";
 import {
   EventParticipantResponseDto,
   ParticipateEventDto,
   UserParticipationResponseDto,
 } from "@shared/dto/event-participation.dto";
+import { CreateEventDto, UpdateEventDto, EventDto } from "@shared/dto/events.dto";
+import { SaveLocalisationDto } from "@shared/dto/localisation.dto";
 import axios from "axios";
 
 const API_URL = import.meta.env.VITE_APP_BACKEND_URL;
 
-const createEvent = async (event: IEvent) => {
-  const userStore = useUserStore();
+const createEvent = async (
+  eventData: CreateEventDto,
+  localisation?: SaveLocalisationDto,
+  imageFile?: File
+) => {
   const apiStore = useApiStore();
 
-  const payload = {
-    ...event,
-    associationId: userStore.user?.associationId || event.associationId,
-  };
+  const formData = new FormData();
+  
+  formData.append('event', JSON.stringify(eventData));
+  
+  if (localisation) 
+    formData.append('localisation', JSON.stringify(localisation));
+  
+  if (imageFile) 
+    formData.append('file', imageFile);
+  
 
   const { data, error } = await useApi(apiStore.events.create)
-    .post(payload)
+    .post(formData)
     .json();
 
   if (error.value) {
-    console.error("Error creating event:", error.value);
-    throw error.value;
+    throw error.value as ResponseError;
   }
 
-  return data.value;
+  return data.value as EventDto;
 };
 
 const getAllEvents = async (
@@ -71,19 +79,60 @@ const getEventsByUserId = async (userId: string) => {
   return response.data;
 };
 
-const updateEvent = async (id: string, event: Partial<IEvent>) => {
+const updateEvent = async (
+  id: string,
+  eventData: UpdateEventDto,
+  localisation?: SaveLocalisationDto,
+  imageFile?: File
+) => {
   const apiStore = useApiStore();
-  const { data, error } = await useApi(
-    apiStore.resolveUrl(apiStore.events.update, {
-      id: id,
-    })
-  )
-    .put(event)
-    .json();
-  if (error.value) {
-    throw new Error(error.value);
+
+  // Préparer FormData pour l'envoi avec fichier
+  const formData = new FormData();
+  
+  // Ajouter les données de l'événement
+  formData.append('event', JSON.stringify(eventData));
+  
+  // Ajouter la localisation si fournie
+  if (localisation) {
+    formData.append('localisation', JSON.stringify(localisation));
   }
-  return data.value;
+  
+  // Ajouter l'image si fournie
+  if (imageFile) {
+    formData.append('file', imageFile);
+  }
+
+  const { data, error } = await useApi(
+    apiStore.resolveUrl(apiStore.events.update, { id })
+  )
+    .put(formData)
+    .json();
+
+  if (error.value) {
+    throw error.value as ResponseError;
+  }
+
+  return data.value as EventDto;
+};
+
+const updateEventImage = async (eventId: string, imageFile: File) => {
+  const apiStore = useApiStore();
+
+  const formData = new FormData();
+  formData.append('file', imageFile);
+
+  const { data, error } = await useApi(
+    apiStore.resolveUrl(apiStore.events.updateImage, { eventId })
+  )
+    .post(formData)
+    .json();
+
+  if (error.value) {
+    throw error.value as ResponseError;
+  }
+
+  return data.value as EventDto;
 };
 
 const deleteEvent = async (id: string, token: string) => {
@@ -214,6 +263,7 @@ export default {
   getAllEvents,
   getEventById,
   updateEvent,
+  updateEventImage,
   deleteEvent,
   getEventsByUserId,
   getEventsByAssociationId,

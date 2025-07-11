@@ -7,7 +7,6 @@ import mediaService from "@/services/mediaService";
 import { EventMapType } from "@/types/map.types";
 import { EventParticipantResponseDto } from "@shared/dto/event-participation.dto";
 import { plainToInstance } from "class-transformer";
-import console from "console";
 import ProgressSpinner from "primevue/progressspinner";
 import Tab from "primevue/tab";
 import TabList from "primevue/tablist";

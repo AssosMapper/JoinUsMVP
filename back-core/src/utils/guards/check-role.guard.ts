@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { checkRole } from '../functions/check-role';
+import { RoleEnum } from '@shared/types';
 
 export const CheckRole = (...roles: string[]) => SetMetadata('roles', roles);
 
@@ -26,6 +27,9 @@ export class CheckRoleGuard implements CanActivate {
     if (!user) {
       return false;
     }
+
+    const isAdmin = roles.some((role) => checkRole(user, RoleEnum.SUPER_ADMIN));
+    if (isAdmin) return true;
 
     return roles.some((role) => checkRole(user, role));
   }

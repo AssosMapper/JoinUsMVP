@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { Association } from '../../associations/entities/association.entity';
 import { Event } from '../../events/entities/event.entity';
+import { Localisation } from '../../localisation/entities/localisation.entity';
 import { TypeEvents } from '../../type-events/entities/type-events.entity';
 import { User } from '../../users/entities/user.entity';
 
@@ -16,6 +17,8 @@ export class EventSeedService {
     private readonly typeEventsRepository: Repository<TypeEvents>,
     @Inject('USER_REPOSITORY')
     private readonly userRepository: Repository<User>,
+    @Inject('LOCALISATION_REPOSITORY')
+    private readonly localisationRepository: Repository<Localisation>,
   ) {}
 
   async seed() {
@@ -34,10 +37,34 @@ export class EventSeedService {
 
     const events = [];
     const locations = [
-      'Place de la République, Paris',
-      'Place de la Bastille, Paris',
-      'Place de la Nation, Paris',
-      "Place de l'Opéra, Paris",
+      {
+        street_number: '1',
+        street_name: 'Place de la République',
+        zip: '75003',
+        city: 'Paris',
+        country: 'France',
+      },
+      {
+        street_number: '1',
+        street_name: 'Place de la Bastille',
+        zip: '75004',
+        city: 'Paris',
+        country: 'France',
+      },
+      {
+        street_number: '1',
+        street_name: 'Place de la Nation',
+        zip: '75012',
+        city: 'Paris',
+        country: 'France',
+      },
+      {
+        street_number: '8',
+        street_name: "Place de l'Opéra",
+        zip: '75009',
+        city: 'Paris',
+        country: 'France',
+      },
     ];
 
     const descriptions = [
@@ -56,8 +83,15 @@ export class EventSeedService {
         event.titre = `Événement ${i + 1} de ${association.name}`;
         event.description =
           descriptions[Math.floor(Math.random() * descriptions.length)];
-        event.localisation =
+
+        // Créer une localisation aléatoire
+        const locationData =
           locations[Math.floor(Math.random() * locations.length)];
+        const localisation = this.localisationRepository.create(locationData);
+        const savedLocalisation =
+          await this.localisationRepository.save(localisation);
+        event.localisation = savedLocalisation;
+
         event.association = association;
         event.typeEvent =
           eventTypes[Math.floor(Math.random() * eventTypes.length)];

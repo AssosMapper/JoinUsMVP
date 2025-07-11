@@ -21,6 +21,7 @@ import { useRoute } from "vue-router";
 import { plainToInstance } from "class-transformer";
 import { formatFullAddress } from "@shared/utils/address.util";
 import { Localisation } from "@shared/types/localisation";
+import { getMediaUrl } from "@/utils/media.util";
 const route = useRoute();
 const userStore = useUserStore();
 const association = ref<any>(null);
@@ -91,14 +92,6 @@ const fetchAssociationDetails = async () => {
   }
 };
 
-const getImageSrc = (associationName: string) => {
-  if (!associationName) return "/assets/associations-images/default.png";
-  const sanitizedAssociationName = associationName
-    .replace(/\s+/g, "")
-    .toLowerCase();
-  return `/assets/associations-images/${sanitizedAssociationName}.png`;
-};
-
 const fetchAssociationApplication = async () => {
   if (!association.value?.id) return;
 
@@ -117,6 +110,10 @@ const onEventClick = (event: EventMapType) => {
   console.log("Event clicked:", event);
 };
 
+const imageUrl = computed(() => {
+  console.log(association.value?.image.filepath);
+  return getMediaUrl(association.value?.image.filepath);
+});
 onMounted(async () => {
   loader.value = true;
   await fetchAssociationDetails();
@@ -132,11 +129,7 @@ onMounted(async () => {
       <!-- Header -->
       <div class="flex items-center space-x-6 bg-primary-hover p-6 rounded-lg">
         <div class="flex-shrink-0">
-          <JnsImage
-            :name="association.name"
-            :src="getImageSrc(association.name)"
-            size="lg"
-          />
+          <JnsImage :name="association.name" :src="imageUrl" size="lg" />
         </div>
         <div class="flex flex-col items-start">
           <div class="flex items-center gap-2 mb-2">

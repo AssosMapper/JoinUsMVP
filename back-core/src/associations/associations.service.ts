@@ -40,7 +40,7 @@ export class AssociationsService {
 
   findAll(): Promise<Association[]> {
     return this.associationsRepository.find({
-      relations: ['users', 'types', 'localisation'],
+      relations: ['users', 'types', 'localisation', 'image'],
     });
   }
 
@@ -64,6 +64,13 @@ export class AssociationsService {
       throw new NotFoundException(`Association with name ${name} not found`);
     }
     return association;
+  }
+
+  async isInAssociation(userId: string): Promise<boolean> {
+    const association = await this.associationsRepository.findOne({
+      where: { users: { id: userId } },
+    });
+    return !!association;
   }
 
   async create(
@@ -150,6 +157,8 @@ export class AssociationsService {
   async update(
     id: string,
     updateAssociationDto: UpdateAssociationDto,
+    saveLocalisationDto?: SaveLocalisationDto,
+    file?: Express.Multer.File,
   ): Promise<Association> {
     console.log('Update DTO received:', updateAssociationDto);
     const existingAssociation = await this.findOne(id);
@@ -159,8 +168,8 @@ export class AssociationsService {
 
     return await this.save(
       updateAssociationDto,
-      undefined,
-      undefined,
+      saveLocalisationDto,
+      file,
       existingAssociation,
     );
   }

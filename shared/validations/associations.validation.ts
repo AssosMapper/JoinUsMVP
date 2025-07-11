@@ -1,4 +1,3 @@
-import { createLocalisationSchema } from "./localisation.validation";
 import * as yup from "yup";
 
 export const createAssociationSchema = yup.object().shape({
@@ -41,7 +40,6 @@ export const updateAssociationSchema = yup.object().shape({
     .of(yup.string().uuid())
     .min(1, "Au moins un type est requis")
     .optional(),
-  localisation: createLocalisationSchema.optional(),
 });
 
 // Garde l'ancien schéma pour la compatibilité

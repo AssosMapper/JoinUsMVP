@@ -26,7 +26,10 @@ import { AssociationsService } from './associations.service';
 import { AssociationManagerGuard } from './guards/association-manager.guard';
 import { AssociationMemberGuard } from './guards/association-member.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { createAssociationSchema } from '@shared/validations/associations.validation';
+import {
+  createAssociationSchema,
+  updateAssociationSchema,
+} from '@shared/validations/associations.validation';
 import { saveLocalisationSchema } from '@shared/validations/localisation.validation';
 import {
   OptionalYupValidationPipe,
@@ -109,13 +112,21 @@ export class AssociationsController {
   @ApiBearerAuth()
   @UseGuards(AssociationManagerGuard)
   @BearAuthToken()
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
   async update(
     @Param('id') id: string,
-    @Body() updateAssociationDto: UpdateAssociationDto,
+    @Body('association', new YupValidationPipe(updateAssociationSchema))
+    updateAssociationDto: UpdateAssociationDto,
+    @Body('localisation', new OptionalYupValidationPipe(saveLocalisationSchema))
+    saveLocalisationDto?: SaveLocalisationDto,
+    @UploadedFile() file?: Express.Multer.File,
   ): Promise<PublicAssociationDto> {
     const association = await this.associationsService.update(
       id,
       updateAssociationDto,
+      saveLocalisationDto,
+      file,
     );
     return plainToInstance(PublicAssociationDto, association, {
       excludeExtraneousValues: true,

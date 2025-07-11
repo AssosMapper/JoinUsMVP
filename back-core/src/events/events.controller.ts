@@ -9,8 +9,11 @@ import {
   Put,
   Query,
   Res,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import {
   EventParticipantResponseDto,
@@ -22,19 +25,30 @@ import {
   GetEventsByMonthDto,
   getEventsByMonthSchema,
 } from '@shared/dto/events.dto';
+import { SaveLocalisationDto } from '@shared/dto/localisation.dto';
+import { RoleEnum } from '@shared/types';
 import { participateEventSchema } from '@shared/validations/event-participation.validation';
+import {
+  createEventSchema,
+  updateEventSchema,
+} from '@shared/validations/events.validation';
 import { plainToInstance } from 'class-transformer';
 import { Response } from 'express';
 import { User } from '../users/entities/user.entity';
 import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
 import { CurrentUserId } from '../utils/decorators/current-user-id.decorator';
-import { YupValidationPipe } from '../utils/pipes/yup-validation.pipe';
+import { CheckRole } from '../utils/guards/check-role.guard';
+import {
+  OptionalYupValidationPipe,
+  YupValidationPipe,
+} from '../utils/pipes/yup-validation.pipe';
 import { CreateEventDto } from './dto/create-events.dto';
 import { UpdateEventDto } from './dto/update-events.dto';
 import { Event as EventEntity } from './entities/event.entity';
 import { EventsService } from './events.service';
 import { IsParticipantGuard } from './guards/is-participant.guard';
 import { IsPublicGuard } from './guards/is-public.guard';
+import { saveLocalisationSchema } from '@shared/validations/localisation.validation';
 
 @Controller('events')
 @ApiBearerAuth()
@@ -43,11 +57,22 @@ export class EventsController {
 
   @Post()
   @BearAuthToken()
+  @CheckRole(RoleEnum.EVENTS_MANAGER)
+  @UseInterceptors(FileInterceptor('file'))
   async create(
     @CurrentUserId() user: User,
-    @Body() createEventDto: CreateEventDto,
+    @Body('event', new YupValidationPipe(createEventSchema))
+    createEventDto: CreateEventDto,
+    @Body('localisation', new OptionalYupValidationPipe(saveLocalisationSchema))
+    localisationDto?: SaveLocalisationDto,
+    @UploadedFile() file?: Express.Multer.File,
   ): Promise<EventDto> {
-    const event = await this.eventsService.create(user, createEventDto);
+    const event = await this.eventsService.create(
+      user,
+      createEventDto,
+      localisationDto,
+      file,
+    );
     return plainToInstance(EventDto, event, {
       excludeExtraneousValues: true,
       enableImplicitConversion: true,
@@ -146,11 +171,22 @@ export class EventsController {
 
   @Put(':id')
   @BearAuthToken()
+  @CheckRole(RoleEnum.EVENTS_MANAGER)
+  @UseInterceptors(FileInterceptor('file'))
   async update(
     @Param('id') id: string,
-    @Body() updateEventDto: UpdateEventDto,
+    @Body('event', new YupValidationPipe(updateEventSchema))
+    updateEventDto: UpdateEventDto,
+    @Body('localisation', new OptionalYupValidationPipe(saveLocalisationSchema))
+    localisationDto?: SaveLocalisationDto,
+    @UploadedFile() file?: Express.Multer.File,
   ): Promise<EventDto> {
-    const event = await this.eventsService.update(id, updateEventDto);
+    const event = await this.eventsService.update(
+      id,
+      updateEventDto,
+      localisationDto,
+      file,
+    );
     return plainToInstance(EventDto, event, {
       excludeExtraneousValues: true,
       enableImplicitConversion: true,
