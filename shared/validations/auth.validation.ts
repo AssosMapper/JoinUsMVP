@@ -4,6 +4,7 @@ import {
   RegisterDto,
 } from "../dto/auth.dto";
 import * as yup from "yup";
+import { ACCENT_STRING_REGEX } from "../utils/yup.util";
 
 export const forgotPasswordSchema = yup.object().shape({
   email: yup
@@ -35,6 +36,7 @@ export const resetPasswordSchema = yup.object().shape({
 export const registerSchema = yup.object().shape({
   firstName: yup
     .string()
+    .matches(ACCENT_STRING_REGEX, "Caractères non autorisés")
     .min(2, "Le prénom doit contenir au moins 2 caractères")
     .max(50, "Le prénom ne peut pas dépasser 50 caractères")
     .matches(
@@ -44,6 +46,7 @@ export const registerSchema = yup.object().shape({
     .required("Le prénom est requis"),
   lastName: yup
     .string()
+    .matches(ACCENT_STRING_REGEX, "Caractères non autorisés")
     .min(2, "Le nom doit contenir au moins 2 caractères")
     .max(50, "Le nom ne peut pas dépasser 50 caractères")
     .matches(

@@ -24,6 +24,7 @@
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.1",
     "primeicons": "^7.0.0",
+    "primelocale": "^2.1.4",
     "primevue": "^4.1.0",
     "reflect-metadata": "^0.2.2",
     "tailwindcss-primeui": "^0.3.4",

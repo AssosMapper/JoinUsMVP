@@ -160,7 +160,7 @@ onMounted(() => {
       <template #title>
         <div class="flex items-center gap-3">
           <i class="pi pi-users text-2xl text-primary"></i>
-          <span>Créer une Association</span>
+          <span class="font-bold">Créer une Association</span>
         </div>
       </template>
 

@@ -6,6 +6,7 @@ import eventService from "@/services/eventService";
 import mediaService from "@/services/mediaService";
 import { EventMapType } from "@/types/map.types";
 import { EventParticipantResponseDto } from "@shared/dto/event-participation.dto";
+import { formatFullAddress } from "@shared/utils/address.util";
 import { plainToInstance } from "class-transformer";
 import ProgressSpinner from "primevue/progressspinner";
 import Tab from "primevue/tab";
@@ -126,7 +127,7 @@ onMounted(() => {
             </div>
             <div class="flex items-center gap-2">
               <i class="pi pi-map-marker"></i>
-              {{ event.localisation }}
+              {{ formatFullAddress(event.localisation) }}
             </div>
           </div>
         </div>

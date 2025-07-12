@@ -1,5 +1,6 @@
 import { Media } from '@src/media/entities/media.entity';
 import {
+  BeforeInsert,
   Column,
   Entity,
   JoinColumn,
@@ -55,4 +56,9 @@ export class Event extends EntityStructure {
     cascade: true,
   })
   participants: EventParticipation[];
+
+  @BeforeInsert()
+  setValidationStatus() {
+    this.isValid = !!this.association;
+  }
 }

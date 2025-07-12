@@ -10,13 +10,14 @@ import ToastService from "primevue/toastservice";
 import { createApp } from "vue";
 import App from "./App.vue";
 import "./index.css";
-
+import { fr } from "primelocale/js/fr.js";
 const pinia = createPinia();
 pinia.use(piniaPluginPersistedstate);
 
 const app = createApp(App);
 app.use(PrimeVue, {
   theme: "none",
+  locale: fr
 });
 
 if (process.env.NODE_ENV === "production") {

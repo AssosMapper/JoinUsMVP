@@ -109,25 +109,26 @@ export class EventsService {
       relations: ['association', 'typeEvent'],
     });
   }
-
-  async create(
-    user: User,
-    createEventDto: CreateEventDto,
-    localisationDto?: SaveLocalisationDto,
-    file?: Express.Multer.File,
-  ): Promise<Event> {
+  async validEvent(
+    userId: string,
+    eventDto: CreateEventDto | UpdateEventDto,
+  ): Promise<{ association: Association; typeEvent: TypeEvents; user: User }> {
     let association = null;
-    if (createEventDto.associationId) {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['roles'],
+    });
+    if (eventDto.associationId) {
       association = await this.associationRepository.findOne({
-        where: { id: createEventDto.associationId },
+        where: { id: eventDto.associationId },
       });
-      user = await this.userRepository.findOne({
-        where: { id: user.id },
-        relations: ['roles'],
-      });
+      if (!association)
+        throw new NotFoundException(`L'association n'existe pas`);
+
       const isAdmin = checkRole(user, RoleEnum.SUPER_ADMIN);
       const isInAssociation = await this.associationsService.isInAssociation(
         user.id,
+        association.id,
       );
 
       if (!isInAssociation && !isAdmin) {
@@ -135,17 +136,26 @@ export class EventsService {
           `L'utilisateur n'est pas dans L'association ${association?.name}`,
         );
       }
-
-      if (!association && createEventDto.associationId)
-        throw new NotFoundException(`L'association n'existe pas`);
     }
 
     const typeEvent = await this.typeEventsRepository.findOne({
-      where: { id: createEventDto.typeEventId },
+      where: { id: eventDto.typeEventId },
     });
     if (!typeEvent)
       throw new NotFoundException(`Le type d'événement n'existe pas`);
 
+    return { association, typeEvent, user };
+  }
+  async create(
+    userId: string,
+    createEventDto: CreateEventDto,
+    localisationDto?: SaveLocalisationDto,
+    file?: Express.Multer.File,
+  ): Promise<Event> {
+    const { association, typeEvent, user } = await this.validEvent(
+      userId,
+      createEventDto,
+    );
     let event = new Event();
     Object.assign(event, createEventDto);
     event.typeEvent = typeEvent;
@@ -157,39 +167,26 @@ export class EventsService {
 
   async update(
     id: string,
+    userId: string,
     updateEventDto: UpdateEventDto,
     localisationDto?: SaveLocalisationDto,
     file?: Express.Multer.File,
   ): Promise<Event> {
-    const existingEvent = await this.findOne(id);
+    let existingEvent = await this.findOne(id);
     if (!existingEvent)
-      throw new NotFoundException(`Event with ID ${id} not found`);
+      throw new NotFoundException(`L'event n'a pas été trouvé`);
 
-    if (updateEventDto.associationId) {
-      const association = await this.associationRepository.findOne({
-        where: { id: updateEventDto.associationId },
-      });
-      if (!association)
-        throw new NotFoundException(`L'association n'a pas été trouvée`);
-
-      existingEvent.association = association;
-    }
-
-    if (updateEventDto.typeEventId) {
-      const typeEvent = await this.typeEventsRepository.findOne({
-        where: { id: updateEventDto.typeEventId },
-      });
-      if (!typeEvent)
-        throw new NotFoundException(`Le type d'événement n'a pas été trouvé`);
-
-      existingEvent.typeEvent = typeEvent;
-    }
+    const { association, typeEvent, user } = await this.validEvent(
+      userId,
+      updateEventDto,
+    );
 
     Object.assign(existingEvent, updateEventDto);
-
+    existingEvent.typeEvent = typeEvent;
+    existingEvent.user = user;
+    existingEvent.association = association ?? null;
+    if (file) existingEvent = await this.updateEventImage(existingEvent, file);
     const savedEvent = await this.save(existingEvent, localisationDto);
-
-    if (file) return this.updateEventImage(savedEvent, file);
 
     return savedEvent;
   }

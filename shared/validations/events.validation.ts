@@ -1,12 +1,15 @@
 import * as yup from "yup";
 import { CreateEventDto, UpdateEventDto } from "../dto/events.dto";
+import { ACCENT_STRING_REGEX } from "../utils/yup.util";
 
 export const createEventSchema = yup.object().shape({
   titre: yup.string()
     .required("Le titre est requis")
+    .matches(ACCENT_STRING_REGEX, "Caractères non autorisés")
     .max(255, "Le titre ne peut pas dépasser 255 caractères"),
   
   description: yup.string()
+    .matches(ACCENT_STRING_REGEX, "Caractères non autorisés")
     .required("La description est requise")
     .max(1000, "La description ne peut pas dépasser 1000 caractères"),
   
@@ -25,7 +28,6 @@ export const createEventSchema = yup.object().shape({
   isPublic: yup.boolean()
     .required("Le statut public/privé est requis"),
   
-  isValid: yup.boolean().optional(),
 }) satisfies yup.ObjectSchema<CreateEventDto>;
 
 export const updateEventSchema = yup.object().shape({
@@ -34,10 +36,12 @@ export const updateEventSchema = yup.object().shape({
     .required("L'ID de l'événement est requis"),
 
   titre: yup.string()
+    .matches(ACCENT_STRING_REGEX, "Caractères non autorisés")
     .max(255, "Le titre ne peut pas dépasser 255 caractères")
     .optional(),
   
   description: yup.string()
+    .matches(ACCENT_STRING_REGEX, "Caractères non autorisés")
     .max(1000, "La description ne peut pas dépasser 1000 caractères")
     .optional(),
   
@@ -55,5 +59,4 @@ export const updateEventSchema = yup.object().shape({
   
   isPublic: yup.boolean().optional(),
   
-  isValid: yup.boolean().optional(),
 }) satisfies yup.ObjectSchema<UpdateEventDto>; 

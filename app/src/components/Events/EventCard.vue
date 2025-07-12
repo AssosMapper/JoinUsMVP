@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import JnsImage from "@/components/ui/JnsImage.vue";
 import ParticipateEventButton from "@/components/Events/ParticipateEventButton.vue";
-import mediaService from "@/services/mediaService";
 import { EventCard, EventParticipation } from "@/types/event.types";
 import { formatFullAddress } from "@shared/utils/address.util";
 import { friendlyDate } from "@shared/utils/date";
@@ -9,6 +8,7 @@ import Button from "primevue/button";
 import Card from "primevue/card";
 import { computed } from "vue";
 import { useRouter } from "vue-router";
+import { getMediaUrl } from "@/utils/media.util";
 
 const router = useRouter();
 
@@ -44,7 +44,7 @@ const goToEventDetails = () => {
           :name="event.titre"
           :src="
             event.image
-              ? mediaService.getMediaUrl(event.image)
+              ? getMediaUrl(event?.image?.filepath)
               : '/default-event.jpg'
           "
           size="lg"

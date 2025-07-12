@@ -66,9 +66,12 @@ export class AssociationsService {
     return association;
   }
 
-  async isInAssociation(userId: string): Promise<boolean> {
+  async isInAssociation(
+    userId: string,
+    associationId: string,
+  ): Promise<boolean> {
     const association = await this.associationsRepository.findOne({
-      where: { users: { id: userId } },
+      where: { id: associationId, users: { id: userId } },
     });
     return !!association;
   }

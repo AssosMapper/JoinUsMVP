@@ -1,3 +1,6 @@
+import { formatFullAddress } from "@shared/utils/address.util";
+import { Transform } from "class-transformer";
+
 export interface MapType {
   center: {
     lat: number;
@@ -11,6 +14,7 @@ export class EventMapType {
   id: string;
   titre: string;
   description: string;
+  @Transform(({ value }) => formatFullAddress(value))
   localisation: string;
   date: string;
   association?: {

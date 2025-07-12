@@ -34,7 +34,6 @@ import {
 } from '@shared/validations/events.validation';
 import { plainToInstance } from 'class-transformer';
 import { Response } from 'express';
-import { User } from '../users/entities/user.entity';
 import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
 import { CurrentUserId } from '../utils/decorators/current-user-id.decorator';
 import { CheckRole } from '../utils/guards/check-role.guard';
@@ -46,6 +45,7 @@ import { CreateEventDto } from './dto/create-events.dto';
 import { UpdateEventDto } from './dto/update-events.dto';
 import { Event as EventEntity } from './entities/event.entity';
 import { EventsService } from './events.service';
+import { CanUpdateEventGuard } from './guards/can-update-event.guard';
 import { IsParticipantGuard } from './guards/is-participant.guard';
 import { IsPublicGuard } from './guards/is-public.guard';
 import { saveLocalisationSchema } from '@shared/validations/localisation.validation';
@@ -60,7 +60,7 @@ export class EventsController {
   @CheckRole(RoleEnum.EVENTS_MANAGER)
   @UseInterceptors(FileInterceptor('file'))
   async create(
-    @CurrentUserId() user: User,
+    @CurrentUserId() userId: string,
     @Body('event', new YupValidationPipe(createEventSchema))
     createEventDto: CreateEventDto,
     @Body('localisation', new OptionalYupValidationPipe(saveLocalisationSchema))
@@ -68,7 +68,7 @@ export class EventsController {
     @UploadedFile() file?: Express.Multer.File,
   ): Promise<EventDto> {
     const event = await this.eventsService.create(
-      user,
+      userId,
       createEventDto,
       localisationDto,
       file,
@@ -172,8 +172,10 @@ export class EventsController {
   @Put(':id')
   @BearAuthToken()
   @CheckRole(RoleEnum.EVENTS_MANAGER)
+  @UseGuards(CanUpdateEventGuard)
   @UseInterceptors(FileInterceptor('file'))
   async update(
+    @CurrentUserId() userId: string,
     @Param('id') id: string,
     @Body('event', new YupValidationPipe(updateEventSchema))
     updateEventDto: UpdateEventDto,
@@ -183,6 +185,7 @@ export class EventsController {
   ): Promise<EventDto> {
     const event = await this.eventsService.update(
       id,
+      userId,
       updateEventDto,
       localisationDto,
       file,

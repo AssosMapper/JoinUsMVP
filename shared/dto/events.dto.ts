@@ -5,6 +5,7 @@ import { LocalisationDto } from "./localisation.dto";
 import { PublicMediaDto } from "./media.dto";
 import { TypeEventsDto } from "./type-events.dto";
 import { PublicUserDto } from "./user.dto";
+import { ACCENT_STRING_REGEX } from "../utils/yup.util";
 
 export const getEventsByMonthSchema = yup
   .object()
@@ -12,7 +13,7 @@ export const getEventsByMonthSchema = yup
     year: yup.number().required("L'année est requise"),
     month: yup.number().min(1).max(12).required("Le mois est requis"),
     isValid: yup.boolean().optional(),
-    search: yup.string().max(255).optional(),
+    search: yup.string().matches(ACCENT_STRING_REGEX, "Caractères non autorisés").max(255).optional(),
     typeEventId: yup.string().uuid().optional(),
   })
   .required();
@@ -79,8 +80,6 @@ export class BaseEventDto {
   @Expose()
   isPublic: boolean;
 
-  @Expose()
-  isValid?: boolean;
 }
 
 export class CreateEventDto extends BaseEventDto {}
@@ -107,6 +106,4 @@ export class UpdateEventDto {
   @Expose()
   isPublic?: boolean;
 
-  @Expose()
-  isValid?: boolean;
 }

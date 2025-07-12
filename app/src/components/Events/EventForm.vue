@@ -68,15 +68,13 @@ const { handleSubmit, errors, defineField, values, resetForm } = useForm<CreateE
     associationId: props.event?.association?.id,
     typeEventId: props.event?.typeEvent?.id || "",
     isPublic: props.event?.isPublic ?? true,
-    isValid: props.event?.isValid ?? false,
-  } : {
+    } : {
     titre: "",
     description: "",
     date: new Date(),
     associationId: userStore.user?.associationId,
     typeEventId: "",
     isPublic: true,
-    isValid: false,
   }
 });
 
@@ -86,7 +84,6 @@ const [date, dateAttrs] = defineField("date");
 const [associationId, associationIdAttrs] = defineField("associationId");
 const [typeEventId, typeEventIdAttrs] = defineField("typeEventId");
 const [isPublic, isPublicAttrs] = defineField("isPublic");
-const [isValid, isValidAttrs] = defineField("isValid");
 
 // Charger les associations disponibles
 const loadAvailableAssociations = async () => {
@@ -277,21 +274,43 @@ watch(associationId, (newId) => {
             </FloatLabel>
           </JnsField>
 
-          <JnsField :errorMessage="errors.date">
-            <FloatLabel variant="in" class="w-full">
-              <Calendar
-                id="date"
-                v-model="date"
-                v-bind="dateAttrs"
-                showTime
-                hourFormat="24"
-                dateFormat="dd/mm/yy"
-                class="w-full"
-                :class="{ 'p-invalid': errors.date }"
-              />
-              <label for="date">Date et heure *</label>
-            </FloatLabel>
-          </JnsField>
+          <div class="md:flex md:items-end md:gap-6">
+            <div class="md:flex-1">
+              <JnsField :errorMessage="errors.date">
+                <FloatLabel variant="in" class="w-full">
+                  <Calendar
+                    id="date"
+                    v-model="date"
+                    v-bind="dateAttrs"
+                    showTime
+                    touchUI 
+                    :minDate="new Date()"
+                    hourFormat="24"
+                    dateFormat="dd/mm/yy"
+                    class="w-full"
+                    :class="{ 'p-invalid': errors.date }"
+                  />
+                  <label for="date">Date et heure *</label>
+                </FloatLabel>
+              </JnsField>
+            </div>
+            <div class="md:flex-1 mt-6 md:mt-0">
+              <h3 class="text-lg font-semibold mb-4 md:mb-2">Type d'événement</h3>
+              <JnsField :errorMessage="errors.typeEventId">
+                <Dropdown
+                  v-model="typeEventId"
+                  v-bind="typeEventIdAttrs"
+                  :options="typeEvents"
+                  optionLabel="name"
+                  optionValue="id"
+                  placeholder="Sélectionnez le type d'événement"
+                  class="w-full"
+                  :class="{ 'p-invalid': errors.typeEventId }"
+                />
+              </JnsField>
+            </div>
+          </div>
+
         </div>
 
         <Divider />
@@ -308,23 +327,6 @@ watch(associationId, (newId) => {
               placeholder="Choisir une association"
               class="w-full"
               :class="{ 'p-invalid': errors.associationId }"
-            />
-          </JnsField>
-        </div>
-
-        <!-- Type d'événement -->
-        <div>
-          <h3 class="text-lg font-semibold mb-4">Type d'événement</h3>
-          <JnsField :errorMessage="errors.typeEventId">
-            <Dropdown
-              v-model="typeEventId"
-              v-bind="typeEventIdAttrs"
-              :options="typeEvents"
-              optionLabel="name"
-              optionValue="id"
-              placeholder="Sélectionnez le type d'événement"
-              class="w-full"
-              :class="{ 'p-invalid': errors.typeEventId }"
             />
           </JnsField>
         </div>
