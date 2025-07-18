@@ -163,7 +163,6 @@ export class AssociationsService {
     saveLocalisationDto?: SaveLocalisationDto,
     file?: Express.Multer.File,
   ): Promise<Association> {
-    console.log('Update DTO received:', updateAssociationDto);
     const existingAssociation = await this.findOne(id);
     if (!existingAssociation) {
       throw new NotFoundException(`Association with ID ${id} not found`);
@@ -188,11 +187,6 @@ export class AssociationsService {
     });
 
     const relations = ['users', 'types', 'localisation', 'image'];
-    console.log(
-      await this.associationsRepository.find({
-        relations,
-      }),
-    );
     if (checkRole(user, RoleEnum.SUPER_ADMIN))
       return await this.associationsRepository.find({
         relations,

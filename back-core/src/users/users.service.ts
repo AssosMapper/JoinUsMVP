@@ -57,7 +57,7 @@ export class UsersService {
   async getProfile(id: string): Promise<UserProfileDto> {
     const user = await this.usersRepository.findOne({
       where: { id },
-      relations: ['roles.permissions', 'localisation', 'image'],
+      relations: ['roles.permissions', 'localisation', 'image', 'associations'],
     });
     return user;
   }

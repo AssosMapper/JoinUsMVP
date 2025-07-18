@@ -1,6 +1,7 @@
 import router from "@/router";
 import authService from "@/services/authService.ts";
 import usersService from "@/services/usersService.ts";
+import associationService from "@/services/associationService.ts";
 import { ICredentials, IRegister } from "@/types/security.types.ts";
 import { LocalisationDto } from "@shared/dto/localisation.dto";
 import { PublicMediaDto } from "@shared/dto/media.dto";
@@ -73,6 +74,7 @@ export const useUserStore = defineStore("user", {
         const data = await authService.login(credentials);
         this.token = data?.access_token;
         await this.refetchUser();
+        await this.updateMyAssociations();
         this.isAuth = true;
       } catch (e: unknown) {
         if (e instanceof Error) {
@@ -104,6 +106,7 @@ export const useUserStore = defineStore("user", {
           excludeExtraneousValues: true,
           enableImplicitConversion: true,
         });
+        await this.updateMyAssociations();
       } catch (e: unknown) {
         if (e instanceof Error) {
           throw new Error(e.message);
@@ -111,6 +114,24 @@ export const useUserStore = defineStore("user", {
         throw new Error("Une erreur est survenue");
       } finally {
         this.loader = false;
+      }
+    },
+
+    async updateMyAssociations(associations?: Association[]) {
+      try {
+        if (this.user) {
+          if (associations) {
+            // Utiliser les associations fournies
+            this.user.associations = associations;
+          } else {
+            // Récupérer les associations depuis l'API
+            const fetchedAssociations = await associationService.getMyAssociations();
+            this.user.associations = fetchedAssociations;
+          }
+        }
+      } catch (e: unknown) {
+        console.error("Erreur lors de la mise à jour des associations:", e);
+        // On ne throw pas l'erreur pour ne pas bloquer le login
       }
     },
 
@@ -150,6 +171,8 @@ export const useUserStore = defineStore("user", {
           context.store.$state.user = data;
           context.store.$state.isAuth = true;
           context.store.$state.initialized = true;
+          // Récupérer les associations après restauration
+          await context.store.updateMyAssociations();
         } catch (error) {
           console.error("Failed to restore user session:", error);
           context.store.$state.initialized = true;

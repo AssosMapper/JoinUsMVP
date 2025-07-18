@@ -50,19 +50,12 @@ const menuItems = [
     label: "Administration",
     icon: "pi pi-cog",
     route: "/adminInterface",
-    admin: true,
-  },
-  {
-    label: "Gestion des Associations",
-    icon: "pi pi-users",
-    route: "/associationManagerInterface",
-    manager: true,
+    admin:true
   },
   {
     label: "Gestion des Événements",
     icon: "pi pi-calendar-plus",
     route: "/eventsManagerInterface",
-    eventsManager: true,
   },
 ];
 

@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeEventsService } from './type-events.service';
 import { TypeEventsController } from './type-events.controller';
-import { TypeEvents } from './entities/type-events.entity';
+import { CheckRoleGuard } from '../utils/guards/check-role.guard';
 
 @Module({
-  providers: [TypeEventsService],
+  providers: [TypeEventsService, CheckRoleGuard],
   controllers: [TypeEventsController],
 })
 export class TypeEventsModule {}

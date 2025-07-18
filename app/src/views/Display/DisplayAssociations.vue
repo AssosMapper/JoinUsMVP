@@ -134,7 +134,7 @@ watch([debouncedSearch, selectedType], fetchAssociations);
       <Loader />
     </div>
     <div v-else class="pt-4 px-10">
-      <div class="pb-4">
+      <div v-if="false" class="pb-4">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-4">
             <Dropdown

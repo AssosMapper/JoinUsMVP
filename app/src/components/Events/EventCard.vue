@@ -9,6 +9,7 @@ import Card from "primevue/card";
 import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { getMediaUrl } from "@/utils/media.util";
+import { Localisation } from "@shared/types/localisation";
 
 const router = useRouter();
 
@@ -90,7 +91,7 @@ const goToEventDetails = () => {
             </div>
             <div v-if="event.localisation" class="flex items-center gap-2 text-gray-500">
               <i class="pi pi-map-marker"></i>
-              {{ formatFullAddress(event.localisation) }}
+              {{ formatFullAddress(event.localisation as Localisation) }}
             </div>
           </div>
 

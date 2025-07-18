@@ -181,10 +181,20 @@ export class EventsService {
       updateEventDto,
     );
 
+    const participants = await this.getEventParticipants(id);
+
+    if (
+      participants.length > 0 &&
+      updateEventDto.associationId !== existingEvent.association?.id
+    )
+      throw new InternalServerErrorException(
+        "Vous ne pouvez pas modifier l'association d'un événement qui a des participants",
+      );
+
     Object.assign(existingEvent, updateEventDto);
     existingEvent.typeEvent = typeEvent;
-    existingEvent.user = user;
     existingEvent.association = association ?? null;
+    existingEvent.user = user;
     if (file) existingEvent = await this.updateEventImage(existingEvent, file);
     const savedEvent = await this.save(existingEvent, localisationDto);
 
@@ -403,8 +413,8 @@ export class EventsService {
 
     const participations = await this.eventParticipationRepository.find({
       where: { event: { id: eventId } },
+      relations: ['user.image'],
     });
-
     return participations.map((participation) => ({
       id: participation.id,
       eventId: eventId,

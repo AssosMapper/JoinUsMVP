@@ -6,7 +6,7 @@ import { Event } from './event.entity';
 @Entity()
 @Unique(['user', 'event'])
 export class EventParticipation extends EntityStructure {
-  @ManyToOne(() => User, { eager: true })
+  @ManyToOne(() => User)
   @JoinColumn()
   user: User;
 

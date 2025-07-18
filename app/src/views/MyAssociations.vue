@@ -4,8 +4,9 @@ import Loader from "@/components/ui/Loader.vue";
 import associationService from "@/services/associationService";
 import typeAssociationService from "@/services/typeAssociationService";
 import { useNotificationStore } from "@/store/notificationStore";
+import { useUserStore } from "@/store/userStore";
 import type { Association } from "@shared/types/association.ts";
-import type { TypeAssociation } from "@shared/types/type-association";
+import type { TypeAssociation } from "@shared/types/type-associations";
 import { formatFullAddress } from "@shared/utils/address.util";
 import { useDebounce } from "@vueuse/core";
 import Dropdown from "primevue/dropdown";
@@ -19,8 +20,10 @@ import { getMediaUrl } from "@/utils/media.util";
 import { Localisation } from "@shared/types/localisation";
 
 const notificationStore = useNotificationStore();
+const userStore = useUserStore();
 const associations = ref<Association[]>([]);
 const typeAssociations = ref<TypeAssociation[]>([]);
+const selectedType = ref<TypeAssociation | null>(null);
 const search = ref("");
 const isLoading = ref(true);
 const router = useRouter();
@@ -30,6 +33,8 @@ const debouncedSearch = useDebounce(search, 300);
 const fetchAssociations = async () => {
   try {
     associations.value = await associationService.getMyAssociations();
+    // Mettre à jour le userStore avec les associations récupérées
+    await userStore.updateMyAssociations(associations.value);
   } catch (error: any) {
     notificationStore.showNotification(error.message, "error");
   } finally {
@@ -70,7 +75,7 @@ onMounted(() => {
     </div>
 
     <!-- Barre de recherche et filtres -->
-    <div class="px-10 py-4">
+    <div v-if="false" class="px-10 py-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-4">
           <Dropdown
@@ -118,10 +123,11 @@ onMounted(() => {
         <div
           v-for="association in associations"
           :key="association.id"
-          class="flex flex-col bg-white rounded-xl border-primary shadow-[2px_2px_8px_-1px_rgba(0,0,0,0.1),4px_4px_12px_-2px_rgba(0,0,0,0.15)] transform transition-all duration-200 ease-in-out hover:shadow-[4px_4px_16px_-1px_rgba(0,0,0,0.15),8px_8px_20px_-4px_rgba(0,0,0,0.2)] hover:-translate-y-1 hover:bg-primary-hover/5 cursor-pointer"
+          class="flex flex-col h-full bg-white rounded-xl border-primary shadow-[2px_2px_8px_-1px_rgba(0,0,0,0.1),4px_4px_12px_-2px_rgba(0,0,0,0.15)] transform transition-all duration-200 ease-in-out hover:shadow-[4px_4px_16px_-1px_rgba(0,0,0,0.15),8px_8px_20px_-4px_rgba(0,0,0,0.2)] hover:-translate-y-1 hover:bg-primary-hover/5 cursor-pointer"
           @click="navigateToDashboard(association.id!)"
         >
-          <div class="flex items-center p-4 gap-4 border-b-primary">
+          <!-- En-tête avec image et informations -->
+          <div class="flex items-center p-4 gap-4 border-b border-gray-200">
             <div class="flex-shrink-0">
               <JnsImage
                 :name="association.name"
@@ -130,12 +136,12 @@ onMounted(() => {
               />
             </div>
             <div class="flex-grow flex flex-col text-left items-start min-w-0">
-              <h5 class="text-lg font-semibold text-gray-900 w-full">
+              <h5 class="text-lg font-semibold text-gray-900 w-full truncate">
                 {{ association.name }}
               </h5>
               <p
                 v-if="association.localisation"
-                class="text-sm text-gray-600 mt-1 w-full"
+                class="text-sm text-gray-600 mt-1 w-full truncate"
                 :title="formatFullAddress(association.localisation as Localisation)"
               >
                 <i class="pi pi-map-marker mr-1"></i>
@@ -146,29 +152,36 @@ onMounted(() => {
             </div>
           </div>
 
-          <div class="flex flex-col items-center text-center">
-            <p class="text-gray-600 mb-3 line-clamp-2 max-w-prose p-4">
-              {{ association.description }}
-            </p>
-            <div class="flex flex-wrap justify-center gap-2 mb-3 px-4">
+          <!-- Contenu principal avec tags uniquement -->
+          <div class="flex flex-col flex-grow px-4 py-2 justify-center">
+            <!-- Tags -->
+            <div class="flex flex-wrap justify-center items-center gap-2">
+              <template v-if="association.types && association.types.length > 0">
+                <span
+                  v-for="type in association.types"
+                  :key="type.id"
+                  class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
+                >
+                  {{ type.name }}
+                </span>
+              </template>
               <span
-                v-for="type in association.types"
-                :key="type.id"
-                class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
+                v-else
+                class="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm"
               >
-                {{ type.name }}
+                Autre
               </span>
             </div>
-            <div
-              class="mt-auto p-4 flex justify-center gap-3 border-t-primary w-full"
+          </div>
+
+          <!-- Footer avec bouton aligné -->
+          <div class="mt-auto p-3 border-t border-gray-200">
+            <Button
+              class="w-full bg-primary text-white justify-center"
+              @click="navigateToDashboard(association.id!)"
             >
-              <Button
-                class="bg-primary text-white"
-                @click="navigateToDashboard(association.id!)"
-              >
-                Accéder au tableau de bord
-              </Button>
-            </div>
+              Accéder au tableau de bord
+            </Button>
           </div>
         </div>
       </div>

@@ -10,6 +10,7 @@ export function canManageAssociation(
   user: User | null,
   associationId: string
 ): boolean {
+
   if (!user) return false;
 
   // Si l'utilisateur est SuperAdmin, il peut tout gérer
@@ -18,6 +19,6 @@ export function canManageAssociation(
   // Vérifie si l'utilisateur est manager et membre de l'association
   return (
     checkRole(user, RoleEnum.ASSOCIATION_MANAGER) &&
-    user.associations.some((assoc) => assoc.id === associationId)
+    user.associations?.some((assoc) => assoc.id === associationId) || false
   );
 }

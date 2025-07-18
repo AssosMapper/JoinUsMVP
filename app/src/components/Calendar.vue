@@ -3,6 +3,7 @@ import { Event } from "@shared/types/event";
 import { computed, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import JnsImage from "./ui/JnsImage.vue";
+import { formatFullAddress } from "@shared/utils/address.util";
 
 interface Props {
   events: Event[];
@@ -240,7 +241,8 @@ const emit = defineEmits<{
                 <p
                   class="text-xs pt-1 leading-4 leading-none text-gray-600 dark:text-gray-300"
                 >
-                  {{ event.localisation }} | {{ formatTime(event.date) }}
+                  {{ formatFullAddress(event.localisation) }} |
+                  {{ formatTime(event.date) }}
                 </p>
                 <p
                   class="text-sm pt-2 leading-4 leading-none text-gray-600 dark:text-gray-300"

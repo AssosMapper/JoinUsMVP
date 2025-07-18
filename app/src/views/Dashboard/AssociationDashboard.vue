@@ -41,7 +41,6 @@ const canManageApplications = computed(() =>
     route.params.id as string
   )
 );
-
 // Transformer les événements en EventCard
 const eventCards = computed(() => EventCardType.fromEvents(events.value));
 

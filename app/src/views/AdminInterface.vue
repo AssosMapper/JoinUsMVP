@@ -1,11 +1,10 @@
 <script setup>
-import { shallowRef, defineAsyncComponent } from 'vue'
+import { shallowRef, defineAsyncComponent } from 'vue';
 
 const components = {
   'CreateAssociation': defineAsyncComponent(() => import('../components/Create/CreateAssociation.vue')),
   'UpdateAssociation': defineAsyncComponent(() => import('../components/Update/UpdateAssociation.vue')),
   'CreateEvent': defineAsyncComponent(() => import('../components/Create/CreateEvent.vue')),
-  'UpdateEvent': defineAsyncComponent(() => import('../components/Update/UpdateEvent.vue')),
   'CreateTypeAssociation': defineAsyncComponent(() => import('../components/Create/CreateTypeAssociation.vue')),
   'UpdateTypeAssociation': defineAsyncComponent(() => import('../components/Update/UpdateTypeAssociation.vue')),
   'CreateTypeEvent': defineAsyncComponent(() => import('../components/Create/CreateTypeEvent.vue')),
@@ -23,7 +22,6 @@ const currentView = shallowRef('CreateAssociation')
       <button :class="{ 'font-bold': currentView === 'CreateAssociation' }" @click="currentView = 'CreateAssociation'">Create Association</button> |
       <button :class="{ 'font-bold': currentView === 'UpdateAssociation' }" @click="currentView = 'UpdateAssociation'">Update Association</button> |
       <button :class="{ 'font-bold': currentView === 'CreateEvent' }" @click="currentView = 'CreateEvent'">Create Event</button> |
-      <button :class="{ 'font-bold': currentView === 'UpdateEvent' }" @click="currentView = 'UpdateEvent'">Update Event</button> |
       <button :class="{ 'font-bold': currentView === 'CreateTypeAssociation' }" @click="currentView = 'CreateTypeAssociation'">Create TypeAssociation</button> |
       <button :class="{ 'font-bold': currentView === 'UpdateTypeAssociation' }" @click="currentView = 'UpdateTypeAssociation'">Update TypeAssociation</button> |
       <button :class="{ 'font-bold': currentView === 'CreateTypeEvent' }" @click="currentView = 'CreateTypeEvent'">Create TypeEvent</button> |

@@ -61,7 +61,6 @@ export class UserSeedService {
     const uploadedImage = await this.mediaService.create(imageFile, {
       filepath: PROFILE_PICTURE_PATH,
     });
-    console.log('Image uploaded successfully:', uploadedImage.filename);
 
     user = new User();
     user.first_name = 'Manager';
@@ -88,10 +87,8 @@ export class UserSeedService {
     user.roles = [eventsManagerRole];
     user.isActive = true;
     users.push(user);
-
-    console.log('Seeding users...');
+    
     await this.userRepository.save(users);
-    console.log('Seeded users...');
   }
 
   private async drop() {

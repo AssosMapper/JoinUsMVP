@@ -204,38 +204,7 @@ watch([debouncedSearch, selectedType], fetchEvents);
                   />
                 </IconField>
               </div>
-              <Dropdown
-                v-model="currentComponent"
-                :options="['CreateEvent', 'UpdateEvent']"
-                placeholder="Mes événements"
-                :class="[
-                  'font-semibold',
-                  currentComponent ? 'text-[#168003]' : 'text-gray-600',
-                ]"
-              >
-                <template #value="{ value }">
-                  <i
-                    class="pi pi-user mr-2"
-                    :class="
-                      currentComponent ? 'text-[#168003]' : 'text-gray-600'
-                    "
-                  />
-                  {{
-                    value === "CreateEvent"
-                      ? "Créer un événement"
-                      : value === "UpdateEvent"
-                      ? "Modifier un événement"
-                      : "Mes événements"
-                  }}
-                </template>
-                <template #option="{ option }">
-                  {{
-                    option === "CreateEvent"
-                      ? "Créer un événement"
-                      : "Modifier un événement"
-                  }}
-                </template>
-              </Dropdown>
+            
             </div>
           </div>
         </div>

@@ -27,7 +27,7 @@ export class CanUpdateEventGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const userId = request.user?.userId;
     const eventId = request.params.id;
-
+    console.log(request.user);
     if (!userId || !eventId) {
       throw new ForbiddenException('Accès non autorisé');
     }

@@ -3,6 +3,7 @@ import {
   ExecutionContext,
   Injectable,
   SetMetadata,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { checkRole } from '../functions/check-role';
@@ -17,20 +18,18 @@ export class CheckRoleGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const roles = this.reflector.get<string[]>('roles', context.getHandler());
 
-    if (!roles) {
-      return true;
-    }
+    if (roles.length === 0)
+      throw new UnauthorizedException('Aucun role trouvé');
 
     const request = context.switchToHttp().getRequest();
     const user = request.user;
-
-    if (!user) {
-      return false;
-    }
+    if (!user) throw new UnauthorizedException('Utilisateur non trouvé');
 
     const isAdmin = roles.some((role) => checkRole(user, RoleEnum.SUPER_ADMIN));
     if (isAdmin) return true;
 
-    return roles.some((role) => checkRole(user, role));
+    const isAllowed = roles.some((role) => checkRole(user, role));
+    if (!isAllowed) throw new UnauthorizedException('Accès refusé');
+    return true;
   }
 }

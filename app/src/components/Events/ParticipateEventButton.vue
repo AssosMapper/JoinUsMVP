@@ -6,13 +6,13 @@ import {
   ParticipateEventDto,
   UserParticipationResponseDto,
 } from "@shared/dto/event-participation.dto";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, defineEmits } from "vue";
 
 interface Props {
   eventId: string;
   participation?: EventParticipation | null;
 }
-
+const emit = defineEmits(["event-participation-success","event-participation-error"]);
 const props = defineProps<Props>();
 
 const eventParticipation = ref<EventParticipation | null>(
@@ -58,9 +58,10 @@ const handleParticipation = async () => {
         registrationDate: participation.registrationDate,
       };
     }
+    emit("event-participation-success");
+
   } catch (error) {
-    console.error("Error handling participation:", error);
-    notificationStore.showNotification(error.message, "error");
+    emit("event-participation-error");
   } finally {
     isLoading.value = false;
   }

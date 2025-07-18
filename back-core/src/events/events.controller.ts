@@ -36,7 +36,7 @@ import { plainToInstance } from 'class-transformer';
 import { Response } from 'express';
 import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
 import { CurrentUserId } from '../utils/decorators/current-user-id.decorator';
-import { CheckRole } from '../utils/guards/check-role.guard';
+import { CheckRole, CheckRoleGuard } from '../utils/guards/check-role.guard';
 import {
   OptionalYupValidationPipe,
   YupValidationPipe,
@@ -56,8 +56,9 @@ export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Post()
+  @CheckRole(RoleEnum.ASSOCIATION_MANAGER, RoleEnum.EVENTS_MANAGER)
+  @UseGuards(CheckRoleGuard)
   @BearAuthToken()
-  @CheckRole(RoleEnum.EVENTS_MANAGER)
   @UseInterceptors(FileInterceptor('file'))
   async create(
     @CurrentUserId() userId: string,
@@ -170,9 +171,8 @@ export class EventsController {
   }
 
   @Put(':id')
-  @BearAuthToken()
-  @CheckRole(RoleEnum.EVENTS_MANAGER)
   @UseGuards(CanUpdateEventGuard)
+  @BearAuthToken()
   @UseInterceptors(FileInterceptor('file'))
   async update(
     @CurrentUserId() userId: string,

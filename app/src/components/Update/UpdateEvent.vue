@@ -1,292 +1,75 @@
 <script setup lang="ts">
-import associationService from "@/services/associationService";
+import EventForm from "@/components/Events/EventForm.vue";
 import eventService from "@/services/eventService";
-import typeEventService from "@/services/typeEventService";
-import { useUserStore } from "@/store/userStore";
 import { useNotificationStore } from "@/store/notificationStore";
-import { onMounted, ref } from "vue";
-import { useRouter } from "vue-router";
-import GoogleAutoCompleteComponent from "../GoogleAutoCompleteComponent.vue";
+import { CreateEventDto, UpdateEventDto, EventDto } from "@shared/dto/events.dto";
+import { SaveLocalisationDto } from "@shared/dto/localisation.dto";
+import { ref } from "vue";
 
-const userStore = useUserStore();
-const notificationStore = useNotificationStore();
-const router = useRouter();
+interface Props {
+  event: EventDto;
+}
 
-const isAdmin = userStore.isAdmin;
-const isAssociationManager = userStore.isAssociationManager;
+const props = defineProps<Props>();
 
-const checkPermissions = () => {
-  if (!isAssociationManager && !isAdmin) {
-    notificationStore.showNotification(
-      "Vous devez être gestionnaire d'association pour modifier un événement",
-      "error"
-    );
-    router.push('/');
-    return false;
-  }
-  return true;
-};
-
-const event = ref({
-  id: "" as string,
-  titre: "",
-  description: "",
-  image: "",
-  date: "",
-  localisation: "",
-  associationId: null as string | null,
-  typeEventId: null as string | null,
-  isPublic: true,
-  association: null as any,
-});
-
-const associations = ref<{ id: string; name: string }[]>([]);
-const typeEvents = ref<{ id: string; name: string }[]>([]);
-
-const props = defineProps<{
-  eventId: string;
+const emit = defineEmits<{
+  'event-updated': [event: EventDto];
+  'update-cancelled': [];
 }>();
 
-const fetchEventDetails = async (id: string) => {
-  try {
-    const eventData = await eventService.getEventById(id);
-    console.log(eventData);
-    event.value = {
-      id: eventData.id,
-      titre: eventData.titre,
-      description: eventData.description,
-      image: eventData.image,
-      date: formatDateForInput(eventData.date),
-      localisation: eventData.localisation,
-      associationId: eventData.association?.id ?? null,
-      typeEventId: eventData.typeEvent?.id ?? null,
-      isPublic: eventData.isPublic,
-      association: eventData.association,
-    };
-    console.log(event.value.association);
-  } catch (error) {
-    console.error("Error fetching event details:", error);
+const notificationStore = useNotificationStore();
+const isUpdating = ref(false);
+
+const handleUpdateEvent = async (
+  formData: CreateEventDto | UpdateEventDto,
+  localisation?: SaveLocalisationDto,
+  imageFile?: File
+) => {
+  if (!props.event?.id) {
+    throw new Error("ID de l'événement manquant");
   }
-};
 
-const handleSubmit = async () => {
+  isUpdating.value = true;
+  
   try {
-    if (!checkPermissions()) return;
-
-    const { association, id, ...dataToSend } = {
-      ...event.value,
-      associationId: event.value.associationId,
-      typeEventId: event.value.typeEventId,
+    const updateData: UpdateEventDto = {
+      ...formData,
+      id: props.event.id,
     };
 
-    await eventService.updateEvent(props.eventId, dataToSend);
-    await router.push("/");
-  } catch (error) {
-    console.error("Error updating event:", error);
+    const updatedEvent = await eventService.updateEvent(
+      props.event.id,
+      updateData,
+      localisation,
+      imageFile
+    );
+
+    notificationStore.showNotification(
+      "Événement modifié avec succès",
+      "success"
+    );
+
+    emit('event-updated', updatedEvent);
+  } catch (error: any) {    
+    const errorMessage = error?.message || "Erreur lors de la modification de l'événement";
+    notificationStore.showNotification(errorMessage, "error");
+  } finally {
+    isUpdating.value = false;
   }
 };
-
-const fetchAssociations = async () => {
-  try {
-    associations.value = await associationService.getAllAssociations();
-  } catch (error) {
-    console.error("Error fetching associations:", error);
-  }
-};
-
-const fetchTypeEvents = async () => {
-  try {
-    const response = await typeEventService.getAllTypeEvents();
-    typeEvents.value = Array.isArray(response) ? response : [];
-  } catch (error) {
-    console.error("Error fetching type events:", error);
-    typeEvents.value = [];
-  }
-};
-
-const handlePlaceChanged = (place: any) => {
-  event.value.localisation = place.formatted_address;
-};
-
-const formatDateForInput = (dateString: string) => {
-  const date = new Date(dateString);
-  const offset = date.getTimezoneOffset();
-  const formattedDate = new Date(date.getTime() - offset * 60 * 1000);
-  return formattedDate.toISOString().slice(0, 16);
-};
-
-onMounted(() => {
-  if (!checkPermissions()) return;
-
-  fetchAssociations();
-  fetchTypeEvents();
-  if (props.eventId) {
-    fetchEventDetails(props.eventId);
-  }
-});
 </script>
 
 <template>
-  <div
-    class="form-container w-4/5 flex justify-center text-center mx-auto my-10 py-8 border border-gray-300 rounded-lg text-black"
-  >
-    <form class="w-full max-w-md" @submit.prevent="handleSubmit">
-      <h2 class="text-2xl font-semibold leading-7 text-gray-900 mb-6">
-        Update Event
-      </h2>
-
-      <div class="mb-4">
-        <label
-          for="titre"
-          class="block text-sm font-medium leading-6 text-gray-900"
-          >Title</label
-        >
-        <input
-          type="text"
-          id="titre"
-          v-model="event.titre"
-          required
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-        />
-      </div>
-
-      <div class="mb-4">
-        <label
-          for="description"
-          class="block text-sm font-medium leading-6 text-gray-900"
-          >Description</label
-        >
-        <textarea
-          id="description"
-          v-model="event.description"
-          required
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-        ></textarea>
-      </div>
-
-      <div class="mb-4">
-        <label
-          for="image"
-          class="block text-sm font-medium leading-6 text-gray-900"
-          >Image URL</label
-        >
-        <input
-          type="text"
-          id="image"
-          v-model="event.image"
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-        />
-      </div>
-
-      <div class="mb-4">
-        <label
-          for="date"
-          class="block text-sm font-medium leading-6 text-gray-900"
-          >Date</label
-        >
-        <input
-          type="datetime-local"
-          id="date"
-          v-model="event.date"
-          required
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-        />
-      </div>
-
-      <div class="mb-4">
-        <label
-          for="localisation"
-          class="block text-sm font-medium leading-6 text-gray-900"
-          >Localisation</label
-        >
-        <GoogleAutoCompleteComponent
-          id="localisation"
-          v-model="event.localisation"
-          :value="event.localisation"
-          @place-changed="handlePlaceChanged"
-          required
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-        />
-      </div>
-
-      <div v-if="isAdmin" class="mb-4">
-        <label
-          for="association"
-          class="block text-sm font-medium leading-6 text-gray-900"
-          >Association</label
-        >
-        <div
-          id="association"
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2 bg-gray-100"
-        >
-          {{ event.association?.name }}
-        </div>
-      </div>
-
-      <div class="mb-4" v-if="isAdmin">
-        <label
-          for="associationId"
-          class="block text-sm font-medium leading-6 text-gray-900"
-          >Attribuer nouvelle Association</label
-        >
-        <select
-          id="associationId"
-          v-model="event.associationId"
-          required
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-        >
-          <option
-            v-for="association in associations"
-            :key="association.id"
-            :value="association.id"
-          >
-            {{ association.name }}
-          </option>
-        </select>
-      </div>
-
-      <div class="mb-4">
-        <label
-          for="type_event_id"
-          class="block text-sm font-medium leading-6 text-gray-900"
-          >Event Type</label
-        >
-        <select
-          id="type_event_id"
-          v-model="event.typeEventId"
-          required
-          class="mt-1 block w-full border rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2"
-        >
-          <option
-            v-for="typeEvent in typeEvents"
-            :key="typeEvent.id"
-            :value="typeEvent.id"
-          >
-            {{ typeEvent.name }}
-          </option>
-        </select>
-      </div>
-
-      <div class="mb-4">
-        <label
-          for="isPublic"
-          class="block text-sm font-medium leading-6 text-gray-900"
-          >Public Event</label
-        >
-        <input
-          type="checkbox"
-          id="isPublic"
-          v-model="event.isPublic"
-          class="mt-1"
-        />
-      </div>
-
-      <button
-        type="submit"
-        class="w-full bg-indigo-600 text-white font-semibold py-2 px-4 rounded-md shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-600 focus:ring-offset-2"
-      >
-        Update Event
-      </button>
-    </form>
+  <div class="update-event">
+    <EventForm
+      :event="event"
+      :on-submit="handleUpdateEvent"
+    />
   </div>
 </template>
+
+<style scoped>
+.update-event {
+  width: 100%;
+}
+</style>

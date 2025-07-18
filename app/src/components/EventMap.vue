@@ -3,7 +3,7 @@ import { ref, computed, watch } from "vue";
 import { useRouter } from "vue-router";
 import Map from "@/components/Map.vue";
 import type { EventMapType, MapType, MarkerInfo } from "@/types/map.types";
-import mediaService from "@/services/mediaService";
+import { getMediaUrl } from "@/utils/media.util";
 
 interface Props {
   events: EventMapType[];
@@ -89,7 +89,7 @@ const geocodeEvents = async () => {
 
       if (position) {
         const imageUrl = event.association?.image
-          ? mediaService.getMediaUrl(event.association.image as any)
+          ? getMediaUrl(event.association.image as any)
           : "/assets/associations-images/default.png";
 
         markers.push({
