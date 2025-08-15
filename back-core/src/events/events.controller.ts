@@ -115,13 +115,15 @@ export class EventsController {
   @ApiQuery({ name: 'typeEventId', required: false, type: String })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'sortField', required: false, type: String })
+  @ApiQuery({ name: 'sortOrder', required: false, type: String })
   @BearAuthToken()
   async getFilteredEvents(
     @Query(new YupValidationPipe(getFilteredEventsSchema))
     query: GetFilteredEventsDto,
     @CurrentUserId() userId: string,
   ): Promise<{ events: EventDto[]; total: number; page: number; limit: number }> {
-    const { minDate, maxDate, isValid, search, typeEventId, page, limit } = query;
+    const { minDate, maxDate, isValid, search, typeEventId, page, limit, sortField, sortOrder } = query;
     const result = await this.eventsService.findFilteredEvents(
       minDate,
       maxDate,
@@ -131,6 +133,8 @@ export class EventsController {
       userId,
       page,
       limit,
+      sortField,
+      sortOrder,
     );
     return {
       events: plainToInstance(EventDto, result.events, {

@@ -30,6 +30,8 @@ export const getFilteredEventsSchema = yup
     typeEventId: yup.string().uuid().optional(),
     page: yup.number().min(1).optional().default(1),
     limit: yup.number().min(1).max(100).optional().default(10),
+    sortField: yup.string().oneOf(['titre', 'date', 'createdAt', 'updatedAt']).optional(),
+    sortOrder: yup.string().oneOf(['asc', 'desc']).optional(),
   })
   .required();
 

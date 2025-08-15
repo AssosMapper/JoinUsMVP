@@ -45,6 +45,11 @@ export interface EventFilters {
   typeEventId?: string;
 }
 
+export interface EventSorting {
+  field?: string;
+  order?: 'asc' | 'desc';
+}
+
 export interface EventPagination {
   page: number;
   limit: number;

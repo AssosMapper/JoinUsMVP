@@ -21,6 +21,7 @@ import type {
   Event, 
   EventFilters, 
   EventPagination,
+  EventSorting,
   FilteredEventsResponse 
 } from '@/types/event.types';
 
@@ -41,6 +42,9 @@ const pagination = ref<EventPagination>({
 const editModalVisible = ref(false);
 const selectedEvent = ref<EventDto | null>(null);
 
+// Tri
+const sorting = ref<EventSorting>({});
+
 const validityOptions = [
   { label: 'Tous', value: undefined },
   { label: 'Validés', value: true },
@@ -55,7 +59,9 @@ async function loadEvents() {
     const response: FilteredEventsResponse = await eventService.getFilteredEvents(
       filters.value,
       pagination.value.page,
-      pagination.value.limit
+      pagination.value.limit,
+      sorting.value.field,
+      sorting.value.order
     );
     
     events.value = response.events;
@@ -76,6 +82,13 @@ async function loadEvents() {
 function onPageChange(event: any) {
   pagination.value.page = event.page + 1;
   pagination.value.limit = event.rows;
+  loadEvents();
+}
+
+function onSort(event: any) {
+  sorting.value.field = event.sortField;
+  sorting.value.order = event.sortOrder === 1 ? 'asc' : 'desc';
+  pagination.value.page = 1; // Reset à la première page lors du tri
   loadEvents();
 }
 
@@ -259,6 +272,7 @@ onMounted(() => {
         :totalRecords="pagination.total"
         :lazy="true"
         @page="onPageChange"
+        @sort="onSort"
         :loading="loading"
         dataKey="id"
         class="p-datatable-gridlines"

@@ -232,6 +232,8 @@ export class EventsService {
     userId?: string,
     page: number = 1,
     limit: number = 10,
+    sortField?: string,
+    sortOrder?: string,
   ): Promise<{ events: Event[]; total: number }> {
     const user = await this.userRepository.findOne({
       where: { id: userId },
@@ -276,7 +278,28 @@ export class EventsService {
       query.andWhere('event.typeEvent.id = :typeEventId', { typeEventId });
     }
 
-    query.orderBy('event.date', 'DESC').addOrderBy('event.titre', 'ASC');
+    // Gestion du tri
+    if (sortField && sortOrder) {
+      const direction = sortOrder.toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
+      switch (sortField) {
+        case 'titre':
+          query.orderBy('event.titre', direction);
+          break;
+        case 'date':
+          query.orderBy('event.date', direction);
+          break;
+        case 'createdAt':
+          query.orderBy('event.createdAt', direction);
+          break;
+        case 'updatedAt':
+          query.orderBy('event.updatedAt', direction);
+          break;
+        default:
+          query.orderBy('event.date', 'DESC').addOrderBy('event.titre', 'ASC');
+      }
+    } else {
+      query.orderBy('event.date', 'DESC').addOrderBy('event.titre', 'ASC');
+    }
 
     const total = await query.getCount();
     const events = await query

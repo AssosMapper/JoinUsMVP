@@ -267,7 +267,9 @@ const getFilteredEvents = async (
     typeEventId?: string;
   },
   page: number = 1,
-  limit: number = 10
+  limit: number = 10,
+  sortField?: string,
+  sortOrder?: 'asc' | 'desc'
 ) => {
   const apiStore = useApiStore();
   const params = new URLSearchParams({
@@ -284,6 +286,13 @@ const getFilteredEvents = async (
       }
     }
   });
+
+  if (sortField) {
+    params.append('sortField', sortField);
+  }
+  if (sortOrder) {
+    params.append('sortOrder', sortOrder);
+  }
 
   const url = `${apiStore.events.filtered}?${params.toString()}`;
   
