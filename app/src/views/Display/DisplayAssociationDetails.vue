@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AssociationApplicationFormModal from "@/components/AssociationApplication/AssociationApplicationFormModal.vue";
 import EventList from "@/components/EventsList.vue";
+import router from "@/router";
 import EventMap from "@/components/EventMap.vue";
 import JnsImage from "@/components/ui/JnsImage.vue";
 import Loader from "@/components/ui/Loader.vue";
@@ -105,13 +106,11 @@ const fetchAssociationApplication = async () => {
       console.error("Error fetching association application:", error);
   }
 };
-
 const onEventClick = (event: EventMapType) => {
   console.log("Event clicked:", event);
 };
 
 const imageUrl = computed(() => {
-  console.log(association.value?.image.filepath);
   return getMediaUrl(association.value?.image.filepath);
 });
 onMounted(async () => {
@@ -182,6 +181,8 @@ onMounted(async () => {
                     :applicationQuestion="association.applicationQuestion"
                     :associationId="association.id"
                     :associationApplication="associationApplication"
+                    :isPublic = "association.isPublic"
+                    @join:success="router.push(`/associations/${association.id}/dashboard`)"
                   />
                 </div>
               </div>

@@ -4,9 +4,10 @@ import ManageAssociationApplications from "@/components/AssociationDashboard/Man
 import EventCard from "@/components/Events/EventCard.vue";
 import JnsImage from "@/components/ui/JnsImage.vue";
 import Loader from "@/components/ui/Loader.vue";
+import UpdateAssociation from "@/components/Update/UpdateAssociation.vue";
 import associationService from "@/services/associationService";
 import eventService from "@/services/eventService";
-import mediaService from "@/services/mediaService";
+import { getMediaUrl } from "@/utils/media.util";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useUserStore } from "@/store/userStore";
 import { canManageAssociation } from "@/utils/check-role";
@@ -41,6 +42,24 @@ const canManageApplications = computed(() =>
     route.params.id as string
   )
 );
+
+// Computed pour vérifier si l'utilisateur peut modifier l'association
+const canEditAssociation = computed(() => {
+  if (!association.value || !userStore.isAuthenticated) return false;
+  
+  // Admin peut tout modifier
+  if (userStore.isAdmin) return true;
+  
+  // Association manager peut modifier son association
+  if (userStore.isAssociationManager) {
+    return canManageAssociation(
+      userStore.user as unknown as User,
+      route.params.id as string
+    );
+  }
+  
+  return false;
+});
 // Transformer les événements en EventCard
 const eventCards = computed(() => EventCardType.fromEvents(events.value));
 
@@ -76,6 +95,12 @@ onMounted(async () => {
     isLoading.value = false;
   }
 });
+
+const onAssociationUpdated = (updatedAssociation: PublicAssociationDto) => {
+  association.value = updatedAssociation;
+  // Retourner à l'onglet informations après la modification
+  activeTab.value = "0";
+};
 </script>
 
 <template>
@@ -89,7 +114,7 @@ onMounted(async () => {
       <div class="flex items-center space-x-6 bg-primary-hover p-6 rounded-lg">
         <JnsImage
           :name="association.name"
-          :src="mediaService.getMediaUrl(association.image as Media)"
+          :src="getMediaUrl(association.image?.filepath)"
           size="lg"
         />
         <div>
@@ -112,6 +137,9 @@ onMounted(async () => {
             <Tab value="2">Évènements</Tab>
             <Tab v-if="canManageApplications" value="3">
               Gérer les candidatures
+            </Tab>
+            <Tab v-if="canEditAssociation" value="4">
+              <i class="pi pi-edit mr-2"></i>Modifier
             </Tab>
           </TabList>
 
@@ -150,6 +178,15 @@ onMounted(async () => {
               <ManageAssociationApplications
                 :associationId="route.params.id as string"
               />
+            </TabPanel>
+            
+            <TabPanel v-if="canEditAssociation" value="4">
+              <div class="p-6">
+                <UpdateAssociation
+                  :association-id="associationId"
+                  @association-updated="onAssociationUpdated"
+                />
+              </div>
             </TabPanel>
           </TabPanels>
         </Tabs>

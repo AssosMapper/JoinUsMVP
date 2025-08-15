@@ -45,7 +45,6 @@ export class AssociationApplicationsController {
   }
 
   @Patch(':id/status/:associationId')
-  @UseGuards(AssociationManagerGuard)
   async updateApplicationStatus(
     @Param('id') id: string,
     @Param('associationId') associationId: string,

@@ -27,7 +27,6 @@ export class AssociationManagerGuard implements CanActivate {
       where: { id: userId },
       relations: ['roles', 'associations'],
     });
-
     // SuperAdmin peut tout faire
     if (checkRole(user, RoleEnum.SUPER_ADMIN)) return true;
 
@@ -37,12 +36,13 @@ export class AssociationManagerGuard implements CanActivate {
         return true;
       }
     }
+    // rechercher l'association dans les associations de l'utilisateur
+    const isAssociationMember = user.associations.some(
+        (association) => association.id === associationId,
+    );
 
-    // Pour les autres opérations, vérifier que l'utilisateur est manager et membre de l'association
     const isAssociationManager =
-      checkRole(user, RoleEnum.ASSOCIATION_MANAGER) &&
-      (user.associations.some((assoc) => assoc.id === associationId) ||
-        user.associationId === associationId);
+      checkRole(user, RoleEnum.ASSOCIATION_MANAGER) && isAssociationMember;
 
     if (!isAssociationManager) {
       throw new ForbiddenException({

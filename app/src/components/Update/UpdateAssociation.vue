@@ -29,6 +29,18 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { plainToInstance } from "class-transformer";
 
+// Props et emits
+interface Props {
+  associationId?: string;
+}
+
+interface Emits {
+  (e: 'association-updated', association: PublicAssociationDto): void;
+}
+
+const props = defineProps<Props>();
+const emit = defineEmits<Emits>();
+
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
 const router = useRouter();
@@ -78,6 +90,9 @@ const [typeIds, typeIdsAttrs] = defineField("typeIds");
 
 // Computed pour afficher conditionnellement la question d'application
 const showApplicationQuestion = computed(() => !values.isPublic);
+
+// Computed pour déterminer si on est en mode "association spécifique"
+const isSpecificAssociation = computed(() => !!props.associationId);
 
 // Charger les associations disponibles
 const loadAvailableAssociations = async () => {
@@ -177,7 +192,7 @@ const onSubmit = handleSubmit(async (formValues: UpdateAssociationDto) => {
 
   isSubmitting.value = true;
   try {
-    await associationService.updateAssociation(
+    const updatedAssociation = await associationService.updateAssociation(
       selectedAssociationId.value,
       formValues,
       localisation.value.street_name ? localisation.value : undefined,
@@ -189,7 +204,13 @@ const onSubmit = handleSubmit(async (formValues: UpdateAssociationDto) => {
       "success"
     );
 
-    router.push(`/associations/${selectedAssociationId.value}`);
+    if (isSpecificAssociation.value) {
+      // Mode association spécifique - émettre l'événement
+      emit('association-updated', updatedAssociation);
+    } else {
+      // Mode sélection - rediriger
+      router.push(`/associations/${selectedAssociationId.value}`);
+    }
   } catch (error: any) {
     notificationStore.showNotification(
       error.message || "Erreur lors de la mise à jour de l'association",
@@ -241,12 +262,20 @@ const handleCancel = () => {
 // Initialisation au montage
 onMounted(async () => {
   try {
-    await Promise.all([loadAvailableAssociations(), loadTypeAssociations()]);
-
-    // Sélectionner automatiquement la première association si disponible
-    if (availableAssociations.value.length > 0) {
-      selectedAssociationId.value = availableAssociations.value[0].id;
+    if (isSpecificAssociation.value) {
+      // Mode association spécifique - charger directement l'association
+      await loadTypeAssociations();
+      selectedAssociationId.value = props.associationId!;
       await loadAssociationData(selectedAssociationId.value);
+    } else {
+      // Mode sélection - charger les associations disponibles
+      await Promise.all([loadAvailableAssociations(), loadTypeAssociations()]);
+
+      // Sélectionner automatiquement la première association si disponible
+      if (availableAssociations.value.length > 0) {
+        selectedAssociationId.value = availableAssociations.value[0].id;
+        await loadAssociationData(selectedAssociationId.value);
+      }
     }
   } catch (error: any) {
     notificationStore.showNotification(
@@ -283,7 +312,7 @@ watch(selectedAssociationId, async (newId) => {
         </div>
 
         <div
-          v-else-if="availableAssociations.length === 0"
+          v-else-if="!isSpecificAssociation && availableAssociations.length === 0"
           class="text-center py-8"
         >
           <i class="pi pi-info-circle text-2xl text-gray-400"></i>
@@ -293,8 +322,8 @@ watch(selectedAssociationId, async (newId) => {
         </div>
 
         <div v-else>
-          <!-- Sélection d'association pour les admins -->
-          <div v-if="isAdmin" class="mb-6">
+          <!-- Sélection d'association pour les admins (uniquement en mode sélection) -->
+          <div v-if="isAdmin && !isSpecificAssociation" class="mb-6">
             <h3 class="text-lg font-semibold mb-4">
               Sélectionner une association
             </h3>
@@ -307,6 +336,13 @@ watch(selectedAssociationId, async (newId) => {
               class="w-full"
             />
           </div>
+          
+          <!-- Input hidden pour l'association spécifique -->
+          <input 
+            v-if="isSpecificAssociation" 
+            type="hidden" 
+            v-model="selectedAssociationId"
+          />
 
           <!-- Formulaire d'association -->
           <div v-if="selectedAssociationId && currentAssociation">

@@ -6,7 +6,7 @@ import { PublicUserDto } from "./user.dto";
 export class JoinAssociationDto {
   associationId: string;
 
-  applicationAnswer: string;
+  applicationAnswer?: string;
 }
 
 export class UpdateApplicationStatusDto {

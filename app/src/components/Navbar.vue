@@ -172,6 +172,7 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
             <template #icon>
               <i :class="[item.icon, 'text-primary mr-2']"></i>
             </template>
+
           </Button>
         </template>
       </div>
@@ -241,7 +242,9 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
 :deep(.p-sidebar-mask) {
   @apply backdrop-blur-sm;
 }
-
+:deep(.p-button-label){
+  @apply text-left;
+}
 :deep(.p-sidebar-header),
 :deep(.p-sidebar-content),
 :deep(.p-sidebar-footer) {
