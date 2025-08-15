@@ -27,10 +27,7 @@ export class CanUpdateEventGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const userId = request.user?.userId;
     const eventId = request.params.id;
-    console.log(request.user);
-    if (!userId || !eventId) {
-      throw new ForbiddenException('Accès non autorisé');
-    }
+    if (!userId || !eventId) throw new ForbiddenException('Accès non autorisé');
 
     const user = await this.userRepository.findOne({
       where: { id: userId },
@@ -58,7 +55,7 @@ export class CanUpdateEventGuard implements CanActivate {
       if (isInAssociation && isEventManager) return true;
     }
 
-    if (!event.association && event.user.id === userId) return true;
+    if (event.user.id === userId) return true;
 
     throw new ForbiddenException(
       'Vous ne pouvez pas mettre à jour cet événement',

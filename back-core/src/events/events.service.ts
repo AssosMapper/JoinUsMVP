@@ -258,8 +258,9 @@ export class EventsService {
     }
 
     if (userId && !checkRole(user, RoleEnum.SUPER_ADMIN)) {
+      // Tous les utilisateurs non-admin : seulement leurs événements et ceux des associations dont ils font partie
       query.andWhere(
-        '(event.isPublic = true OR event.user.id = :userId OR associationUser.id = :userId)',
+        '(event.user.id = :userId OR associationUser.id = :userId)',
         { userId },
       );
     }
