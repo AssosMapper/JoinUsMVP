@@ -24,6 +24,7 @@ export const useApiStore = defineStore("api", {
         byAssociation: "/events/association/:associationId",
         byDate: "/events/by-date",
         byMonth: "/events/by-month",
+        filtered: "/events/filtered",
         participate: "/events/participate",
         cancelParticipation: "/events/participate/:eventId",
         participants: "/events/:eventId/participants",

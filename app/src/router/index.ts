@@ -83,12 +83,6 @@ const routes: Array<RouteRecordRaw> = [
     props: true,
   },
   {
-    path: "/eventsManagerInterface",
-    name: "EventsManagerInterface",
-    meta: { requiresEventsManager: true },
-    component: () => import("@/views/Dashboard/EventsManagerInterface.vue"),
-  },
-  {
     path: "/my-associations",
     name: "my-associations",
     component: () => import("@/views/MyAssociations.vue"),
@@ -116,6 +110,14 @@ const routes: Array<RouteRecordRaw> = [
     path: "/associations/:id",
     name: "DisplayAssociationDetails",
     component: () => import("@/views/Display/DisplayAssociationDetails.vue"),
+    meta: {
+      requiresAuth: true,
+    },
+  },
+  {
+    path: "/events/management",
+    name: "EventsManagement",
+    component: () => import("@/views/EventsManagement.vue"),
     meta: {
       requiresAuth: true,
     },

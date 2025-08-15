@@ -20,6 +20,21 @@ export const getEventsByMonthSchema = yup
 
 export type GetEventsByMonthDto = yup.InferType<typeof getEventsByMonthSchema>;
 
+export const getFilteredEventsSchema = yup
+  .object()
+  .shape({
+    minDate: yup.date().optional(),
+    maxDate: yup.date().optional(),
+    isValid: yup.boolean().optional(),
+    search: yup.string().matches(ACCENT_STRING_REGEX, "Caractères non autorisés").max(255).optional(),
+    typeEventId: yup.string().uuid().optional(),
+    page: yup.number().min(1).optional().default(1),
+    limit: yup.number().min(1).max(100).optional().default(10),
+  })
+  .required();
+
+export type GetFilteredEventsDto = yup.InferType<typeof getFilteredEventsSchema>;
+
 export class EventDto {
   @Expose()
   id: string;

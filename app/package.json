@@ -21,6 +21,7 @@
     "class-transformer": "^0.5.1",
     "destr": "^2.0.3",
     "event-source-polyfill": "^1.0.31",
+    "lodash": "^4.17.21",
     "pinia": "^2.1.7",
     "pinia-plugin-persistedstate": "^3.2.1",
     "primeicons": "^7.0.0",

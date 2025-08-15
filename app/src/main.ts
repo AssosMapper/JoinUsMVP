@@ -7,6 +7,7 @@ import piniaPluginPersistedstate from "pinia-plugin-persistedstate";
 import "primeicons/primeicons.css";
 import PrimeVue from "primevue/config";
 import ToastService from "primevue/toastservice";
+import ConfirmationService from "primevue/confirmationservice";
 import { createApp } from "vue";
 import App from "./App.vue";
 import "./index.css";
@@ -28,6 +29,7 @@ if (process.env.NODE_ENV === "production") {
 }
 
 app.use(ToastService);
+app.use(ConfirmationService);
 app.use(router);
 app.use(pinia);
 

@@ -55,7 +55,7 @@ const menuItems = [
   {
     label: "Gestion des Événements",
     icon: "pi pi-calendar-plus",
-    route: "/eventsManagerInterface",
+    route: "/events/management",
   },
 ];
 

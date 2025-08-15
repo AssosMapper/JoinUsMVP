@@ -258,6 +258,41 @@ const getUserParticipation = async (
   return data.value;
 };
 
+const getFilteredEvents = async (
+  filters: {
+    minDate?: Date;
+    maxDate?: Date;
+    search?: string;
+    isValid?: boolean;
+    typeEventId?: string;
+  },
+  page: number = 1,
+  limit: number = 10
+) => {
+  const apiStore = useApiStore();
+  const params = new URLSearchParams({
+    page: page.toString(),
+    limit: limit.toString()
+  });
+  
+  Object.entries(filters).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') {
+      if (key === 'minDate' || key === 'maxDate') {
+        params.append(key, (value as Date).toISOString());
+      } else {
+        params.append(key, value.toString());
+      }
+    }
+  });
+
+  const url = `${apiStore.events.filtered}?${params.toString()}`;
+  
+  const { data, error } = await useApi(url).json();
+  if (error.value) throw error.value as ResponseError;
+
+  return data.value;
+};
+
 export default {
   createEvent,
   getAllEvents,
@@ -269,6 +304,7 @@ export default {
   getEventsByAssociationId,
   getEventsByDate,
   getEventsByMonth,
+  getFilteredEvents,
   participateEvent,
   cancelParticipation,
   getEventParticipants,

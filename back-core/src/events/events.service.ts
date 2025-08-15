@@ -223,6 +223,70 @@ export class EventsService {
     await this.eventsRepository.delete(id);
   }
 
+  async findFilteredEvents(
+    minDate?: Date,
+    maxDate?: Date,
+    isValid?: boolean,
+    search?: string,
+    typeEventId?: string,
+    userId?: string,
+    page: number = 1,
+    limit: number = 10,
+  ): Promise<{ events: Event[]; total: number }> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['roles'],
+    });
+
+    const query = this.eventsRepository
+      .createQueryBuilder('event')
+      .distinct()
+      .leftJoinAndSelect('event.association', 'association')
+      .leftJoinAndSelect('event.user', 'user')
+      .leftJoinAndSelect('event.typeEvent', 'typeEvent')
+      .leftJoinAndSelect('event.localisation', 'localisation')
+      .leftJoinAndSelect('event.image', 'image')
+      .leftJoin('association.users', 'associationUser');
+
+    if (minDate) {
+      query.andWhere('event.date >= :minDate', { minDate });
+    }
+    if (maxDate) {
+      query.andWhere('event.date <= :maxDate', { maxDate });
+    }
+
+    if (userId && !checkRole(user, RoleEnum.SUPER_ADMIN)) {
+      query.andWhere(
+        '(event.isPublic = true OR event.user.id = :userId OR associationUser.id = :userId)',
+        { userId },
+      );
+    }
+
+    if (isValid !== undefined) {
+      query.andWhere('event.isValid = :isValid', { isValid });
+    }
+
+    if (search) {
+      query.andWhere('LOWER(event.titre) LIKE LOWER(:search)', {
+        search: `%${search}%`,
+      });
+    }
+
+    if (typeEventId) {
+      query.andWhere('event.typeEvent.id = :typeEventId', { typeEventId });
+    }
+
+    query.orderBy('event.date', 'DESC').addOrderBy('event.titre', 'ASC');
+
+    const total = await query.getCount();
+    const events = await query
+      .skip((page - 1) * limit)
+      .take(limit)
+      .getMany();
+
+    return { events, total };
+  }
+
   async findEventsByAssociationId(
     associationId: string,
     limit: number,

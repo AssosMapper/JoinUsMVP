@@ -37,6 +37,27 @@ export interface EventParticipation {
   registrationDate: Date;
 }
 
+export interface EventFilters {
+  minDate?: Date;
+  maxDate?: Date;
+  search?: string;
+  isValid?: boolean;
+  typeEventId?: string;
+}
+
+export interface EventPagination {
+  page: number;
+  limit: number;
+  total: number;
+}
+
+export interface FilteredEventsResponse {
+  events: Event[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 export class EventCard {
   @Expose()
   id: string;

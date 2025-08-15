@@ -24,6 +24,8 @@ import {
   EventDto,
   GetEventsByMonthDto,
   getEventsByMonthSchema,
+  GetFilteredEventsDto,
+  getFilteredEventsSchema,
 } from '@shared/dto/events.dto';
 import { SaveLocalisationDto } from '@shared/dto/localisation.dto';
 import { RoleEnum } from '@shared/types';
@@ -103,6 +105,42 @@ export class EventsController {
       excludeExtraneousValues: true,
       enableImplicitConversion: true,
     });
+  }
+
+  @Get('filtered')
+  @ApiQuery({ name: 'minDate', required: false, type: Date })
+  @ApiQuery({ name: 'maxDate', required: false, type: Date })
+  @ApiQuery({ name: 'isValid', required: false, type: Boolean })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'typeEventId', required: false, type: String })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @BearAuthToken()
+  async getFilteredEvents(
+    @Query(new YupValidationPipe(getFilteredEventsSchema))
+    query: GetFilteredEventsDto,
+    @CurrentUserId() userId: string,
+  ): Promise<{ events: EventDto[]; total: number; page: number; limit: number }> {
+    const { minDate, maxDate, isValid, search, typeEventId, page, limit } = query;
+    const result = await this.eventsService.findFilteredEvents(
+      minDate,
+      maxDate,
+      isValid,
+      search,
+      typeEventId,
+      userId,
+      page,
+      limit,
+    );
+    return {
+      events: plainToInstance(EventDto, result.events, {
+        excludeExtraneousValues: true,
+        enableImplicitConversion: true,
+      }),
+      total: result.total,
+      page,
+      limit,
+    };
   }
 
   @Get('association/:associationId')
