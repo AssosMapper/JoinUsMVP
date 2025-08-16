@@ -25,6 +25,7 @@ declare module 'vue' {
     Divider: typeof import('primevue/divider')['default']
     EventCard: typeof import('./src/components/Events/EventCard.vue')['default']
     EventForm: typeof import('./src/components/Events/EventForm.vue')['default']
+    EventManagementCard: typeof import('./src/components/Events/EventManagementCard.vue')['default']
     EventMap: typeof import('./src/components/EventMap.vue')['default']
     EventsList: typeof import('./src/components/EventsList.vue')['default']
     FloatLabel: typeof import('primevue/floatlabel')['default']

@@ -4,6 +4,7 @@ import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
+import { useBreakpoints } from '@vueuse/core';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import Button from 'primevue/button';
@@ -13,16 +14,18 @@ import Dropdown from 'primevue/dropdown';
 import Tag from 'primevue/tag';
 import ConfirmDialog from 'primevue/confirmdialog';
 import Dialog from 'primevue/dialog';
+import Card from 'primevue/card';
 import { debounce } from 'lodash';
 import eventService from '@/services/eventService';
 import UpdateEvent from '@/components/Update/UpdateEvent.vue';
+import EventManagementCard from '@/components/Events/EventManagementCard.vue';
 import type { EventDto } from '@shared/dto/events.dto';
-import type { 
-  Event, 
-  EventFilters, 
+import type {
+  Event,
+  EventFilters,
   EventPagination,
   EventSorting,
-  FilteredEventsResponse 
+  FilteredEventsResponse
 } from '@/types/event.types';
 
 const router = useRouter();
@@ -52,6 +55,15 @@ const validityOptions = [
 ];
 
 const debouncedLoadEvents = debounce(loadEvents, 500);
+
+// Breakpoints pour la responsivité
+const breakpoints = useBreakpoints({
+  tablet: 1024,
+  laptop: 1280,
+  desktop: 1536,
+});
+
+const isDesktop = breakpoints.greater('tablet');
 
 async function loadEvents() {
   loading.value = true;
@@ -99,7 +111,7 @@ function resetFilters() {
 }
 
 function toggleValidation(event: Event) {
-  const action = event.isValid ? 'révoquer' : 'valider';
+  const action = event.isValid ? 'annuler' : 'valider';
   const message = `Êtes-vous sûr de vouloir ${action} cet événement ?`;
   
   confirm.require({
@@ -119,7 +131,6 @@ function toggleValidation(event: Event) {
 
 async function editEvent(eventId: string) {
   try {
-    loading.value = true;
     const event = await eventService.getEventById(eventId);
     selectedEvent.value = event;
     editModalVisible.value = true;
@@ -131,8 +142,6 @@ async function editEvent(eventId: string) {
       detail: 'Impossible de charger l\'événement',
       life: 3000
     });
-  } finally {
-    loading.value = false;
   }
 }
 
@@ -140,7 +149,7 @@ function onEventUpdated(updatedEvent: EventDto) {
   // Mettre à jour l'événement dans la liste
   const index = events.value.findIndex(e => e.id === updatedEvent.id);
   if (index !== -1) {
-    events.value[index] = updatedEvent as Event;
+    events.value[index] = updatedEvent as unknown as Event;
   }
   editModalVisible.value = false;
   selectedEvent.value = null;
@@ -196,6 +205,78 @@ onMounted(() => {
 
 .text-muted {
   color: #6c757d;
+}
+
+/* Styles pour les cards */
+.events-cards {
+  width: 100%;
+}
+
+.event-card {
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.event-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.event-card :deep(.p-card-header) {
+  padding-bottom: 0;
+}
+
+.event-card :deep(.p-card-content) {
+  padding-top: 1rem;
+}
+
+.event-card :deep(.p-card-footer) {
+  padding-top: 0;
+}
+
+/* Animation skeleton */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: .5;
+  }
+}
+
+.h-3 {
+  height: 0.75rem;
+}
+
+.h-4 {
+  height: 1rem;
+}
+
+.bg-gray-200 {
+  background-color: #e5e7eb;
+}
+
+.bg-gray-300 {
+  background-color: #d1d5db;
+}
+
+.rounded {
+  border-radius: 0.25rem;
+}
+
+.mb-1 {
+  margin-bottom: 0.25rem;
+}
+
+.mb-2 {
+  margin-bottom: 0.5rem;
+}
+
+.w-3\/4 {
+  width: 75%;
 }
 </style>
 <template>
@@ -264,93 +345,143 @@ onMounted(() => {
         </div>
       </div>
       
-      <!-- Tableau -->
-      <DataTable 
-        :value="events" 
-        :paginator="true" 
-        :rows="pagination.limit"
-        :totalRecords="pagination.total"
-        :lazy="true"
-        @page="onPageChange"
-        @sort="onSort"
-        :loading="loading"
-        dataKey="id"
-        class="p-datatable-gridlines"
-      >
-        <Column field="titre" header="Titre" sortable>
-          <template #body="{ data }">
-            <span class="font-semibold">{{ data.titre }}</span>
-          </template>
-        </Column>
-        
-        <Column field="date" header="Date" sortable>
-          <template #body="{ data }">
-            {{ formatDate(data.date) }}
-          </template>
-        </Column>
-        
-        <Column field="association.nom" header="Association">
-          <template #body="{ data }">
-            <span v-if="data.association">{{ data.association.nom }}</span>
-            <span v-else class="text-muted">Événement personnel</span>
-          </template>
-        </Column>
-        
-        <Column field="typeEvent.nom" header="Type">
-          <template #body="{ data }">
-            <Tag :value="data.typeEvent?.nom || 'Non défini'" />
-          </template>
-        </Column>
-        
-        <Column field="isPublic" header="Visibilité">
-          <template #body="{ data }">
-            <i v-if="data.isPublic" class="pi pi-eye text-green-500" title="Public"></i>
-            <i v-else class="pi pi-eye-slash text-orange-500" title="Privé"></i>
-          </template>
-        </Column>
-        
-        <Column field="isValid" header="Statut">
-          <template #body="{ data }">
-            <Tag 
-              :value="data.isValid ? 'Validé' : 'En attente'" 
-              :severity="data.isValid ? 'success' : 'warning'"
-            />
-          </template>
-        </Column>
-        
-        <Column header="Actions" :exportable="false">
-          <template #body="{ data }">
-            <div class="flex gap-2">
-              <!-- Bouton Valider/Révoquer -->
-              <Button
-                :icon="data.isValid ? 'pi pi-times' : 'pi pi-check'"
-                :label="data.isValid ? 'Révoquer' : 'Valider'"
-                :class="data.isValid ? 'p-button-danger p-button-outlined' : 'p-button-success p-button-outlined'"
-                size="small"
-                @click="toggleValidation(data)"
+      <!-- Affichage conditionnel : Tableau ou Cards -->
+      <div v-if="isDesktop">
+        <!-- Tableau pour desktop -->
+        <DataTable 
+          :value="events" 
+          :paginator="true" 
+          :rows="pagination.limit"
+          :totalRecords="pagination.total"
+          :lazy="true"
+          @page="onPageChange"
+          @sort="onSort"
+          :loading="loading"
+          dataKey="id"
+          class="p-datatable-gridlines"
+        >
+          <Column field="titre" header="Titre" sortable>
+            <template #body="{ data }">
+              <span class="font-semibold">{{ data.titre }}</span>
+            </template>
+          </Column>
+          
+          <Column field="date" header="Date" sortable>
+            <template #body="{ data }">
+              {{ formatDate(data.date) }}
+            </template>
+          </Column>
+          
+          <Column field="association.nom" header="Association">
+            <template #body="{ data }">
+              <span v-if="data.association">{{ data.association.nom }}</span>
+              <span v-else class="text-muted">Événement personnel</span>
+            </template>
+          </Column>
+          
+          <Column field="typeEvent.nom" header="Type">
+            <template #body="{ data }">
+              <Tag :value="data.typeEvent?.nom || 'Non défini'" />
+            </template>
+          </Column>
+          
+          <Column field="isPublic" header="Visibilité">
+            <template #body="{ data }">
+              <i v-if="data.isPublic" class="pi pi-eye text-green-500" title="Public"></i>
+              <i v-else class="pi pi-eye-slash text-orange-500" title="Privé"></i>
+            </template>
+          </Column>
+          
+          <Column field="isValid" header="Statut">
+            <template #body="{ data }">
+              <Tag 
+                :value="data.isValid ? 'Validé' : 'En attente'" 
+                :severity="data.isValid ? 'success' : 'warning'"
               />
-              
-              <!-- Bouton Éditer -->
-              <Button
-                icon="pi pi-pencil"
-                label="Éditer"
-                class="p-button-info p-button-outlined"
-                size="small"
-                @click="editEvent(data.id)"
-              />
-            </div>
-          </template>
-        </Column>
-      </DataTable>
+            </template>
+          </Column>
+          
+          <Column header="Actions" :exportable="false">
+            <template #body="{ data }">
+              <div class="flex gap-2">
+                <!-- Bouton Valider/Révoquer -->
+                <Button
+                  :icon="data.isValid ? 'pi pi-times' : 'pi pi-check'"
+                  :label="data.isValid ? 'Révoquer' : 'Valider'"
+                  :class="data.isValid ? 'p-button-danger p-button-outlined' : 'p-button-success p-button-outlined'"
+                  size="small"
+                  @click="toggleValidation(data)"
+                />
+                
+                <!-- Bouton Éditer -->
+                <Button
+                  icon="pi pi-pencil"
+                  label="Éditer"
+                  class="p-button-info p-button-outlined"
+                  size="small"
+                  @click="editEvent(data.id)"
+                />
+              </div>
+            </template>
+          </Column>
+        </DataTable>
+      </div>
+
+      <!-- Affichage en cards pour mobile/tablet -->
+      <div v-else class="events-cards">
+        <!-- Loading skeleton pour cards -->
+        <div v-if="loading" class="flex flex-column gap-3">
+          <Card v-for="i in pagination.limit" :key="i" class="event-card">
+            <template #content>
+              <div class="animate-pulse">
+                <div class="h-4 bg-gray-300 rounded mb-2"></div>
+                <div class="h-3 bg-gray-200 rounded mb-1"></div>
+                <div class="h-3 bg-gray-200 rounded w-3/4"></div>
+              </div>
+            </template>
+          </Card>
+        </div>
+
+        <!-- Cards des événements avec le nouveau composant -->
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+          <EventManagementCard 
+            v-for="event in events" 
+            :key="event.id" 
+            :event="event"
+            @toggle-validation="toggleValidation"
+            @edit-event="editEvent"
+          />
+        </div>
+
+        <!-- Pagination pour les cards -->
+        <div v-if="!loading && events.length > 0" class="flex justify-content-center mt-4">
+          <Button 
+            v-if="pagination.page > 1"
+            icon="pi pi-chevron-left" 
+            class="p-button-outlined mr-2"
+            @click="onPageChange({ page: pagination.page - 2, rows: pagination.limit })"
+          />
+          <span class="flex align-items-center px-3">
+            Page {{ pagination.page }} sur {{ Math.ceil(pagination.total / pagination.limit) }}
+          </span>
+          <Button 
+            v-if="pagination.page < Math.ceil(pagination.total / pagination.limit)"
+            icon="pi pi-chevron-right" 
+            class="p-button-outlined ml-2"
+            @click="onPageChange({ page: pagination.page, rows: pagination.limit })"
+          />
+        </div>
+      </div>
     </div>
     
     <!-- Dialog de confirmation -->
-    <ConfirmDialog />
+    <ConfirmDialog class="text-black" />
     
     <!-- Modal d'édition -->
     <Dialog 
       v-model:visible="editModalVisible" 
       modal 
+      class="text-primary"
       :header="`Modifier l'événement: ${selectedEvent?.titre || ''}`"
       :style="{ width: '90vw', maxWidth: '800px' }"
       :dismissableMask="true"
