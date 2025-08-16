@@ -24,7 +24,9 @@ export class EventSeedService {
   async seed() {
     await this.drop();
 
-    const associations = await this.associationRepository.find();
+    const associations = await this.associationRepository.find({
+      relations: ['users'],
+    });
     const eventTypes = await this.typeEventsRepository.find();
     const users = await this.userRepository.find();
 
@@ -77,6 +79,12 @@ export class EventSeedService {
     // Créer des événements pour chaque association
     for (const association of associations) {
       const numEvents = 10; // 10 événements par association
+      
+      // Vérifier que l'association a des utilisateurs
+      if (!association.users || association.users.length === 0) {
+        console.log(`Association ${association.name} has no users, skipping events.`);
+        continue;
+      }
 
       for (let i = 0; i < numEvents; i++) {
         const event = new Event();
@@ -95,7 +103,8 @@ export class EventSeedService {
         event.association = association;
         event.typeEvent =
           eventTypes[Math.floor(Math.random() * eventTypes.length)];
-        event.user = users[Math.floor(Math.random() * users.length)];
+        // Choisir un utilisateur qui fait partie de l'association
+        event.user = association.users[Math.floor(Math.random() * association.users.length)];
 
         // Dates aléatoires dans les 3 prochains mois
         const date = new Date();
@@ -107,6 +116,40 @@ export class EventSeedService {
 
         events.push(event);
       }
+    }
+
+    // Créer quelques événements sans association (events publics généraux)
+    const numPublicEvents = 5;
+    for (let i = 0; i < numPublicEvents; i++) {
+      const event = new Event();
+      event.titre = `Événement public ${i + 1}`;
+      event.description =
+        descriptions[Math.floor(Math.random() * descriptions.length)];
+
+      // Créer une localisation aléatoire
+      const locationData =
+        locations[Math.floor(Math.random() * locations.length)];
+      const localisation = this.localisationRepository.create(locationData);
+      const savedLocalisation =
+        await this.localisationRepository.save(localisation);
+      event.localisation = savedLocalisation;
+
+      // Pas d'association
+      event.association = null;
+      event.typeEvent =
+        eventTypes[Math.floor(Math.random() * eventTypes.length)];
+      // Utilisateur aléatoire (car pas d'association)
+      event.user = users[Math.floor(Math.random() * users.length)];
+
+      // Dates aléatoires dans les 3 prochains mois
+      const date = new Date();
+      date.setDate(date.getDate() + Math.floor(Math.random() * 90));
+      event.date = date;
+
+      event.isPublic = true; // Toujours public
+      event.isValid = Math.random() > 0.2; // 80% de chances d'être validé
+
+      events.push(event);
     }
 
     await this.eventRepository.save(events);
