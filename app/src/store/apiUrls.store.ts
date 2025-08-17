@@ -21,6 +21,7 @@ export const useApiStore = defineStore("api", {
         update: "/events/:id",
         delete: "/events/:id",
         updateImage: "/events/:eventId/image",
+        updateStatus: "/events/:id/status",
         byAssociation: "/events/association/:associationId",
         byDate: "/events/by-date",
         byMonth: "/events/by-month",

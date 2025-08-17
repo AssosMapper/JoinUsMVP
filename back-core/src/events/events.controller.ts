@@ -122,8 +122,23 @@ export class EventsController {
     @Query(new YupValidationPipe(getFilteredEventsSchema))
     query: GetFilteredEventsDto,
     @CurrentUserId() userId: string,
-  ): Promise<{ events: EventDto[]; total: number; page: number; limit: number }> {
-    const { minDate, maxDate, isValid, search, typeEventId, page, limit, sortField, sortOrder } = query;
+  ): Promise<{
+    events: EventDto[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
+    const {
+      minDate,
+      maxDate,
+      isValid,
+      search,
+      typeEventId,
+      page,
+      limit,
+      sortField,
+      sortOrder,
+    } = query;
     const result = await this.eventsService.findFilteredEvents(
       minDate,
       maxDate,
@@ -198,6 +213,22 @@ export class EventsController {
   ): Promise<EventParticipantResponseDto[]> {
     const participants = await this.eventsService.getEventParticipants(eventId);
     return plainToInstance(EventParticipantResponseDto, participants, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
+  }
+
+  /**
+   * Mettre à jour le statut de validation d'un événement
+   */
+  @Put(':id/status')
+  @BearAuthToken()
+  async updateEventStatus(
+    @CurrentUserId() userId: string,
+    @Param('id') eventId: string,
+  ): Promise<EventDto> {
+    const event = await this.eventsService.updateEventStatus(eventId, userId);
+    return plainToInstance(EventDto, event, {
       excludeExtraneousValues: true,
       enableImplicitConversion: true,
     });

@@ -563,4 +563,61 @@ export class EventsService {
 
     await this.eventParticipationRepository.remove(participation);
   }
+
+  /**
+   * Mettre à jour le statut de validation d'un événement
+   * - ADMIN : peut toujours changer le statut
+   * - ASSOCIATION_MANAGER : peut changer le statut si l'événement appartient à une de ses associations
+   * - USER : ne peut pas changer le statut
+   */
+  async updateEventStatus(eventId: string, userId: string): Promise<Event> {
+    // Récupérer l'événement avec ses relations
+    const event = await this.eventsRepository.findOne({
+      where: { id: eventId },
+      relations: ['association', 'association.users'],
+    });
+
+    if (!event) {
+      throw new NotFoundException(`Événement avec l'ID ${eventId} non trouvé`);
+    }
+
+    // Récupérer l'utilisateur avec ses rôles
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['roles'],
+    });
+
+    if (!user) {
+      throw new NotFoundException(`Utilisateur avec l'ID ${userId} non trouvé`);
+    }
+
+    // Vérifier les permissions
+    const isAdmin = checkRole(user, RoleEnum.SUPER_ADMIN);
+    const isAssociationManager = checkRole(user, RoleEnum.ASSOCIATION_MANAGER);
+
+    let canUpdateStatus = false;
+
+    if (isAdmin) {
+      // Un admin peut toujours modifier le statut
+      canUpdateStatus = true;
+    } else if (isAssociationManager && event.association) {
+      // Un association manager peut modifier si l'événement appartient à une de ses associations
+      const isUserInAssociation = event.association.users.some(
+        (u) => u.id === userId,
+      );
+      canUpdateStatus = isUserInAssociation;
+    }
+
+    if (!canUpdateStatus) {
+      throw new NotFoundException(
+        "Vous n'avez pas les permissions pour modifier le statut de cet événement",
+      );
+    }
+
+    // Inverser le statut de validation
+    event.isValid = !event.isValid;
+
+    // Sauvegarder et retourner l'événement mis à jour
+    return await this.eventsRepository.save(event);
+  }
 }

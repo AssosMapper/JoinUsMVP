@@ -302,6 +302,21 @@ const getFilteredEvents = async (
   return data.value;
 };
 
+const updateEventStatus = async (eventId: string): Promise<EventDto> => {
+  const apiStore = useApiStore();
+  const { data, error } = await useApi(
+    apiStore.resolveUrl(apiStore.events.updateStatus, { id: eventId })
+  )
+    .put({})
+    .json();
+
+  if (error.value) {
+    throw error.value as ResponseError;
+  }
+
+  return data.value as EventDto;
+};
+
 export default {
   createEvent,
   getAllEvents,
@@ -319,4 +334,5 @@ export default {
   getEventParticipants,
   getUserParticipations,
   getUserParticipation,
+  updateEventStatus,
 };

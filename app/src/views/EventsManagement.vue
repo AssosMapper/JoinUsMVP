@@ -110,7 +110,7 @@ function resetFilters() {
   loadEvents();
 }
 
-function toggleValidation(event: Event) {
+async function toggleValidation(event: Event) {
   const action = event.isValid ? 'annuler' : 'valider';
   const message = `Êtes-vous sûr de vouloir ${action} cet événement ?`;
   
@@ -118,13 +118,31 @@ function toggleValidation(event: Event) {
     message: message,
     header: 'Confirmation',
     icon: 'pi pi-exclamation-triangle',
-    accept: () => {
-      toast.add({
-        severity: 'info',
-        summary: 'Action en attente',
-        detail: `La fonctionnalité ${action} sera implémentée prochainement`,
-        life: 3000
-      });
+    accept: async () => {
+      try {
+        const updatedEvent = await eventService.updateEventStatus(event.id);
+        
+        // Mettre à jour l'événement dans la liste locale
+        const index = events.value.findIndex(e => e.id === event.id);
+        if (index !== -1) {
+          events.value[index] = updatedEvent as unknown as Event;
+        }
+        
+        toast.add({
+          severity: 'success',
+          summary: 'Succès',
+          detail: `Événement ${updatedEvent.isValid ? 'validé' : 'annulé'} avec succès`,
+          life: 3000
+        });
+      } catch (error) {
+        console.error('Erreur lors de la mise à jour du statut:', error);
+        toast.add({
+          severity: 'error',
+          summary: 'Erreur',
+          detail: 'Impossible de modifier le statut de l\'événement',
+          life: 3000
+        });
+      }
     }
   });
 }
