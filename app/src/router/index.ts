@@ -122,6 +122,14 @@ const routes: Array<RouteRecordRaw> = [
       requiresAuth: true,
     },
   },
+  {
+    path: "/create-event",
+    name: "CreateEvent",
+    component: () => import("@/views/CreateEvent.vue"),
+    meta: {
+      requiresAuth: true,
+    },
+  },
 ];
 
 const router = createRouter({

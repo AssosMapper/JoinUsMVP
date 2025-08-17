@@ -53,35 +53,36 @@ const goToEventDetails = () => {
           class="w-full h-48 mb-4 event-card-image"
         />
 
-        <!-- Association info (conditionnelle) -->
-        <div v-if="showAssociation" class="flex items-center gap-2 mb-4 px-2">
-          <span class="text-lg font-semibold text-gray-700">
-            {{ event.association?.name }}
-          </span>
-          <span
-            class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm ml-auto"
-          >
-            {{ event.typeEvent?.name }}
-          </span>
-        </div>
-
-        <!-- Type d'événement seul si pas d'association -->
-        <div v-else class="flex justify-center mb-4">
-          <span
-            class="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
-          >
-            {{ event.typeEvent?.name }}
-          </span>
-        </div>
-
         <!-- Contenu principal -->
         <div
           class="flex flex-col p-4 border-t border-surface-300 dark:border-surface-700"
         >
-          <div class="flex flex-col mb-4">
-            <span class="text-base font-semibold text-gray-700">{{
+          <!-- Titre de l'événement en premier -->
+          <div class="flex flex-col mb-3">
+            <span class="text-lg font-bold text-gray-800">{{
               event.titre
             }}</span>
+          </div>
+
+          <!-- Association et type en dessous -->
+          <div v-if="showAssociation" class="flex items-center gap-2 mb-4">
+            <span class="text-sm text-gray-600">
+              {{ event.association?.name }}
+            </span>
+            <span
+              class="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs ml-auto"
+            >
+              {{ event.typeEvent?.name }}
+            </span>
+          </div>
+
+          <!-- Type d'événement seul si pas d'association -->
+          <div v-else class="flex justify-center mb-4">
+            <span
+              class="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs"
+            >
+              {{ event.typeEvent?.name }}
+            </span>
           </div>
 
           <div class="flex flex-col gap-2 mb-4 items-center">

@@ -8,23 +8,22 @@ import { useRouter } from "vue-router";
 
 const notificationStore = useNotificationStore();
 const router = useRouter();
-
+const emit = defineEmits(["event:created"]);
 const handleSubmit = async (
   formData: CreateEventDto | UpdateEventDto,
   localisation?: SaveLocalisationDto,
   imageFile?: File
 ) => {
   try {
-    await eventService.createEvent(formData as CreateEventDto, localisation, imageFile);
+    const createdEvent = await eventService.createEvent(formData as CreateEventDto, localisation, imageFile);
     
     notificationStore.showNotification(
       "Événement créé avec succès !",
       "success"
     );
-    
-    await router.push("/");
+    emit("event:created", createdEvent);
   } catch (error: any) {
-    throw error; // Re-throw pour que EventForm gère l'affichage de l'erreur
+    throw error; 
   }
 };
 </script>

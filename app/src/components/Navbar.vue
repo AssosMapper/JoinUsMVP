@@ -56,6 +56,7 @@ const menuItems = [
     label: "Gestion des Événements",
     icon: "pi pi-calendar-plus",
     route: "/events/management",
+    auth: true,
   },
 ];
 
@@ -119,7 +120,7 @@ const isDesktop = computed(() => window.innerWidth >= 1024);
   <div
     :class="[
       'bg-white shadow-lg z-[91] transition-transform duration-300 h-screen',
-      'lg:w-64 w-[80vw]',
+      'lg:w-72 w-[80vw]',
       'lg:relative fixed',
       'lg:translate-x-0',
       mobileSidebarVisible ? 'translate-x-0' : '-translate-x-full',

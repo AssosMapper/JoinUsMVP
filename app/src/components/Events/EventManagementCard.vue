@@ -10,8 +10,14 @@ import { computed } from "vue";
 import { useRouter } from "vue-router";
 import { getMediaUrl } from "@/utils/media.util";
 import { Localisation } from "@shared/types/localisation";
+import { useUserStore } from "@/store";
 
 const router = useRouter();
+const userStore = useUserStore();
+
+const canManageEventStatus = computed(() => {
+  return userStore.isAdmin || userStore.isEventsManager || userStore.isAssociationManager;
+});
 
 const props = defineProps<{
   event: Event;
@@ -129,7 +135,7 @@ const handleEditEvent = (eventId: string) => {
             
             <div class="flex gap-2 justify-content-center">
               <!-- Bouton Valider/Annuler -->
-              <Button
+              <Button  v-if="canManageEventStatus" 
                 :icon="event.isValid ? 'pi pi-times' : 'pi pi-check'"
                 :label="event.isValid ? 'Annuler' : 'Valider'"
                 :class="event.isValid ? 'p-button-danger p-button-outlined' : 'p-button-success p-button-outlined'"

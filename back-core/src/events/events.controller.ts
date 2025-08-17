@@ -28,7 +28,6 @@ import {
   getFilteredEventsSchema,
 } from '@shared/dto/events.dto';
 import { SaveLocalisationDto } from '@shared/dto/localisation.dto';
-import { RoleEnum } from '@shared/types';
 import { participateEventSchema } from '@shared/validations/event-participation.validation';
 import {
   createEventSchema,
@@ -38,7 +37,6 @@ import { plainToInstance } from 'class-transformer';
 import { Response } from 'express';
 import { BearAuthToken } from '../utils/decorators/BearerAuth.decorator';
 import { CurrentUserId } from '../utils/decorators/current-user-id.decorator';
-import { CheckRole, CheckRoleGuard } from '../utils/guards/check-role.guard';
 import {
   OptionalYupValidationPipe,
   YupValidationPipe,
@@ -51,6 +49,8 @@ import { CanUpdateEventGuard } from './guards/can-update-event.guard';
 import { IsParticipantGuard } from './guards/is-participant.guard';
 import { IsPublicGuard } from './guards/is-public.guard';
 import { saveLocalisationSchema } from '@shared/validations/localisation.validation';
+import { RoleEnum } from '@shared/types';
+import { CheckRole, CheckRoleGuard } from '@src/utils/guards/check-role.guard';
 
 @Controller('events')
 @ApiBearerAuth()
@@ -58,8 +58,6 @@ export class EventsController {
   constructor(private readonly eventsService: EventsService) {}
 
   @Post()
-  @CheckRole(RoleEnum.ASSOCIATION_MANAGER, RoleEnum.EVENTS_MANAGER)
-  @UseGuards(CheckRoleGuard)
   @BearAuthToken()
   @UseInterceptors(FileInterceptor('file'))
   async create(
@@ -222,7 +220,12 @@ export class EventsController {
    * Mettre à jour le statut de validation d'un événement
    */
   @Put(':id/status')
-  @UseGuards(CanUpdateEventGuard)
+  @CheckRole(
+    RoleEnum.SUPER_ADMIN,
+    RoleEnum.ASSOCIATION_MANAGER,
+    RoleEnum.EVENTS_MANAGER,
+  )
+  @UseGuards(CanUpdateEventGuard, CheckRoleGuard)
   @BearAuthToken()
   async updateEventStatus(
     @CurrentUserId() userId: string,

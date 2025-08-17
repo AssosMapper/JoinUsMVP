@@ -1,5 +1,8 @@
 <script setup>
 import { shallowRef, defineAsyncComponent } from 'vue';
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
 
 const components = {
   'CreateAssociation': defineAsyncComponent(() => import('../components/Create/CreateAssociation.vue')),
@@ -12,6 +15,10 @@ const components = {
 }
 
 const currentView = shallowRef('CreateAssociation')
+
+const handleEventCreated = (createdEvent) => {
+  router.push({ name: 'EventDetails', params: { id: createdEvent.id } });
+}
 </script>
 
 <template>
@@ -28,7 +35,7 @@ const currentView = shallowRef('CreateAssociation')
       <button :class="{ 'font-bold': currentView === 'UpdateTypeEvent' }" @click="currentView = 'UpdateTypeEvent'">Update TypeEvent</button> |
     </nav>
 
-    <component :is="components[currentView]"></component>
+    <component :is="components[currentView]" @event:created="handleEventCreated"></component>
   </div>
 </template>
 <style scoped>

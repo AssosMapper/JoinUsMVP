@@ -1,6 +1,6 @@
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRouter } from 'vue-router';
 import { useConfirm } from 'primevue/useconfirm';
 import { useToast } from 'primevue/usetoast';
@@ -27,10 +27,16 @@ import type {
   EventSorting,
   FilteredEventsResponse
 } from '@/types/event.types';
+import { useUserStore } from '@/store';
 
 const router = useRouter();
 const confirm = useConfirm();
 const toast = useToast();
+const userStore = useUserStore();
+
+const canManageEventStatus = computed(() => {
+  return userStore.isAdmin || userStore.isEventsManager || userStore.isAssociationManager;
+});
 
 const events = ref<Event[]>([]);
 const loading = ref(false);
@@ -139,7 +145,7 @@ async function toggleValidation(event: Event) {
         toast.add({
           severity: 'error',
           summary: 'Erreur',
-          detail: 'Impossible de modifier le statut de l\'événement',
+          detail: 'Vous n\'avez pas les permissions pour modifier le statut de cet événement',
           life: 3000
         });
       }
@@ -172,17 +178,16 @@ function onEventUpdated(updatedEvent: EventDto) {
   editModalVisible.value = false;
   selectedEvent.value = null;
   
-  toast.add({
-    severity: 'success',
-    summary: 'Succès',
-    detail: 'Événement mis à jour avec succès',
-    life: 3000
-  });
+
 }
 
 function onUpdateCancelled() {
   editModalVisible.value = false;
   selectedEvent.value = null;
+}
+
+function navigateToCreateEvent() {
+  router.push('/create-event');
 }
 
 function formatDate(date: Date | string) {
@@ -300,7 +305,16 @@ onMounted(() => {
 <template>
   <div class="events-management">
     <div class="card">
-      <h2>Gestion des Événements</h2>
+      <div class="grid mb-4">
+        <h1 class="text-primary text-2xl font-bold text-center">Gestion des Événements</h1>
+        <Button 
+          label="Créer un événement" 
+          icon="pi pi-plus"
+          size="small"
+          class="bg-primary text-white justify-self-start"
+          @click="navigateToCreateEvent"
+        />
+      </div>
       
       <!-- Filtres -->
       <div class="filters mb-4">
@@ -419,11 +433,11 @@ onMounted(() => {
             </template>
           </Column>
           
-          <Column header="Actions" :exportable="false">
+          <Column  header="Actions" :exportable="false">
             <template #body="{ data }">
               <div class="flex gap-2">
                 <!-- Bouton Valider/Révoquer -->
-                <Button
+                <Button v-if="canManageEventStatus"
                   :icon="data.isValid ? 'pi pi-times' : 'pi pi-check'"
                   :label="data.isValid ? 'Révoquer' : 'Valider'"
                   :class="data.isValid ? 'p-button-danger p-button-outlined' : 'p-button-success p-button-outlined'"
@@ -432,7 +446,7 @@ onMounted(() => {
                 />
                 
                 <!-- Bouton Éditer -->
-                <Button
+                <Button 
                   icon="pi pi-pencil"
                   label="Éditer"
                   class="p-button-info p-button-outlined"
