@@ -76,7 +76,6 @@ export class UserSeedService {
       where: { name: 'EventsManager' },
     });
     if (!eventsManagerRole) {
-      console.log('Role EventsManager not found');
       return;
     }
     user = new User();
@@ -87,7 +86,7 @@ export class UserSeedService {
     user.roles = [eventsManagerRole];
     user.isActive = true;
     users.push(user);
-    
+
     await this.userRepository.save(users);
   }
 

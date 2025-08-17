@@ -224,7 +224,7 @@ onMounted(() => {
           </div>
           <div>
             <p class="text-sm text-gray-500 text-left">Organisé par</p>
-            <p class="font-medium text-gray-900">{{ event.association.name }}</p>
+            <p class="font-medium text-gray-900">{{ event.association?.name || event.user.first_name + ' ' + event.user.last_name }}</p>
           </div>
         </div>
 

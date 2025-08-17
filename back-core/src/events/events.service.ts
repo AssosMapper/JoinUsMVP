@@ -591,33 +591,8 @@ export class EventsService {
       throw new NotFoundException(`Utilisateur avec l'ID ${userId} non trouvé`);
     }
 
-    // Vérifier les permissions
-    const isAdmin = checkRole(user, RoleEnum.SUPER_ADMIN);
-    const isAssociationManager = checkRole(user, RoleEnum.ASSOCIATION_MANAGER);
-
-    let canUpdateStatus = false;
-
-    if (isAdmin) {
-      // Un admin peut toujours modifier le statut
-      canUpdateStatus = true;
-    } else if (isAssociationManager && event.association) {
-      // Un association manager peut modifier si l'événement appartient à une de ses associations
-      const isUserInAssociation = event.association.users.some(
-        (u) => u.id === userId,
-      );
-      canUpdateStatus = isUserInAssociation;
-    }
-
-    if (!canUpdateStatus) {
-      throw new NotFoundException(
-        "Vous n'avez pas les permissions pour modifier le statut de cet événement",
-      );
-    }
-
-    // Inverser le statut de validation
     event.isValid = !event.isValid;
 
-    // Sauvegarder et retourner l'événement mis à jour
     return await this.eventsRepository.save(event);
   }
 }

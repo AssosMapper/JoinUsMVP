@@ -222,6 +222,7 @@ export class EventsController {
    * Mettre à jour le statut de validation d'un événement
    */
   @Put(':id/status')
+  @UseGuards(CanUpdateEventGuard)
   @BearAuthToken()
   async updateEventStatus(
     @CurrentUserId() userId: string,
