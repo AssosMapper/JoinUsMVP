@@ -76,6 +76,9 @@ export class EventDto {
 
   @Expose()
   isValid: boolean;
+
+  @Expose()
+  canUpdateEvent?: boolean;
 }
 
 export class BaseEventDto {

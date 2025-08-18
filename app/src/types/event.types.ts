@@ -30,6 +30,7 @@ export class Event {
   typeEvent: TypeEvents;
   isPublic: boolean;
   isValid: boolean;
+  canUpdateEvent?: boolean;
 }
 
 export interface EventParticipation {

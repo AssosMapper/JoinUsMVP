@@ -35,6 +35,12 @@ const menuItems = [
     auth: true,
   },
   {
+    label: "Mes Événements",
+    icon: "pi pi-calendar-plus",
+    route: "/events/management",
+    auth: true,
+  },
+  {
     label: "Associations",
     icon: "pi pi-users",
     route: "/displayAssociations",
@@ -51,13 +57,8 @@ const menuItems = [
     icon: "pi pi-cog",
     route: "/adminInterface",
     admin:true
-  },
-  {
-    label: "Gestion des Événements",
-    icon: "pi pi-calendar-plus",
-    route: "/events/management",
-    auth: true,
-  },
+  }
+
 ];
 
 const isActiveRoute = (route: string) =>

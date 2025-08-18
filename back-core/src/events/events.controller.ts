@@ -149,8 +149,21 @@ export class EventsController {
       sortField,
       sortOrder,
     );
+    const eventsWithPermissions = await Promise.all(
+      result.events.map(async (event) => {
+        const canUpdateEvent = await this.eventsService.canUserUpdateEvent(
+          event,
+          userId,
+        );
+        return {
+          ...event,
+          canUpdateEvent,
+        };
+      }),
+    );
+
     return {
-      events: plainToInstance(EventDto, result.events, {
+      events: plainToInstance(EventDto, eventsWithPermissions, {
         excludeExtraneousValues: true,
         enableImplicitConversion: true,
       }),

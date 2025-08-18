@@ -143,8 +143,11 @@ const handleEditEvent = (eventId: string) => {
                 @click="handleToggleValidation(event)"
               />
               
+        
+              
               <!-- Bouton Éditer -->
               <Button
+                v-if="event.canUpdateEvent"
                 icon="pi pi-pencil"
                 label="Éditer"
                 class="p-button-info p-button-outlined"

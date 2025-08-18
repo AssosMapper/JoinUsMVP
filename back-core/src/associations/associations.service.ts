@@ -21,6 +21,7 @@ import { TypeAssociations } from '../type-associations/entities/type-association
 import { User } from '../users/entities/user.entity';
 import { checkRole } from '../utils/functions/check-role';
 import { Association } from './entities/association.entity';
+import { EventParticipation } from '../events/entities/event-participation.entity';
 
 @Injectable()
 export class AssociationsService {
@@ -36,6 +37,8 @@ export class AssociationsService {
     private mediaRepository: Repository<Media>,
     private mediaService: MediaService,
     private localisationService: LocalisationService,
+    @Inject('EVENT_PARTICIPATION_REPOSITORY')
+    private eventParticipationRepository: Repository<EventParticipation>,
   ) {}
 
   findAll(): Promise<Association[]> {
@@ -239,6 +242,12 @@ export class AssociationsService {
       throw new UnauthorizedException(
         "Un gérant d'association ne peut pas être viré d'une association",
       );
+
+    // Retirer toutes les participations aux événements de l'association
+    await this.eventParticipationRepository.delete({
+      user: { id: userId },
+      event: { association: { id: associationId } },
+    });
 
     // Retirer le membre
     association.users = association.users.filter((user) => user.id !== userId);

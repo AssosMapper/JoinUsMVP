@@ -202,6 +202,10 @@ function formatDate(date: Date | string) {
   });
 }
 
+function goToEventDetails(eventId: string) {
+  router.push({ name: 'EventDetails', params: { id: eventId } });
+}
+
 onMounted(() => {
   loadEvents();
 });
@@ -445,8 +449,18 @@ onMounted(() => {
                   @click="toggleValidation(data)"
                 />
                 
+                <!-- Bouton Voir -->
+                <Button 
+                label="Voir"
+                  icon="pi pi-eye"
+                  class="p-button-outlined"
+                  size="small"
+                  @click="goToEventDetails(data.id)"
+                />
+                
                 <!-- Bouton Éditer -->
                 <Button 
+                  v-if="data.canUpdateEvent"
                   icon="pi pi-pencil"
                   label="Éditer"
                   class="p-button-info p-button-outlined"

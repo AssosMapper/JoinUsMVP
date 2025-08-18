@@ -126,6 +126,7 @@ export class EventsService {
         throw new NotFoundException(`L'association n'existe pas`);
 
       const isAdmin = checkRole(user, RoleEnum.SUPER_ADMIN);
+      const isAssociationManager = checkRole(user, RoleEnum.ASSOCIATION_MANAGER);
       const isInAssociation = await this.associationsService.isInAssociation(
         user.id,
         association.id,
@@ -134,6 +135,13 @@ export class EventsService {
       if (!isInAssociation && !isAdmin) {
         throw new NotFoundException(
           `L'utilisateur n'est pas dans L'association ${association?.name}`,
+        );
+      }
+
+      // Si l'utilisateur est dans l'association mais n'est pas gestionnaire d'association, il ne peut pas attribuer l'événement à l'association
+      if (isInAssociation && !isAssociationManager && !isAdmin) {
+        throw new NotFoundException(
+          `Vous devez être gestionnaire d'association pour créer des événements au nom de l'association ${association?.name}`,
         );
       }
     }
@@ -594,5 +602,41 @@ export class EventsService {
     event.isValid = !event.isValid;
 
     return await this.eventsRepository.save(event);
+  }
+
+  /**
+   * Vérifier si un utilisateur peut mettre à jour un événement
+   * Basé sur la logique du guard CanUpdateEventGuard
+   */
+  async canUserUpdateEvent(event: Event, userId: string): Promise<boolean> {
+    try {
+      const user = await this.userRepository.findOne({
+        where: { id: userId },
+        relations: ['roles'],
+      });
+
+      if (!user) return false;
+
+      // Super admin peut toujours mettre à jour
+      if (checkRole(user, RoleEnum.SUPER_ADMIN)) return true;
+
+      // Si l'événement appartient à une association
+      if (event.association) {
+        const isInAssociation = await this.associationsService.isInAssociation(
+          user.id,
+          event.association.id,
+        );
+        const isEventManager = checkRole(user, RoleEnum.EVENTS_MANAGER);
+
+        if (isInAssociation && isEventManager) return true;
+      }
+
+      // Si l'utilisateur est le créateur de l'événement
+      if (event.user && event.user.id === userId) return true;
+
+      return false;
+    } catch (error) {
+      return false;
+    }
   }
 }

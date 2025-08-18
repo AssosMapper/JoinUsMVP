@@ -13,7 +13,7 @@ const handleEventCreated = (createdEvent: Event) => {
 </script>
 
 <template>
-  <div class="create-event-page">
+  <div class="create-event-page h-full bg-surface-50">
     <div class="container mx-auto p-6">
       <div class="mb-6">
         <h1 class="text-3xl font-bold text-primary mb-2">Créer un événement</h1>
@@ -24,10 +24,3 @@ const handleEventCreated = (createdEvent: Event) => {
     </div>
   </div>
 </template>
-
-<style scoped>
-.create-event-page {
-  min-height: calc(100vh - 80px);
-  background-color: #f8f9fa;
-}
-</style>

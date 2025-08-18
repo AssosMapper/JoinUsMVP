@@ -287,11 +287,17 @@ const getFilteredEvents = async (
     }
   });
 
-  if (sortField) {
-    params.append('sortField', sortField);
-  }
-  if (sortOrder) {
-    params.append('sortOrder', sortOrder);
+  // Si aucun tri n'est spécifié, trier par date (proche d'aujourd'hui)
+  if (!sortField) {
+    params.append('sortField', 'date');
+    params.append('sortOrder', 'asc');
+  } else {
+    if (sortField) {
+      params.append('sortField', sortField);
+    }
+    if (sortOrder) {
+      params.append('sortOrder', sortOrder);
+    }
   }
 
   const url = `${apiStore.events.filtered}?${params.toString()}`;
