@@ -15,6 +15,7 @@ declare module 'vue' {
     Button: typeof import('primevue/button')['default']
     Calendar: typeof import('./src/components/Calendar.vue')['default']
     Card: typeof import('primevue/card')['default']
+    ContentDisplay: typeof import('./src/components/ui/ContentDisplay.vue')['default']
     CreateAssociation: typeof import('./src/components/Create/CreateAssociation.vue')['default']
     CreateEvent: typeof import('./src/components/Create/CreateEvent.vue')['default']
     CreateTypeAssociation: typeof import('./src/components/Create/CreateTypeAssociation.vue')['default']
@@ -63,6 +64,7 @@ declare module 'vue' {
     UpdateTypeEvent: typeof import('./src/components/Update/UpdateTypeEvent.vue')['default']
     Uploader: typeof import('./src/components/ui/Uploader.vue')['default']
     UploadImage: typeof import('./src/components/ui/UploadImage.vue')['default']
+    WysiwygEditor: typeof import('./src/components/ui/WysiwygEditor.vue')['default']
   }
   export interface ComponentCustomProperties {
     Tooltip: typeof import('primevue/tooltip')['default']

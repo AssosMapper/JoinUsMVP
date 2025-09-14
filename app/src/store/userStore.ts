@@ -139,11 +139,8 @@ export const useUserStore = defineStore("user", {
       this.loader = true;
       try {
         await authService.register(register);
-      } catch (e: unknown) {
-        if (e instanceof Error) {
-          throw new Error(e.message);
-        }
-        throw new Error("Une erreur est survenue");
+      } catch (e: any) {
+        throw e
       } finally {
         this.loader = false;
       }
@@ -171,7 +168,6 @@ export const useUserStore = defineStore("user", {
           context.store.$state.user = data;
           context.store.$state.isAuth = true;
           context.store.$state.initialized = true;
-          // Récupérer les associations après restauration
           await context.store.updateMyAssociations();
         } catch (error) {
           console.error("Failed to restore user session:", error);

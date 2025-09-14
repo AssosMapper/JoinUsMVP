@@ -21,6 +21,9 @@ import { useRoute } from "vue-router";
 import { getMediaUrl } from "@/utils/media.util";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useUserStore } from "@/store/userStore";
+import WysiwygEditor from '@/components/ui/WysiwygEditor.vue';
+import ContentDisplay from '@/components/ui/ContentDisplay.vue';
+import { useContentEditor } from '@/composables/useContentEditor';
 
 const route = useRoute();
 const event = ref(null);
@@ -30,6 +33,13 @@ const participants = ref<EventParticipantResponseDto[]>([]);
 const participantsLoading = ref(false);
 const notificationStore = useNotificationStore();
 const userStore = useUserStore();
+
+// Gestion du contenu WYSIWYG
+const contentEditor = useContentEditor({
+  onSuccess: (updatedEvent) => {
+    event.value = updatedEvent as EventDto;
+  },
+});
 
 // Computed pour vérifier si l'utilisateur peut modifier l'événement
 const canEditEvent = computed(() => {
@@ -42,6 +52,10 @@ const canEditEvent = computed(() => {
   if (userStore.isEventsManager) {
     return event.value.association?.id === userStore.associationId;
   }
+  
+  if(event.value?.user?.id === userStore.user?.id){
+    return true;
+  } 
   
   return false;
 });
@@ -154,6 +168,20 @@ const onEventUpdated = (updatedEvent: EventDto) => {
 };
 
 const onImageError = ref(false);
+
+// Fonctions pour l'éditeur WYSIWYG
+const handleEditContent = (): void => {
+  contentEditor.startEditing(event.value?.content || '');
+};
+
+const handleSaveContent = async (): Promise<void> => {
+  if (!event.value) return;
+  
+  await contentEditor.saveContent(
+    event.value.id,
+    eventService.updateEventContent
+  );
+};
 
 onMounted(() => {
   fetchEventDetails();
@@ -274,7 +302,33 @@ onMounted(() => {
 
         <TabPanels>
           <TabPanel value="0">
-           
+            <!-- Mode affichage -->
+            <ContentDisplay
+              v-if="!contentEditor.isEditing.value"
+              :content="event?.content"
+              :can-edit="canEditEvent && !isEventPast"
+              edit-label="Modifier le contenu"
+              empty-message="Aucun contenu détaillé disponible pour cet événement."
+              @edit="handleEditContent"
+            >
+              <template #header>
+                <h2 class="text-lg font-semibold">Détails de l'événement</h2>
+              </template>
+            </ContentDisplay>
+
+            <!-- Mode édition -->
+            <div v-else class="bg-white rounded-lg shadow p-6">
+              <h2 class="text-lg font-semibold mb-4">Modifier le contenu de l'événement</h2>
+              
+              <WysiwygEditor
+                v-model="contentEditor.content.value"
+                placeholder="Décrivez en détail votre événement..."
+                :loading="contentEditor.isLoading.value"
+                height="400px"
+                @save="handleSaveContent"
+                @cancel="contentEditor.cancelEditing"
+              />
+            </div>
           </TabPanel>
 
           <TabPanel value="1">

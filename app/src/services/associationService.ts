@@ -2,9 +2,9 @@ import { useApi } from "@/composables/useApi.ts";
 import { useApiStore } from "@/store/apiUrls.store.ts";
 import { ResponseError } from "@/types/http.types";
 import {
-  CreateAssociationDto,
-  PublicAssociationDto,
-  UpdateAssociationDto,
+    CreateAssociationDto,
+    PublicAssociationDto,
+    UpdateAssociationDto,
 } from "@shared/dto/associations.dto";
 import { CreateLocalisationDto } from "@shared/dto/localisation.dto";
 
@@ -128,6 +128,18 @@ const removeMember = async (associationId: string, userId: string) => {
   if (error.value) throw error.value as ResponseError;
 };
 
+const updateAssociationContent = async (associationId: string, content: string): Promise<PublicAssociationDto> => {
+  const apiStore = useApiStore();
+  const { data, error } = await useApi(
+    apiStore.resolveUrl(apiStore.associations.updateContent, { id: associationId })
+  )
+    .put({ content })
+    .json();
+
+  if (error.value) throw error.value as ResponseError;
+  return data.value;
+};
+
 export default {
   createAssociation,
   getAllAssociations,
@@ -137,4 +149,5 @@ export default {
   getMyAssociations,
   getAssociationMembers,
   removeMember,
+  updateAssociationContent,
 };

@@ -219,9 +219,7 @@ export class UsersService {
       where: { email: registerDto.email },
     });
     if (existingUser) {
-      throw new ConflictException(
-        `User with email ${registerDto.email} already exists`,
-      );
+      throw new ConflictException(`l'Utilisateur existe déjà`);
     }
 
     const hashedPassword = await hashPassword(registerDto.password);

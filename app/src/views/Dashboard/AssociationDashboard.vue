@@ -14,7 +14,6 @@ import { canManageAssociation } from "@/utils/check-role";
 import { EventCard as EventCardType } from "@/types/event.types";
 import type { PublicAssociationDto } from "@shared/dto/associations.dto";
 import { User } from "@shared/types";
-import type { Media } from "@shared/types/media";
 import ConfirmDialog from "primevue/confirmdialog";
 import Tab from "primevue/tab";
 import TabList from "primevue/tablist";
@@ -25,6 +24,9 @@ import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { formatFullAddress } from "@shared/utils/address.util";
 import { Localisation } from "@shared/types/localisation";
+import WysiwygEditor from '@/components/ui/WysiwygEditor.vue';
+import ContentDisplay from '@/components/ui/ContentDisplay.vue';
+import { useContentEditor } from '@/composables/useContentEditor';
 const route = useRoute();
 const userStore = useUserStore();
 const notificationStore = useNotificationStore();
@@ -34,6 +36,13 @@ const association = ref<PublicAssociationDto | null>(null);
 const events = ref([]);
 const isLoading = ref(true);
 const activeTab = ref("0");
+
+// Gestion du contenu WYSIWYG
+const contentEditor = useContentEditor({
+  onSuccess: (updatedAssociation) => {
+    association.value = updatedAssociation as PublicAssociationDto;
+  },
+});
 
 const associationId = computed(() => route.params.id as string);
 const canManageApplications = computed(() =>
@@ -101,6 +110,20 @@ const onAssociationUpdated = (updatedAssociation: PublicAssociationDto) => {
   // Retourner à l'onglet informations après la modification
   activeTab.value = "0";
 };
+
+// Fonctions pour l'éditeur WYSIWYG
+const handleEditContent = (): void => {
+  contentEditor.startEditing(association.value?.content || '');
+};
+
+const handleSaveContent = async (): Promise<void> => {
+  if (!association.value) return;
+  
+  await contentEditor.saveContent(
+    association.value.id,
+    associationService.updateAssociationContent
+  );
+};
 </script>
 
 <template>
@@ -145,9 +168,36 @@ const onAssociationUpdated = (updatedAssociation: PublicAssociationDto) => {
 
           <TabPanels>
             <TabPanel value="0">
-              <div class="p-4 bg-white rounded-lg shadow">
-                <h3 class="text-xl font-semibold mb-4">À propos</h3>
-                <p class="text-gray-600">{{ association.description }}</p>
+              <!-- Mode affichage -->
+              <ContentDisplay
+                v-if="!contentEditor.isEditing.value"
+                :content="association?.content"
+                :can-edit="canEditAssociation"
+                edit-label="Modifier le contenu"
+                empty-message="Aucun contenu détaillé disponible pour cette association."
+                @edit="handleEditContent"
+              >
+                <template #header>
+                  <h3 class="text-xl font-semibold">À propos</h3>
+                </template>
+                
+                <template #description>
+                  <p class="text-gray-600 mb-4">{{ association?.description }}</p>
+                </template>
+              </ContentDisplay>
+
+              <!-- Mode édition -->
+              <div v-else class="bg-white rounded-lg shadow p-4">
+                <h3 class="text-xl font-semibold mb-4">Modifier le contenu de l'association</h3>
+                
+                <WysiwygEditor
+                  v-model="contentEditor.content.value"
+                  placeholder="Décrivez en détail votre association..."
+                  :loading="contentEditor.isLoading.value"
+                  height="400px"
+                  @save="handleSaveContent"
+                  @cancel="contentEditor.cancelEditing"
+                />
               </div>
             </TabPanel>
 

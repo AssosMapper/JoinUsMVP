@@ -2,9 +2,9 @@ import { useApi } from "@/composables/useApi.ts";
 import { useApiStore } from "@/store/apiUrls.store.ts";
 import { ResponseError } from "@/types/http.types";
 import {
-  EventParticipantResponseDto,
-  ParticipateEventDto,
-  UserParticipationResponseDto,
+    EventParticipantResponseDto,
+    ParticipateEventDto,
+    UserParticipationResponseDto,
 } from "@shared/dto/event-participation.dto";
 import { CreateEventDto, UpdateEventDto, EventDto } from "@shared/dto/events.dto";
 import { SaveLocalisationDto } from "@shared/dto/localisation.dto";
@@ -323,6 +323,21 @@ const updateEventStatus = async (eventId: string): Promise<EventDto> => {
   return data.value as EventDto;
 };
 
+const updateEventContent = async (eventId: string, content: string): Promise<EventDto> => {
+  const apiStore = useApiStore();
+  const { data, error } = await useApi(
+    apiStore.resolveUrl(apiStore.events.updateContent, { id: eventId })
+  )
+    .put({ content })
+    .json();
+
+  if (error.value) {
+    throw error.value as ResponseError;
+  }
+
+  return data.value as EventDto;
+};
+
 export default {
   createEvent,
   getAllEvents,
@@ -341,4 +356,5 @@ export default {
   getUserParticipations,
   getUserParticipation,
   updateEventStatus,
+  updateEventContent,
 };

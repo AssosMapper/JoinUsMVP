@@ -1,7 +1,7 @@
-import {useUserStore} from '@/store';
-import {ICredentials, IRegister} from "@/types/security.types.ts";
-import {useApi} from "@/composables/useApi.ts";
-import {useApiStore} from "@/store/apiUrls.store.ts";
+import { useUserStore } from '@/store';
+import { ICredentials, IRegister } from "@/types/security.types.ts";
+import { useApi } from "@/composables/useApi.ts";
+import { useApiStore } from "@/store/apiUrls.store.ts";
 
 
 export const login = async (credentials: ICredentials) => {
@@ -16,9 +16,8 @@ export const login = async (credentials: ICredentials) => {
 export const register = async (register: IRegister) =>{
   const urls = useApiStore();
   const {data,error}= await useApi(urls.security.auth.register).post(register).json();
-    if(error.value) {
-      throw new Error(error.value);
-    }
+    if(error.value) 
+      throw error.value;
     return data.value;
 }
 

@@ -31,10 +31,9 @@ const handleRegister = async () => {
     await userStore.register(credentials);
     await router.push("/");
     notificationStore.showNotification("Inscription réussie !", "success");
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
     notificationStore.showNotification(
-      "Une erreur est survenue lors de l'inscription",
+      error?.message,
       "error"
     );
   }
