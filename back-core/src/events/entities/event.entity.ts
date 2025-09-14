@@ -1,12 +1,12 @@
 import { Media } from '@src/media/entities/media.entity';
 import {
-  BeforeInsert,
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
+    BeforeInsert,
+    Column,
+    Entity,
+    JoinColumn,
+    ManyToOne,
+    OneToMany,
+    OneToOne,
 } from 'typeorm';
 import { Association } from '../../associations/entities/association.entity';
 import { TypeEvents } from '../../type-events/entities/type-events.entity';
@@ -56,6 +56,9 @@ export class Event extends EntityStructure {
     cascade: true,
   })
   participants: EventParticipation[];
+
+  @Column('longtext', { nullable: true })
+  content?: string;
 
   @BeforeInsert()
   setValidationStatus() {

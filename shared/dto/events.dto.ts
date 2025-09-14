@@ -79,6 +79,9 @@ export class EventDto {
 
   @Expose()
   canUpdateEvent?: boolean;
+
+  @Expose()
+  content?: string;
 }
 
 export class BaseEventDto {
@@ -99,6 +102,9 @@ export class BaseEventDto {
 
   @Expose()
   isPublic: boolean;
+
+  @Expose()
+  content?: string;
 
 }
 
@@ -125,5 +131,8 @@ export class UpdateEventDto {
 
   @Expose()
   isPublic?: boolean;
+
+  @Expose()
+  content?: string;
 
 }

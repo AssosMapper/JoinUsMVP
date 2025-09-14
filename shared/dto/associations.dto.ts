@@ -21,6 +21,7 @@ export class CreateAssociationDto {
   isPublic: boolean;
   applicationQuestion?: string;
   typeIds: string[];
+  content?: string;
 }
 
 export class UpdateAssociationDto {
@@ -30,6 +31,7 @@ export class UpdateAssociationDto {
   applicationQuestion?: string;
   typeIds?: string[];
   localisation?: CreateLocalisationDto;
+  content?: string;
 }
 
 export class PublicAssociationDto {
@@ -53,6 +55,7 @@ export class PublicAssociationDto {
   @Expose() description: string;
   @Expose() createdAt: Date;
   @Expose() updatedAt: Date;
+  @Expose() content?: string;
 }
 
 export class MyAssociationsDto extends PublicAssociationDto {

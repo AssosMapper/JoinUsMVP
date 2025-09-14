@@ -1,13 +1,13 @@
 import {
-  ConflictException,
-  Inject,
-  Injectable,
-  NotFoundException,
-  UnauthorizedException,
+    ConflictException,
+    Inject,
+    Injectable,
+    NotFoundException,
+    UnauthorizedException,
 } from '@nestjs/common';
 import {
-  CreateAssociationDto,
-  UpdateAssociationDto,
+    CreateAssociationDto,
+    UpdateAssociationDto,
 } from '@shared/dto/associations.dto';
 import { SaveLocalisationDto } from '@shared/dto/localisation.dto';
 import { PublicUserDto } from '@shared/dto/user.dto';
@@ -259,5 +259,30 @@ export class AssociationsService {
       title: "Exclusion d'association",
       message: `Vous avez été exclu de l'association ${association.name}`,
     });
+  }
+
+  /**
+   * Mettre à jour le contenu WYSIWYG d'une association
+   */
+  async updateAssociationContent(
+    associationId: string,
+    content: string,
+  ): Promise<Association> {
+    // Récupérer l'association avec ses relations
+    const association = await this.associationsRepository.findOne({
+      where: { id: associationId },
+      relations: ['users', 'types', 'localisation', 'image'],
+    });
+
+    if (!association) {
+      throw new NotFoundException(
+        `Association avec l'ID ${associationId} non trouvée`,
+      );
+    }
+
+    // Mettre à jour le contenu
+    association.content = content;
+
+    return await this.associationsRepository.save(association);
   }
 }

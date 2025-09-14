@@ -126,7 +126,10 @@ export class EventsService {
         throw new NotFoundException(`L'association n'existe pas`);
 
       const isAdmin = checkRole(user, RoleEnum.SUPER_ADMIN);
-      const isAssociationManager = checkRole(user, RoleEnum.ASSOCIATION_MANAGER);
+      const isAssociationManager = checkRole(
+        user,
+        RoleEnum.ASSOCIATION_MANAGER,
+      );
       const isInAssociation = await this.associationsService.isInAssociation(
         user.id,
         association.id,
@@ -638,5 +641,28 @@ export class EventsService {
     } catch (error) {
       return false;
     }
+  }
+
+  /**
+   * Mettre à jour le contenu WYSIWYG d'un événement
+   */
+  async updateEventContent(
+    eventId: string,
+    userId: string,
+    content: string,
+  ): Promise<Event> {
+    const event = await this.eventsRepository.findOne({
+      where: { id: eventId },
+      relations: ['association', 'user', 'typeEvent', 'localisation', 'image'],
+    });
+
+    if (!event) {
+      throw new NotFoundException(`Événement avec l'ID ${eventId} non trouvé`);
+    }
+
+    // Mettre à jour le contenu
+    event.content = content;
+
+    return await this.eventsRepository.save(event);
   }
 }

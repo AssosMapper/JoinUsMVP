@@ -27,6 +27,8 @@ export const createEventSchema = yup.object().shape({
   
   isPublic: yup.boolean()
     .required("Le statut public/privé est requis"),
+
+  content: yup.string().optional(),
   
 }) satisfies yup.ObjectSchema<CreateEventDto>;
 
@@ -58,5 +60,7 @@ export const updateEventSchema = yup.object().shape({
     .optional(),
   
   isPublic: yup.boolean().optional(),
+
+  content: yup.string().optional(),
   
 }) satisfies yup.ObjectSchema<UpdateEventDto>; 

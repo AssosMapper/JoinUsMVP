@@ -1,10 +1,10 @@
 import {
-  Column,
-  Entity,
-  JoinColumn,
-  JoinTable,
-  ManyToMany,
-  OneToOne,
+    Column,
+    Entity,
+    JoinColumn,
+    JoinTable,
+    ManyToMany,
+    OneToOne,
 } from 'typeorm';
 import { Localisation } from '../../localisation/entities/localisation.entity';
 import { Media } from '../../media/entities/media.entity';
@@ -46,4 +46,7 @@ export class Association extends EntityStructure {
 
   @Column({ default: false })
   isActive: boolean;
+
+  @Column('longtext', { nullable: true })
+  content?: string;
 }

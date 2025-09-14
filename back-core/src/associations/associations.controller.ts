@@ -35,6 +35,9 @@ import {
   OptionalYupValidationPipe,
   YupValidationPipe,
 } from '../utils/pipes/yup-validation.pipe';
+import { UpdateContentDto } from '@shared/dto/content-update.dto';
+import { updateContentSchema } from '@shared/validations/content-update.validation';
+import { AllowedHtmlGuard } from '@src/utils/guards/allowed-html.guard';
 
 @ApiTags('associations')
 @Controller('associations')
@@ -160,5 +163,28 @@ export class AssociationsController {
   @BearAuthToken()
   removeMember(@Param('id') id: string, @Param('userId') userId: string) {
     return this.associationsService.removeMember(id, userId);
+  }
+
+  /**
+   * Mettre à jour le contenu WYSIWYG d'une association
+   */
+  @Put(':id/content')
+  @ApiBearerAuth()
+  @UseGuards(AssociationManagerGuard, AllowedHtmlGuard)
+  @BearAuthToken()
+  async updateAssociationContent(
+    @CurrentUserId() userId: string,
+    @Param('id') associationId: string,
+    @Body(new YupValidationPipe(updateContentSchema))
+    updateContentDto: UpdateContentDto,
+  ): Promise<PublicAssociationDto> {
+    const association = await this.associationsService.updateAssociationContent(
+      associationId,
+      updateContentDto.content,
+    );
+    return plainToInstance(PublicAssociationDto, association, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
   }
 }

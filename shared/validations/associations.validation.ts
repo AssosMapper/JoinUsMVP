@@ -23,6 +23,7 @@ export const createAssociationSchema = yup.object().shape({
     .of(yup.string().uuid())
     .min(1, "Au moins un type est requis")
     .required("Les types sont requis"),
+  content: yup.string().optional(),
 });
 
 export const updateAssociationSchema = yup.object().shape({
@@ -45,6 +46,7 @@ export const updateAssociationSchema = yup.object().shape({
     .of(yup.string().uuid())
     .min(1, "Au moins un type est requis")
     .optional(),
+  content: yup.string().optional(),
 });
 
 // Garde l'ancien schéma pour la compatibilité

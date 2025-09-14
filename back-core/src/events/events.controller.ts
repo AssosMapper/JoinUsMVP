@@ -51,6 +51,9 @@ import { IsPublicGuard } from './guards/is-public.guard';
 import { saveLocalisationSchema } from '@shared/validations/localisation.validation';
 import { RoleEnum } from '@shared/types';
 import { CheckRole, CheckRoleGuard } from '@src/utils/guards/check-role.guard';
+import { UpdateContentDto } from '@shared/dto/content-update.dto';
+import { updateContentSchema } from '@shared/validations/content-update.validation';
+import { AllowedHtmlGuard } from '@src/utils/guards/allowed-html.guard';
 
 @Controller('events')
 @ApiBearerAuth()
@@ -254,6 +257,29 @@ export class EventsController {
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<EventDto> {
     const event = await this.eventsService.findOne(id);
+    return plainToInstance(EventDto, event, {
+      excludeExtraneousValues: true,
+      enableImplicitConversion: true,
+    });
+  }
+
+  /**
+   * Mettre à jour le contenu WYSIWYG d'un événement
+   */
+  @Put(':id/content')
+  @UseGuards(CanUpdateEventGuard, AllowedHtmlGuard)
+  @BearAuthToken()
+  async updateEventContent(
+    @CurrentUserId() userId: string,
+    @Param('id') eventId: string,
+    @Body(new YupValidationPipe(updateContentSchema))
+    updateContentDto: UpdateContentDto,
+  ): Promise<EventDto> {
+    const event = await this.eventsService.updateEventContent(
+      eventId,
+      userId,
+      updateContentDto.content,
+    );
     return plainToInstance(EventDto, event, {
       excludeExtraneousValues: true,
       enableImplicitConversion: true,
