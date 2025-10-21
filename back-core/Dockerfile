@@ -11,9 +11,6 @@ RUN curl -fsSL https://bun.sh/install | bash
 # Ajout de Bun au PATH
 ENV PATH="/root/.bun/bin:${PATH}"
 
-ARG NODE_AUTH_TOKEN
-ENV NODE_AUTH_TOKEN=${NODE_AUTH_TOKEN}
-
 
 COPY back-core/package.json ./
 COPY back-core/tsconfig.json ./
@@ -22,8 +19,6 @@ COPY back-core/.eslintrc.js ./
 COPY back-core/src ./src
 COPY shared ./shared
 RUN bun install
-
-
 
 # Création du dossier uploads
 RUN mkdir -p uploads
@@ -43,8 +38,6 @@ RUN curl -fsSL https://bun.sh/install | bash
 # Ajout de Bun au PATH
 ENV PATH="/root/.bun/bin:${PATH}"
 
-ARG NODE_AUTH_TOKEN
-ENV NODE_AUTH_TOKEN=${NODE_AUTH_TOKEN}
 
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
