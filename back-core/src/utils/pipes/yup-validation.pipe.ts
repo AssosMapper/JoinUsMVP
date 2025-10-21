@@ -2,7 +2,7 @@ import { PipeTransform } from '@nestjs/common';
 import { ObjectSchema } from 'yup';
 
 export class YupValidationPipe implements PipeTransform {
-  constructor(private schema: ObjectSchema<any>) {}
+  constructor(private schema: any) {}
 
   transform(value: any) {
     // Si la valeur est undefined, null ou un objet vide, retourner undefined
@@ -29,7 +29,7 @@ export class YupValidationPipe implements PipeTransform {
 }
 
 export class OptionalYupValidationPipe implements PipeTransform {
-  constructor(private schema: ObjectSchema<any>) {}
+  constructor(private schema: any) {}
 
   transform(value: any) {
     // Pour les validations optionnelles, on retourne undefined si pas de valeur

@@ -15,14 +15,12 @@ ARG NODE_AUTH_TOKEN
 ENV NODE_AUTH_TOKEN=${NODE_AUTH_TOKEN}
 
 
-COPY back-core/.npmrc ./
 COPY back-core/package.json ./
 COPY back-core/tsconfig.json ./
 COPY back-core/tsconfig.build.json ./
 COPY back-core/.eslintrc.js ./
 COPY back-core/src ./src
 COPY shared ./shared
-# Utilisation de Bun au lieu de npm
 RUN bun install
 
 
@@ -48,13 +46,10 @@ ENV PATH="/root/.bun/bin:${PATH}"
 ARG NODE_AUTH_TOKEN
 ENV NODE_AUTH_TOKEN=${NODE_AUTH_TOKEN}
 
-COPY back-core/.npmrc ./
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/shared ./shared
-COPY --from=builder /app/src/utils/documents ./dist/utils/documents
-COPY back-core/package.json ./
-
+COPY --from=builder /app/package.json ./package.json
 # Création du dossier uploads dans l'image de production
 RUN mkdir -p uploads
 
