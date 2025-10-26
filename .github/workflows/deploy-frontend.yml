@@ -28,10 +28,45 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
+            set -e  # Arrêter en cas d'erreur
+            
+            echo "🔍 Vérification de Node.js..."
+            if ! command -v node &> /dev/null; then
+              echo "❌ Node.js n'est pas installé"
+              exit 1
+            fi
+            
+            if ! command -v npm &> /dev/null; then
+              echo "❌ npm n'est pas installé"
+              exit 1
+            fi
+            
+            echo "✅ Node.js version: $(node --version)"
+            echo "✅ npm version: $(npm --version)"
+            
+            echo "📁 Changement de répertoire..."
             cd /tmp/joinus-temp/app
+            
+            echo "📋 Copie du fichier .env.production..."
             cp /var/www/agoraction/agoraction.fr/.env.production .env.production
+            
+            echo "📦 Installation des dépendances..."
             npm ci
+            
+            echo "🔨 Build de l'application..."
             npm run build
+            
+            echo "📁 Vérification du dossier dist..."
+            if [ ! -d "dist" ]; then
+              echo "❌ Le dossier dist n'existe pas"
+              exit 1
+            fi
+            
+            echo "🚀 Déploiement des fichiers..."
             rm -rf /var/www/agoraction/agoraction.fr/* 
             cp -r dist/* /var/www/agoraction/agoraction.fr/
+            
+            echo "🧹 Nettoyage..."
             rm -rf /tmp/joinus-temp
+            
+            echo "✅ Déploiement terminé avec succès !"
