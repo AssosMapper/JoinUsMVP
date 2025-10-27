@@ -29,11 +29,8 @@ jobs:
       - name: Extract build files from Docker
         run: |
           cd app
-          # Créer un conteneur temporaire pour extraire les fichiers
           CONTAINER_ID=$(docker create vue-app-build:latest)
-          # Copier le dossier dist du conteneur vers l'hôte
           docker cp $CONTAINER_ID:/app/dist ./dist
-          # Supprimer le conteneur temporaire
           docker rm $CONTAINER_ID
 
       - name: Deploy to VPS
@@ -45,7 +42,6 @@ jobs:
           source: "app/dist/*"
           target: "/var/www/agoraction/agoraction.fr/"
           strip_components: 1
-
       - name: Verify deployment
         uses: appleboy/ssh-action@v0.1.6
         with:
