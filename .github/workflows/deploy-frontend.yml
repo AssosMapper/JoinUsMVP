@@ -12,40 +12,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Get .env.production content via SSH
-        uses: appleboy/ssh-action@v0.1.6
+steps:
+      - uses: actions/checkout@v4
+      - name: Copy files via SSH
+        uses: appleboy/scp-action@v1
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
-          script: |
-            echo "🔍 Vérification du fichier source..."
-            if [ -f "/var/www/agoraction/agoraction.fr/.env.production" ]; then
-              echo "✅ Fichier source trouvé"
-              echo "📋 Contenu du fichier:"
-              cat /var/www/agoraction/agoraction.fr/.env.production
-              echo ""
-              echo "📝 Copie vers /tmp/env_content.txt..."
-              cp /var/www/agoraction/agoraction.fr/.env.production /tmp/env_content.txt
-              chmod 644 /tmp/env_content.txt
-              echo "✅ Fichier copié avec succès"
-              echo "🔍 Vérification du fichier de destination:"
-              ls -la /tmp/env_content.txt
-              echo "📋 Contenu du fichier copié:"
-              cat /tmp/env_content.txt
-            else
-              echo "❌ Fichier source non trouvé"
-              ls -la /var/www/agoraction/agoraction.fr/
-              exit 1
-            fi
-
-      - name: Download .env.production
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          password: ${{ secrets.SERVER_PASSWORD }}
-          source: "/tmp/env_content.txt"
+          port: 22
+          source: "/var/www/agoraction/agoraction.fr/.env.production"
           target: "app/.env.production"
 
       - name: Build Docker image
@@ -69,6 +45,7 @@ jobs:
           source: "app/dist/*"
           target: "/var/www/agoraction/agoraction.fr/"
           strip_components: 1
+          
       - name: Verify deployment
         uses: appleboy/ssh-action@v0.1.6
         with:
