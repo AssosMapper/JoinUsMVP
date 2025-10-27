@@ -19,8 +19,25 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            cat /var/www/agoraction/agoraction.fr/.env.production > /tmp/env_content.txt
-            echo "Contenu copié dans /tmp/env_content.txt"
+            echo "🔍 Vérification du fichier source..."
+            if [ -f "/var/www/agoraction/agoraction.fr/.env.production" ]; then
+              echo "✅ Fichier source trouvé"
+              echo "📋 Contenu du fichier:"
+              cat /var/www/agoraction/agoraction.fr/.env.production
+              echo ""
+              echo "📝 Copie vers /tmp/env_content.txt..."
+              cp /var/www/agoraction/agoraction.fr/.env.production /tmp/env_content.txt
+              chmod 644 /tmp/env_content.txt
+              echo "✅ Fichier copié avec succès"
+              echo "🔍 Vérification du fichier de destination:"
+              ls -la /tmp/env_content.txt
+              echo "📋 Contenu du fichier copié:"
+              cat /tmp/env_content.txt
+            else
+              echo "❌ Fichier source non trouvé"
+              ls -la /var/www/agoraction/agoraction.fr/
+              exit 1
+            fi
 
       - name: Download .env.production
         uses: appleboy/scp-action@v0.1.7
