@@ -12,13 +12,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Get .env.production from VPS
+      - name: Get .env.production content via SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            cat /var/www/agoraction/agoraction.fr/.env.production > /tmp/env_content.txt
+            echo "Contenu copié dans /tmp/env_content.txt"
+
+      - name: Download .env.production
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
-          source: "/var/www/agoraction/agoraction.fr/.env.production"
+          source: "/tmp/env_content.txt"
           target: "app/.env.production"
 
       - name: Build Docker image
