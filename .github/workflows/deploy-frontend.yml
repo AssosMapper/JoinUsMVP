@@ -2,57 +2,61 @@ name: Deploy Vue App on VPS
 
 on:
   push:
-    branches: [main]
-
+    branches: [main,test-ci]
+  workflow_dispatch:
 jobs:
-  build-on-vps:
+  build-and-deploy:
     runs-on: ubuntu-latest
-
+  
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Copy project to VPS
+      - name: Get .env.production from VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
-          source: "."
-          target: "/tmp/joinus-temp"
+          source: "/var/www/agoraction/agoraction.fr/.env.production"
+          target: "app/.env.production"
 
-      - name: SSH and build
+      - name: Build Docker image
+        run: |
+          cd app
+          docker build . --file Dockerfile --tag vue-app-build:latest
+
+      - name: Extract build files from Docker
+        run: |
+          cd app
+          # Créer un conteneur temporaire pour extraire les fichiers
+          CONTAINER_ID=$(docker create vue-app-build:latest)
+          # Copier le dossier dist du conteneur vers l'hôte
+          docker cp $CONTAINER_ID:/app/dist ./dist
+          # Supprimer le conteneur temporaire
+          docker rm $CONTAINER_ID
+
+      - name: Deploy to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          source: "app/dist/*"
+          target: "/var/www/agoraction/agoraction.fr/"
+          strip_components: 1
+
+      - name: Verify deployment
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            set -e  # Arrêter en cas d'erreur
-            
-            echo "📁 Changement de répertoire..."
-            cd /tmp/joinus-temp/app
-            
-            echo "📋 Copie du fichier .env.production..."
-            cp /var/www/agoraction/agoraction.fr/.env.production .env.production
-            
-            echo "📦 Installation des dépendances..."
-            npm ci
-            
-            echo "🔨 Build de l'application..."
-            npm run build
-            
-            echo "📁 Vérification du dossier dist..."
-            if [ ! -d "dist" ]; then
-              echo "❌ Le dossier dist n'existe pas"
+            if [ -f "/var/www/agoraction/agoraction.fr/index.html" ]; then
+              echo "✅ Déploiement réussi !"
+              echo "📁 Fichiers déployés dans: /var/www/agoraction/agoraction.fr"
+            else
+              echo "❌ Erreur: index.html non trouvé"
               exit 1
             fi
-            
-            echo "🚀 Déploiement des fichiers..."
-            rm -rf /var/www/agoraction/agoraction.fr/* 
-            cp -r dist/* /var/www/agoraction/agoraction.fr/
-            
-            echo "🧹 Nettoyage..."
-            rm -rf /tmp/joinus-temp
-            
-            echo "✅ Déploiement terminé avec succès !"
