@@ -18,30 +18,33 @@ jobs:
         
       - name: Add remote server to known_hosts
         run: |
-          mkdir -p ~/.ssh
           ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
+
       - name: Download .env.production with Password
         run: |
-          # Syntaxe : sshpass -p 'MOT_DE_PASSE' scp [SOURCE_DISTANTE] [TARGET_LOCAL]
           sshpass -p "${{ secrets.SERVER_PASSWORD }}" scp ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/var/www/agoraction/agoraction.fr/.env.production app/.env.production
-          
-          # Vérifier que le fichier est bien là
           echo "Fichier téléchargé :"
           ls -l app/.env.production
-
-      - name: Build Docker image
+          
+      - name: copy shared file
         run: |
-          cd app
-          ls -l
-          docker build . --file Dockerfile --tag vue-app-build:latest
+          cp -r shared app/shared
 
-      - name: Extract build files from Docker
-        run: |
-          cd app
-          CONTAINER_ID=$(docker create vue-app-build:latest)
-          docker cp $CONTAINER_ID:/app/dist ./dist
-          docker rm $CONTAINER_ID
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: app/package-lock.json
 
+      - name: Install dependencies
+        working-directory: app
+        run: npm ci
+      
+      - name: Build app
+        working-directory: app
+        run: npm run build
+        
       - name: Deploy to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
