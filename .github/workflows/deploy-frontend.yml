@@ -12,7 +12,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
+      - name: Create app directory
+        run: mkdir -p app
+        
       - name: Copy .env.production from VPS
         uses: appleboy/scp-action@v0.1.7
         with:
