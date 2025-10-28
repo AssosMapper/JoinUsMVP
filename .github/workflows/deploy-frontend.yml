@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Create app directory
         run: mkdir -p app
-        
+
       - name: Copy .env.production from VPS
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -24,7 +24,6 @@ jobs:
           port: 22
           source: "/var/www/agoraction/agoraction.fr/.env.production"
           target: "app/.env.production"
-          direction: download
 
       - name: Build Docker image
         run: |
