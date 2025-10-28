@@ -22,6 +22,7 @@ jobs:
           port: 22
           source: "/var/www/agoraction/agoraction.fr/.env.production"
           target: "app/.env.production"
+          direction: download
 
       - name: Build Docker image
         run: |
