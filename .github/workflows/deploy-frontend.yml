@@ -28,10 +28,11 @@ jobs:
           # Vérifier que le fichier est bien là
           echo "Fichier téléchargé :"
           ls -l app/.env.production
-          
+
       - name: Build Docker image
         run: |
           cd app
+          ls -l
           docker build . --file Dockerfile --tag vue-app-build:latest
 
       - name: Extract build files from Docker
