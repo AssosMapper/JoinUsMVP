@@ -60,7 +60,7 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           source: "app/dist/*"
-          target: "/var/www/agoraction/agoraction.fr/*"
+          target: "/var/www/agoraction/agoraction.fr"
           strip_components: 1
 
       - name: Verify deployment
