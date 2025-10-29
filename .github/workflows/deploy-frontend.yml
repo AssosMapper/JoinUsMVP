@@ -44,7 +44,10 @@ jobs:
       
       - name: Build app
         working-directory: app
-        run: npm run build
+        run: |
+         ls -l
+         cat package-lock.json
+         npm run build
 
       - name: Deploy to VPS
         uses: appleboy/scp-action@v0.1.7
