@@ -5,7 +5,7 @@ import typeAssociationService from "@/services/typeAssociationService";
 import { useNotificationStore } from "@/store/notificationStore";
 import { PublicMediaDto } from "@shared/dto/media.dto";
 import { Association } from "@shared/types/association";
-import { TypeAssociations } from "@shared/types/type-associations";
+import { TypeAssociation } from "@shared/types/type-associations";
 import { associationSchema } from "@shared/validations/associations.validation.ts";
 import { useForm } from "vee-validate";
 import { computed, onMounted, ref, watch } from "vue";
@@ -19,7 +19,7 @@ const emit = defineEmits<{
 }>();
 
 const notificationStore = useNotificationStore();
-const typeAssociations = ref<TypeAssociations[]>([]);
+const typeAssociations = ref<TypeAssociation[]>([]);
 const isLoading = ref(false);
 
 const isEditMode = computed(() => !!props.association);
