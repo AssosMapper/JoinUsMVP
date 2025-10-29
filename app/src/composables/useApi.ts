@@ -11,7 +11,7 @@ export const useApi = createFetch({
     options: {
         refetch: true,
         async beforeFetch({options}) {
-            const user = useSessionStorage('user').value
+            const user = useSessionStorage('user', null).value
 
             let accessToken = null;
             if(user){

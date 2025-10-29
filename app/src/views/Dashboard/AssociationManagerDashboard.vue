@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import Tab from 'primevue/tab'
 import TabList from 'primevue/tablist'
 import TabPanel from 'primevue/tabpanel'
@@ -16,6 +16,7 @@ import { useUserStore } from "@/store/userStore"
 import { useNotificationStore } from "@/store/notificationStore"
 import associationService from "@/services/associationService"
 import type { PublicAssociationDto } from "@shared/dto/associations.dto"
+import type { EventDto } from "@shared/dto/events.dto"
 import type { Event } from "@shared/types/event"
 import type { Media } from "@shared/types/media"
 import mediaService from "@/services/mediaService"
@@ -25,10 +26,15 @@ import Button from 'primevue/button'
 const userStore = useUserStore()
 const notificationStore = useNotificationStore()
 const association = ref<PublicAssociationDto | null>(null)
-const events = ref<Event[]>([])
+const events = ref<EventDto[]>([])
 const isLoading = ref(true)
 const activeTab = ref('0')
 const selectedEventId = ref<string | null>(null)
+const selectedEvent = computed(() => {
+  if (!selectedEventId.value) return null
+  const found = events.value.find(e => e.id === selectedEventId.value)
+  return found || null
+})
 
 const fetchAssociationDetails = async () => {
   try {
@@ -190,7 +196,7 @@ onMounted(() => {
 
             <TabPanel value="6">
               <div class="bg-white rounded-lg shadow p-6">
-                <UpdateEvent v-if="selectedEventId" :eventId="selectedEventId" />
+                <UpdateEvent v-if="selectedEvent" :event="selectedEvent as EventDto" />
               </div>
             </TabPanel>
           </TabPanels>

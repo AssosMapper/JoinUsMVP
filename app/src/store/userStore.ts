@@ -10,7 +10,7 @@ import { Role } from "@shared/types/roles";
 import { Expose, plainToInstance } from "class-transformer";
 import { defineStore } from "pinia";
 
-class UserState {
+export class UserState {
   @Expose() id: string;
   @Expose() first_name: string;
   @Expose() last_name: string;

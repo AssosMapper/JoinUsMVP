@@ -12,8 +12,11 @@ export const joinAssociationSchema = yup.object().shape({
     .string()
     .matches(ACCENT_STRING_REGEX, "Caractères non autorisés")
     .max(255, "La réponse ne peut pas dépasser 255 caractères")
-      .nullable()
-      .optional(),
+    .transform((value, originalValue) => {
+      if (value === "" || value === null || originalValue === null || originalValue === undefined) return undefined;
+      return value;
+    })
+    .optional(),
 }) satisfies yup.ObjectSchema<JoinAssociationDto>;
 
 export const updateApplicationStatusSchema = yup.object().shape({

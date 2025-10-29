@@ -28,14 +28,16 @@ const { handleSubmit, errors, defineField } = useForm({
   validationSchema: associationSchema,
   initialValues: {
     name: props.association?.name ?? "",
+    description: props.association?.description ?? "",
     isPublic: props.association?.isPublic ?? false,
     applicationQuestion: props.association?.applicationQuestion ?? "",
     typeIds: props.association?.types?.map((type) => type.id) ?? [],
-    image: props.association?.image.id ?? null,
+    image: props.association?.image?.id ?? null,
   },
 });
 
 const [name, nameAttrs] = defineField("name");
+const [description, descriptionAttrs] = defineField("description");
 const [isPublic, isPublicAttrs] = defineField("isPublic");
 const [applicationQuestion, applicationQuestionAttrs] = defineField(
   "applicationQuestion"
@@ -67,13 +69,13 @@ const onSubmit = handleSubmit(async (values) => {
           props.association!.id!,
           values
         )
-      : await associationService.createAssociation(values);
+      : await associationService.createAssociation(values as any);
 
     notificationStore.showNotification(
       `Association ${isEditMode.value ? "modifiée" : "créée"} avec succès`,
       "success"
     );
-    emit("saved", savedAssociation);
+    emit("saved", savedAssociation as any as Association);
   } catch (error: any) {
     notificationStore.showNotification(error.message, "error");
   } finally {
@@ -104,6 +106,24 @@ onMounted(() => {
                 class="w-full"
                 v-bind="nameAttrs"
               />
+              <label>Nom de l'association</label>
+            </FloatLabel>
+          </JnsField>
+        </div>
+
+        <!-- Description -->
+        <div class="col-span-2">
+          <JnsField :error-message="errors.description">
+            <FloatLabel>
+              <Textarea
+                v-model="description"
+                placeholder="Description de l'association"
+                class="w-full"
+                :autoResize="true"
+                rows="4"
+                v-bind="descriptionAttrs"
+              />
+              <label>Description</label>
             </FloatLabel>
           </JnsField>
         </div>

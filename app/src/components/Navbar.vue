@@ -22,7 +22,15 @@ const logout = () => {
   router.push("/login");
 };
 
-const menuItems = [
+const menuItems: Array<{
+  label: string;
+  icon: string;
+  route: string;
+  auth?: boolean;
+  admin?: boolean;
+  manager?: boolean;
+  eventsManager?: boolean;
+}> = [
   {
     label: "Accueil",
     icon: "pi pi-home",
@@ -56,9 +64,8 @@ const menuItems = [
     label: "Administration",
     icon: "pi pi-cog",
     route: "/adminInterface",
-    admin:true
-  }
-
+    admin: true,
+  },
 ];
 
 const isActiveRoute = (route: string) =>

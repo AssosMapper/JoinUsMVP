@@ -29,7 +29,7 @@ const emit = defineEmits<{
 }>();
 
 const isEventPast = computed(() => {
-  return props.event.date < new Date();
+  return new Date(props.event.date) < new Date();
 });
 
 const truncateDescription = (description: string, maxLength: number = 255) => {
@@ -86,11 +86,11 @@ const handleEditEvent = (eventId: string) => {
           <div class="flex align-items-center gap-2">
             <i class="pi pi-users text-gray-500"></i>
             <span class="text-sm">
-              <span v-if="event.association">{{ event.association.nom }}</span>
+              <span v-if="event.association">{{ event.association.name }}</span>
               <span v-else class="text-muted">Événement personnel</span>
             </span>
           </div>
-          <Tag :value="event.typeEvent?.nom || 'Non défini'" />
+          <Tag :value="event.typeEvent?.name || 'Non défini'" />
         </div>
 
         <!-- Contenu principal -->
@@ -99,7 +99,7 @@ const handleEditEvent = (eventId: string) => {
           <div class="flex flex-col gap-2 mb-4">
             <div class="flex items-center gap-2 text-gray-600">
               <i class="pi pi-calendar"></i>
-              {{ friendlyDate(event.date) }}
+              {{ friendlyDate(new Date(event.date)) }}
             </div>
             <div v-if="event.localisation" class="flex items-center gap-2 text-gray-500">
               <i class="pi pi-map-marker"></i>

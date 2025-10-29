@@ -43,8 +43,7 @@ const baseUserSchema = {
     .matches(
       /^(?:\+33|0)[1-9](?:[0-9]{8})$/,
       "Le numéro de téléphone doit être un numéro français valide"
-    )
-    .nullable(),
+    ),
 };
 
 // Schéma pour la création d'utilisateur (tous les champs requis sauf phone)
@@ -56,7 +55,12 @@ export const createUserSchema = yup.object().shape({
   confirmPassword: baseUserSchema.confirmPassword.required(
     "La confirmation du mot de passe est requise"
   ),
-  phone: baseUserSchema.phone.optional(),
+  phone: baseUserSchema.phone
+    .transform((value, originalValue) => {
+      if (value === "" || value === null || originalValue === null || originalValue === undefined) return undefined;
+      return value;
+    })
+    .optional(),
 }) satisfies yup.ObjectSchema<CreateUserDto>;
 
 export const updateUserSchema = yup.object().shape({
@@ -74,7 +78,12 @@ export const updateUserSchema = yup.object().shape({
       otherwise: (schema) => schema.optional(),
     })
     .transform((value) => (value === "" ? undefined : value)),
-  phone: baseUserSchema.phone.optional(),
+  phone: baseUserSchema.phone
+    .transform((value, originalValue) => {
+      if (value === "" || value === null || originalValue === null || originalValue === undefined) return undefined;
+      return value;
+    })
+    .optional(),
   imageId: yup
     .string()
     .uuid("L'ID de l'image doit être un UUID valide")
