@@ -30,7 +30,6 @@ jobs:
       - name: copy shared file
         run: |
           cp -r shared app/shared
-
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
