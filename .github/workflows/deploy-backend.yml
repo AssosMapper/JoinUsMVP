@@ -23,7 +23,7 @@ jobs:
 
       - name: Download .env with Password
         run: |
-          sshpass -p "${{ secrets.SERVER_PASSWORD }}" scp ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/var/secrets/api.agoraction.fr/.env back-core/.env
+          sshpass -p "${{ secrets.SERVER_PASSWORD }}" scp ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/var/secret/api.agoraction.fr/.env back-core/.env
           echo "✅ Fichier .env téléchargé"
           
       - name: Copy shared folder
