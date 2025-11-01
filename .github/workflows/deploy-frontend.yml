@@ -23,7 +23,7 @@ jobs:
 
       - name: Download .env.production with Password
         run: |
-          sshpass -p "${{ secrets.SERVER_PASSWORD }}" scp ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/var/www/agoraction/agoraction.fr/.env.production app/.env.production
+          sshpass -p "${{ secrets.SERVER_PASSWORD }}" scp ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/var/secret/agoraction.fr/.env.production app/.env.production
           echo "Fichier téléchargé :"
           ls -l app/.env.production
           
@@ -37,7 +37,6 @@ jobs:
           node-version: 22
           cache: 'npm'
           cache-dependency-path: app/package-lock.json
-
       - name: Install dependencies
         working-directory: app
         run: npm ci --legacy-peer-deps
