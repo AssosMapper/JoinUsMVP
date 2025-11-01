@@ -68,6 +68,7 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             echo "🔄 Chargement de la nouvelle image Docker..."
+            
             sudo docker load -i /tmp/agoraction_api.tar
             sudo docker stop agoraction_api || true
             sudo docker rm agoraction_api || true
