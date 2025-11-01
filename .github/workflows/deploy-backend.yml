@@ -51,6 +51,7 @@ jobs:
       - name: Save Docker image to tar
         run: |
           docker save -o agoraction_api.tar agoraction_api:latest
+          sudo chmod 644 agoraction_api.tar
           echo "✅ Image Docker sauvegardée"
           ls -lh agoraction_api.tar
 
