@@ -63,25 +63,25 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             echo "🔄 Chargement de la nouvelle image Docker..."
-            docker load -i /tmp/agoraction_api.tar
+            sudo docker load -i /tmp/agoraction_api.tar
             
             echo "🛑 Arrêt de l'ancien conteneur..."
-            docker stop agoraction_api || true
-            docker rm agoraction_api || true
+            sudo docker stop agoraction_api || true
+            sudo docker rm agoraction_api || true
             
             echo "📁 Création du dossier uploads si nécessaire..."
-            mkdir -p /var/www/api.agoraction.fr/uploads
+            mkdir -p /var/www/agoraction/api.agoraction.fr/uploads
             
             echo "🚀 Démarrage du nouveau conteneur..."
-            docker run -d \
+            sudo docker run -d \
               --name agoraction_api \
               --restart unless-stopped \
               -p 3000:3000 \
-              -v /var/www/api.agoraction.fr/uploads:/app/uploads \
+              -v /var/www/agoraction/api.agoraction.fr/uploads:/app/uploads \
               agoraction_api:latest
             
             echo "🧹 Nettoyage..."
-            rm /tmp/agoraction_api.tar
+            sudo rm /tmp/agoraction_api.tar
             
             echo "✅ Déploiement terminé !"
 
@@ -93,11 +93,11 @@ jobs:
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
             echo "🔍 Vérification du conteneur..."
-            if docker ps | grep -q agoraction_api; then
+            if sudo docker ps | grep -q agoraction_api; then
               echo "✅ Le conteneur agoraction_api est en cours d'exécution"
               echo ""
               echo "📋 Logs du conteneur:"
-              docker logs --tail 50 agoraction_api
+              sudo docker logs --tail 50 agoraction_api
             else
               echo "❌ Erreur: le conteneur agoraction_api n'est pas en cours d'exécution"
               exit 1
