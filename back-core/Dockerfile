@@ -18,6 +18,7 @@ COPY back-core/tsconfig.build.json ./
 COPY back-core/.eslintrc.js ./
 COPY back-core/src ./src
 COPY shared ./shared
+COPY back-core/.env ./.env
 RUN bun install
 
 # Création du dossier uploads

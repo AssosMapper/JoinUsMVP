@@ -25,17 +25,7 @@ jobs:
         run: |
           sshpass -p "${{ secrets.SERVER_PASSWORD }}" scp ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/var/secret/api.agoraction.fr/.env back-core/.env
           echo "✅ Fichier .env téléchargé"
-          
-      - name: Copy shared folder
-        run: |
-          cp -r shared back-core/shared
-          echo "✅ Dossier shared copié"
-
-      - name: Modify Dockerfile to include .env
-        run: |
-          sed -i '/^CMD \["bun", "run", "start:prod"\]/i COPY back-core/.env .env' back-core/Dockerfile
-          echo "✅ Dockerfile modifié pour inclure le .env"
-          
+        
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
