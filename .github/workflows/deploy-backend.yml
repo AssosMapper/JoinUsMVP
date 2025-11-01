@@ -36,6 +36,9 @@ jobs:
           tags: agoraction_api:latest
           push: false
           load: true
+        run: |
+          ls -l
+          ls -l back-core
 
       - name: Save Docker image to tar
         run: |
