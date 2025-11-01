@@ -19,7 +19,7 @@ COPY back-core/.eslintrc.js ./
 COPY back-core/src ./src
 COPY shared ./shared
 COPY back-core/.env ./.env
-RUN bun install
+RUN bun install && ls -al
 
 # Création du dossier uploads
 RUN mkdir -p uploads
@@ -44,6 +44,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/shared ./shared
 COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/.env ./
 # Création du dossier uploads dans l'image de production
 RUN mkdir -p uploads
 
