@@ -3,6 +3,10 @@ name: Deploy Backend API on VPS
 on:
   push:
     branches: [main,test-ci]
+    paths:
+      - 'back-core/**'
+      - 'shared/**'
+      - '.github/workflows/deploy-backend.yml'
   workflow_dispatch:
 
 jobs:
@@ -73,6 +77,7 @@ jobs:
             sudo docker run -d \
               --name agoraction_api \
               --restart unless-stopped \
+              --network agoraction_network \
               -p 3000:3000 \
               -v /var/www/agoraction/api.agoraction.fr/uploads:/app/uploads \
               agoraction_api:latest
