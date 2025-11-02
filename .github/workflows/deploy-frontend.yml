@@ -2,7 +2,7 @@ name: Deploy Vue App on VPS
 
 on:
   push:
-    branches: [main,test-ci]
+    branches: [main]
     paths:
       - 'app/**'
       - 'shared/**'

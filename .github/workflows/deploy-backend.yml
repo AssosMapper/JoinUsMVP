@@ -2,7 +2,7 @@ name: Deploy Backend API on VPS
 
 on:
   push:
-    branches: [main,test-ci]
+    branches: [main]
     paths:
       - 'back-core/**'
       - 'shared/**'
