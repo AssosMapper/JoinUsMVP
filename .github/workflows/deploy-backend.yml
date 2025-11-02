@@ -60,6 +60,68 @@ jobs:
           target: "/tmp/"
           strip_components: 0
 
+      - name: Verify tar file on VPS
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            echo "🔍 Vérification du fichier tar sur le VPS..."
+            if [ ! -f /tmp/agoraction_api.tar ]; then
+              echo "❌ Erreur: Le fichier /tmp/agoraction_api.tar n'existe pas"
+              exit 1
+            fi
+            if [ ! -s /tmp/agoraction_api.tar ]; then
+              echo "❌ Erreur: Le fichier /tmp/agoraction_api.tar est vide"
+              exit 1
+            fi
+            echo "✅ Fichier tar vérifié ($(du -h /tmp/agoraction_api.tar | cut -f1))"
+
+      - name: TEST BACKEND ON VPS
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            echo "🧪 Test du backend avant déploiement..."
+            
+            sudo docker load -i /tmp/agoraction_api.tar
+            sudo docker rm -f agoraction_api_test || true
+            mkdir -p /var/www/agoraction/api.agoraction.fr/uploads
+            
+            echo "🚀 Démarrage du conteneur de test..."
+            sudo docker run -d \
+              --name agoraction_api_test \
+              -p 4000:3000 \
+              --env-file /var/www/secrets/api.agoraction.fr/.env \
+              agoraction_api:latest
+            
+            sleep 3
+            
+            echo "⏳ Test de l'endpoint /associations..."
+            SUCCESS=false
+            for i in {1..8}; do
+              if sudo docker exec agoraction_api_test wget --spider -q http://localhost:3000/associations 2>/dev/null; then
+                echo "✅ Backend répond correctement après $((i * 2)) secondes"
+                SUCCESS=true
+                break
+              fi
+              echo "⏳ Tentative $i/8 - Attente de la réponse du backend..."
+              sleep 2
+            done
+            
+            echo "🧹 Nettoyage du conteneur de test..."
+            sudo docker rm -f agoraction_api_test || true
+            
+            if [ "$SUCCESS" = false ]; then
+              echo "❌ Erreur: Le backend ne répond pas après 15 secondes"
+              exit 1
+            fi
+            
+            echo "✅ Test du backend réussi !"
+
       - name: Deploy on VPS
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -67,9 +129,8 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            echo "🔄 Chargement de la nouvelle image Docker..."
+            echo "🔄 Déploiement du backend en production..."
             
-            sudo docker load -i /tmp/agoraction_api.tar
             sudo docker stop agoraction_api || true
             sudo docker rm agoraction_api || true
             
@@ -81,6 +142,7 @@ jobs:
               --network agoraction_network \
               -p 3000:3000 \
               -v /var/www/agoraction/api.agoraction.fr/uploads:/app/uploads \
+              --env-file /var/www/secrets/api.agoraction.fr/.env \
               agoraction_api:latest
             
             sudo rm /tmp/agoraction_api.tar
