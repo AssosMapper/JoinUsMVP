@@ -2,71 +2,78 @@ name: Deploy Vue App on VPS
 
 on:
   push:
-    branches: [main]
+    branches: [main,test-ci]
+    paths:
+      - 'app/**'
+      - 'shared/**'
+      - '.github/workflows/deploy-frontend.yml'
+  workflow_dispatch:
 
 jobs:
-  build-on-vps:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Copy project to VPS
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+        
+      - name: Add remote server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Download .env.production with Password
+        run: |
+          sshpass -p "${{ secrets.SERVER_PASSWORD }}" scp ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/var/secret/agoraction.fr/.env.production app/.env.production
+          echo "Fichier téléchargé :"
+          ls -l app/.env.production
+          
+      - name: copy shared file
+        run: |
+          cp -r shared app/shared
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: app/package-lock.json
+      - name: Install dependencies
+        working-directory: app
+        run: npm ci --legacy-peer-deps
+      
+      - name: Build app
+        working-directory: app
+        run: |
+          npm run build
+          if [ ! -d "dist" ]; then
+            echo "❌ Erreur: le dossier 'dist' n'a pas été créé. Vérifier le build."
+            exit 1
+          fi
+         
+      - name: Deploy to VPS
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
-          source: "."
-          target: "/tmp/joinus-temp"
+          source: "app/dist/*"
+          target: "/var/www/agoraction/agoraction.fr"
+          strip_components: 2
 
-      - name: SSH and build
+      - name: Verify deployment
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
           script: |
-            set -e  # Arrêter en cas d'erreur
-            
-            echo "🔍 Vérification de Node.js..."
-            if ! command -v node &> /dev/null; then
-              echo "❌ Node.js n'est pas installé"
+            if [ -f "/var/www/agoraction/agoraction.fr/index.html" ]; then
+              echo "✅ Déploiement réussi !"
+              echo "📁 Fichiers déployés dans: /var/www/agoraction/agoraction.fr"
+            else
+              echo "❌ Erreur: index.html non trouvé"
               exit 1
             fi
-            
-            if ! command -v npm &> /dev/null; then
-              echo "❌ npm n'est pas installé"
-              exit 1
-            fi
-            
-            echo "✅ Node.js version: $(node --version)"
-            echo "✅ npm version: $(npm --version)"
-            
-            echo "📁 Changement de répertoire..."
-            cd /tmp/joinus-temp/app
-            
-            echo "📋 Copie du fichier .env.production..."
-            cp /var/www/agoraction/agoraction.fr/.env.production .env.production
-            
-            echo "📦 Installation des dépendances..."
-            npm ci
-            
-            echo "🔨 Build de l'application..."
-            npm run build
-            
-            echo "📁 Vérification du dossier dist..."
-            if [ ! -d "dist" ]; then
-              echo "❌ Le dossier dist n'existe pas"
-              exit 1
-            fi
-            
-            echo "🚀 Déploiement des fichiers..."
-            rm -rf /var/www/agoraction/agoraction.fr/* 
-            cp -r dist/* /var/www/agoraction/agoraction.fr/
-            
-            echo "🧹 Nettoyage..."
-            rm -rf /tmp/joinus-temp
-            
-            echo "✅ Déploiement terminé avec succès !"

@@ -1,4 +1,4 @@
-export const useErrorParser = (response)=>{
+export const useErrorParser = (response: { status: number })=>{
     if (response.status === 403) {
         return "Accès refusé";
     }

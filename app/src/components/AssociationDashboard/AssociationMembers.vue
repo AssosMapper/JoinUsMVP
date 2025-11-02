@@ -53,7 +53,7 @@ onMounted(() => {
     >
       <JnsImage
         :name="`${member.first_name} ${member.last_name}`"
-        :src="member.image || '/assets/users-images/default.png'"
+        :src="(typeof member.image === 'string' ? member.image : member.image?.filepath) || '/assets/users-images/default.png'"
         size="sm"
       />
       <div class="flex-grow min-w-0">

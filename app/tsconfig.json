@@ -9,9 +9,12 @@
     }
   ],
   "compilerOptions": {
+    "strictPropertyInitialization": false,
+    "noUnusedLocals": false,    // désactive pour les variables locales
+    "noUnusedParameters": false, // désactive pour les paramètres de fonction
     "paths": {
       "@/*": ["./src/*"],
-      "@shared/*": ["../shared/*"]
+      "@shared/*": ["./shared/*"]
     }
   }
 }

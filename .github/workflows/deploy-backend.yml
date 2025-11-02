@@ -1,0 +1,182 @@
+name: Deploy Backend API on VPS
+
+on:
+  push:
+    branches: [main,test-ci]
+    paths:
+      - 'back-core/**'
+      - 'shared/**'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install sshpass
+        run: sudo apt-get update && sudo apt-get install -y sshpass
+        
+      - name: Add remote server to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ secrets.SERVER_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Download .env with Password
+        run: |
+          sshpass -p "${{ secrets.SERVER_PASSWORD }}" scp ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }}:/var/secret/api.agoraction.fr/.env back-core/.env
+          echo "✅ Fichier .env téléchargé"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: back-core/Dockerfile
+          tags: agoraction_api:latest
+          push: false
+          load: true
+        
+
+
+      - name: Save Docker image to tar
+        run: |
+          docker save -o agoraction_api.tar agoraction_api:latest
+          sudo chmod 644 agoraction_api.tar
+          echo "✅ Image Docker sauvegardée"
+          ls -lh agoraction_api.tar
+
+      - name: Transfer Docker image to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          source: "agoraction_api.tar"
+          target: "/tmp/"
+          strip_components: 0
+
+      - name: Verify tar file on VPS
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            echo "🔍 Vérification du fichier tar sur le VPS..."
+            if [ ! -f /tmp/agoraction_api.tar ]; then
+              echo "❌ Erreur: Le fichier /tmp/agoraction_api.tar n'existe pas"
+              exit 1
+            fi
+            if [ ! -s /tmp/agoraction_api.tar ]; then
+              echo "❌ Erreur: Le fichier /tmp/agoraction_api.tar est vide"
+              exit 1
+            fi
+            echo "✅ Fichier tar vérifié ($(du -h /tmp/agoraction_api.tar | cut -f1))"
+
+      - name: TEST BACKEND ON VPS
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            echo "🧪 Test du backend avant déploiement..."
+            
+            sudo docker load -i /tmp/agoraction_api.tar
+            sudo docker tag agoraction_api:latest agoraction_api:test
+            sudo docker rm -f agoraction_api_test || true
+            mkdir -p /var/www/agoraction/api.agoraction.fr/uploads
+            
+            echo "🚀 Démarrage du conteneur de test..."
+            sudo docker run -d \
+              --name agoraction_api_test \
+              --network agoraction_network \
+              -p 4000:3000 \
+              -v /var/www/agoraction/api.agoraction.fr/uploads:/app/uploads \
+              --env-file /var/secret/api.agoraction.fr/.env \
+              agoraction_api:test
+            
+            sleep 3
+            
+            if ! sudo docker ps | grep -q agoraction_api_test; then
+              echo "❌ Erreur: Le conteneur de test n'a pas démarré"
+              sudo docker logs agoraction_api_test || true
+              sudo docker rm -f agoraction_api_test || true
+              exit 1
+            fi
+            
+            echo "⏳ Test de l'endpoint /associations..."
+            SUCCESS=false
+            for i in {1..8}; do
+              if sudo docker exec agoraction_api_test wget --spider -q http://localhost:3000/associations 2>/dev/null; then
+                echo "✅ Backend répond correctement après $((i * 2)) secondes"
+                SUCCESS=true
+                break
+              fi
+              echo "⏳ Tentative $i/8 - Attente de la réponse du backend..."
+              sleep 2
+            done
+            
+            echo "🧹 Nettoyage du conteneur de test..."
+            sudo docker rm -f agoraction_api_test || true
+            
+            if [ "$SUCCESS" = false ]; then
+              echo "❌ Erreur: Le backend ne répond pas après 15 secondes"
+              sudo docker rmi agoraction_api:test || true
+              exit 1
+            fi
+            
+            echo "✅ Test du backend réussi !"
+            echo "🏷️ Retag de l'image test vers latest..."
+            sudo docker tag agoraction_api:test agoraction_api:latest
+            sudo docker rmi agoraction_api:test || true
+
+      - name: Deploy on VPS
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            echo "🔄 Déploiement du backend en production..."
+            
+            sudo docker stop agoraction_api || true
+            sudo docker rm agoraction_api || true
+            
+            mkdir -p /var/www/agoraction/api.agoraction.fr/uploads
+            
+            sudo docker run -d \
+              --name agoraction_api \
+              --restart unless-stopped \
+              --network agoraction_network \
+              -p 3000:3000 \
+              -v /var/www/agoraction/api.agoraction.fr/uploads:/app/uploads \
+              --env-file /var/secret/api.agoraction.fr/.env \
+              agoraction_api:latest
+            
+            sudo rm /tmp/agoraction_api.tar
+            echo "✅ Déploiement terminé !"
+
+      - name: Verify deployment
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            echo "🔍 Vérification du conteneur..."
+            if sudo docker ps | grep -q agoraction_api; then
+              echo "✅ Le conteneur agoraction_api est en cours d'exécution"
+              echo ""
+              echo "📋 Logs du conteneur:"
+              sudo docker logs --tail 50 agoraction_api
+            else
+              echo "❌ Erreur: le conteneur agoraction_api n'est pas en cours d'exécution"
+              exit 1
+            fi
+

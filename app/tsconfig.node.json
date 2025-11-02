@@ -9,6 +9,7 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "strict": true,
+    "strictPropertyInitialization": false,
     "noEmit": true,
     "types": ["node"]
   },

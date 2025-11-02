@@ -18,7 +18,8 @@ const availableTypeEvents = ref<{ id: number; name: string }[]>([]);
 
 const fetchTypeEvents = async () => {
   try {
-    availableTypeEvents.value = await typeEventService.getAllTypeEvents();
+    const data = await typeEventService.getAllTypeEvents();
+    availableTypeEvents.value = (data || []) as { id: number; name: string }[];
   } catch (error) {
     console.error("Error fetching type events:", error);
   }

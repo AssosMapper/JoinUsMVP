@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import CreateEventComponent from '@/components/Create/CreateEvent.vue';
 import { useNotificationStore } from '@/store/notificationStore';
+import { EventDto } from '@shared/dto/events.dto';
 import { useRouter } from 'vue-router';
 
 const notificationStore = useNotificationStore();
 const router = useRouter();
 
-const handleEventCreated = (createdEvent: Event) => {
+const handleEventCreated = (createdEvent: EventDto) => {
   router.push(`/displayEvent/${createdEvent.id}`);
 };
 

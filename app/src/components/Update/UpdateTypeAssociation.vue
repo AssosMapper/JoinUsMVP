@@ -28,7 +28,7 @@ const fetchTypeAssociations = async () => {
 const fetchTypeAssociationDetails = async (id: number) => {
   try {
     typeAssociation.value = await typeAssociationService.getTypeAssociationById(
-      id
+      String(id)
     );
   } catch (error) {
     console.error("Error fetching type association details:", error);
@@ -37,10 +37,9 @@ const fetchTypeAssociationDetails = async (id: number) => {
 
 const handleSubmit = async () => {
   try {
-    const token = userStore.access_token;
     const { name, description } = typeAssociation.value;
     await typeAssociationService.updateTypeAssociation(
-      typeAssociation.value.id,
+      String(typeAssociation.value.id),
       { name, description }
     );
     await router.push("/");
