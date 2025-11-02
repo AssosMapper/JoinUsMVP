@@ -88,17 +88,27 @@ jobs:
             echo "🧪 Test du backend avant déploiement..."
             
             sudo docker load -i /tmp/agoraction_api.tar
+            sudo docker tag agoraction_api:latest agoraction_api:test
             sudo docker rm -f agoraction_api_test || true
             mkdir -p /var/www/agoraction/api.agoraction.fr/uploads
             
             echo "🚀 Démarrage du conteneur de test..."
             sudo docker run -d \
               --name agoraction_api_test \
+              --network agoraction_network \
               -p 4000:3000 \
-              --env-file /var/www/secrets/api.agoraction.fr/.env \
-              agoraction_api:latest
+              -v /var/www/agoraction/api.agoraction.fr/uploads:/app/uploads \
+              --env-file /var/secret/api.agoraction.fr/.env \
+              agoraction_api:test
             
             sleep 3
+            
+            if ! sudo docker ps | grep -q agoraction_api_test; then
+              echo "❌ Erreur: Le conteneur de test n'a pas démarré"
+              sudo docker logs agoraction_api_test || true
+              sudo docker rm -f agoraction_api_test || true
+              exit 1
+            fi
             
             echo "⏳ Test de l'endpoint /associations..."
             SUCCESS=false
@@ -117,10 +127,14 @@ jobs:
             
             if [ "$SUCCESS" = false ]; then
               echo "❌ Erreur: Le backend ne répond pas après 15 secondes"
+              sudo docker rmi agoraction_api:test || true
               exit 1
             fi
             
             echo "✅ Test du backend réussi !"
+            echo "🏷️ Retag de l'image test vers latest..."
+            sudo docker tag agoraction_api:test agoraction_api:latest
+            sudo docker rmi agoraction_api:test || true
 
       - name: Deploy on VPS
         uses: appleboy/ssh-action@v0.1.6
@@ -142,7 +156,7 @@ jobs:
               --network agoraction_network \
               -p 3000:3000 \
               -v /var/www/agoraction/api.agoraction.fr/uploads:/app/uploads \
-              --env-file /var/www/secrets/api.agoraction.fr/.env \
+              --env-file /var/secret/api.agoraction.fr/.env \
               agoraction_api:latest
             
             sudo rm /tmp/agoraction_api.tar
