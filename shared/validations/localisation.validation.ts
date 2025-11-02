@@ -6,7 +6,14 @@ import {
 import { ACCENT_STRING_REGEX } from "../utils/yup.util";
 
 export const createLocalisationSchema = yup.object().shape({
-  street_number: yup.string().matches(ACCENT_STRING_REGEX, "Caractères non autorisés").optional(),
+  street_number: yup
+    .string()
+    .matches(ACCENT_STRING_REGEX, "Caractères non autorisés")
+    .transform((value, originalValue) => {
+      if (value === "" || value === null || originalValue === null || originalValue === undefined) return undefined;
+      return value;
+    })
+    .optional(),
   street_name: yup.string().matches(ACCENT_STRING_REGEX, "Caractères non autorisés").required("Le nom de la rue est requis"),
   zip: yup.string().matches(ACCENT_STRING_REGEX, "Caractères non autorisés").required("Le code postal est requis"),
   city: yup.string().matches(ACCENT_STRING_REGEX, "Caractères non autorisés").required("La ville est requise"),

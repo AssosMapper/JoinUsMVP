@@ -9,7 +9,7 @@ export class LocalisationDto {
 }
 
 export class CreateLocalisationDto {
-  @Expose() street_number: string;
+  @Expose() street_number?: string;
   @Expose() street_name: string;
   @Expose() zip: string;
   @Expose() city: string;

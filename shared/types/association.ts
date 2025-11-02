@@ -1,4 +1,4 @@
-import { Media } from "@shared/types/media";
+import { Media } from "../types/media";
 import { TypeAssociation } from "./type-associations";
 import { PublicUser, User } from "./user";
 import { Localisation } from "./localisation";

@@ -4,9 +4,9 @@ import {useApi} from "@/composables/useApi.ts";
 
 const API_URL = import.meta.env.VITE_APP_BACKEND_URL;
 
-const createTypeAssociation = async (typeAssociation) => {
+const createTypeAssociation = async (typeAssociation: any) => {
     const apiStore = useApiStore();
-    const {data, error} = await useApi(apiStore.associationTypes.create).post(typeAssociation).json(typeAssociation);
+    const {data, error} = await useApi(apiStore.associationTypes.create).post(typeAssociation).json();
     if (error.value) {
         throw new Error(error.value);
     }
@@ -33,11 +33,11 @@ const getTypeAssociationById = async (id: string) => {
     return data.value;
 };
 
-const updateTypeAssociation = async (id: string, typeAssociation) => {
+const updateTypeAssociation = async (id: string, typeAssociation: any) => {
     const apiStore = useApiStore();
     const {data, error} = await useApi(apiStore.resolveUrl(apiStore.associationTypes.detail, {
         id
-    })).put(typeAssociation).json(typeAssociation);
+    })).put(typeAssociation).json();
     if (error.value) {
         throw new Error(error.value);
     }
